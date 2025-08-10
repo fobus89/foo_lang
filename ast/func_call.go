@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"foo_lang/scope"
 )
 
 type FuncCallExpr struct {
@@ -20,19 +21,14 @@ func NewFuncCallExpr(funcName string, args []Expr) *FuncCallExpr {
 }
 
 func (f *FuncCallExpr) Eval() *Value {
-
-	val := Container[f.funcName]
-	{
-		if val == nil {
-			return nil
-		}
+	val, ok := scope.GlobalScope.Get(f.funcName)
+	if !ok {
+		panic("function '" + f.funcName + "' is not defined")
 	}
 
 	fnStatment, ok := val.Any().(*FuncStatment)
-	{
-		if !ok {
-			panic("not a function")
-		}
+	if !ok {
+		panic("'" + f.funcName + "' is not a function")
 	}
 
 	bodyStm := fnStatment.body.(*BodyExpr)
@@ -44,29 +40,40 @@ func (f *FuncCallExpr) Eval() *Value {
 		panic(fmt.Sprintf("too many arguments: expected %d, got %d", expected, passed))
 	}
 
+	// Создаем новую область видимости для функции с проверкой рекурсии
+	err := scope.GlobalScope.PushFunction()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer scope.GlobalScope.PopFunction()
+
+	// Устанавливаем параметры функции в локальной области
 	for i, arg := range fnStatment.args {
 		for name, expr := range arg {
 			if i < len(f.args) {
 				value := f.args[i].Eval()
-				Container[name] = value
+				scope.GlobalScope.Set(name, value)
 			} else if expr != nil {
 				defaultValue := expr.Eval()
-				Container[name] = defaultValue
+				scope.GlobalScope.Set(name, defaultValue)
 			} else {
 				panic(fmt.Sprintf("missing required argument: %s", name))
 			}
 		}
 	}
 
+	// Выполняем тело функции
 	for _, stm := range bodyStm.Statments {
 		if stm == nil {
 			continue
 		}
 
-		if _, ok := stm.(*ReturnExpr); ok {
-			return stm.Eval()
+		result := stm.Eval()
+		
+		// Проверяем на return
+		if result != nil && result.IsReturn() {
+			return result
 		}
-
 	}
 
 	return nil

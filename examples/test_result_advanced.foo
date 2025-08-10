@@ -1,0 +1,75 @@
+// Продвинутые примеры работы с Result
+
+fn safeDivide(a, b) {
+    if b == 0 {
+        return Err("Division by zero")
+    }
+    return Ok(a / b)
+}
+
+fn safeSqrt(x) {
+    if x < 0 {
+        return Err("Cannot take square root of negative number")
+    }
+    // Упрощенная реализация sqrt
+    if x == 4 { return Ok(2) }
+    if x == 9 { return Ok(3) }
+    if x == 16 { return Ok(4) }
+    if x == 25 { return Ok(5) }
+    return Ok(x) // Для простоты
+}
+
+fn processNumber(input) {
+    let divResult = safeDivide(input, 2)
+    
+    if divResult.isErr() {
+        return divResult // Передаем ошибку дальше
+    }
+    
+    let halfValue = divResult.unwrap()
+    return safeSqrt(halfValue)
+}
+
+println("=== Продвинутые примеры Result ===")
+
+// Тестируем различные случаи
+let cases = [16, -8, 0, 50]
+
+let i = 0
+for i = 0; i < cases.length(); i++ {
+    let value = cases[i]
+    let result = processNumber(value)
+    
+    println("processNumber(" + value + ") = " + result)
+    
+    if result.isOk() {
+        println("  -> Успешно: " + result.unwrap())
+    } else {
+        println("  -> Ошибка: " + result.unwrapOr("неизвестная ошибка"))
+    }
+}
+
+// Работа с множественными Result
+println("\n=== Множественные операции ===")
+
+let operations = [
+    safeDivide(10, 2),
+    safeDivide(20, 4), 
+    safeDivide(30, 0),  // Ошибка
+    safeDivide(40, 8)
+]
+
+let j = 0
+for j = 0; j < operations.length(); j++ {
+    let op = operations[j]
+    let opNum = j + 1
+    let description = "Операция " + opNum
+    
+    if op.isOk() {
+        println(description + ": Результат = " + op.unwrap())
+    } else {
+        println(description + ": Ошибка = " + op.unwrapOr("неизвестно"))
+    }
+}
+
+println("\n=== Тесты завершены ===")

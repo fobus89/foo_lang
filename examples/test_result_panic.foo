@@ -1,0 +1,12 @@
+// Тест unwrap с ошибкой (должен вызвать panic)
+
+fn failingFunction() {
+    return Err("something went wrong")
+}
+
+println("Вызываем функцию с ошибкой...")
+let result = failingFunction()
+println("Результат: " + result)
+
+println("Пытаемся unwrap ошибку (это вызовет panic)...")
+result.unwrap() // Это должно вызвать panic

@@ -1,0 +1,27 @@
+// Примеры использования модулей
+
+// 1. Полный импорт модуля
+import "./math_module.foo"
+
+println("Using direct import:")
+let result1 = add(5, 3)
+println("5 + 3 = " + result1)
+println("PI = " + PI)
+
+// 2. Селективный импорт
+import { multiply, divide } from "./math_module.foo"
+
+println("\nUsing selective import:")
+let result2 = multiply(4, 6)
+println("4 * 6 = " + result2)
+
+let divResult = divide(10, 2)
+println("10 / 2 = " + divResult.unwrap())
+
+// 3. Импорт с алиасом
+import * as Math from "./math_module.foo"
+
+println("\nUsing alias import:")
+println("Math.E = " + Math.E)
+let result3 = Math.subtract(10, 3)
+println("10 - 3 = " + result3)

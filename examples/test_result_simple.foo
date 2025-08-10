@@ -1,0 +1,47 @@
+// Простые примеры Result типа
+
+fn safeDivide(a, b) {
+    if b == 0 {
+        return Err("Division by zero")
+    }
+    return Ok(a / b)
+}
+
+println("=== Простые примеры Result ===")
+
+// Тест 1: успешный случай
+let result1 = safeDivide(10, 2)
+println("safeDivide(10, 2) = " + result1)
+println("isOk: " + result1.isOk() + ", value: " + result1.unwrapOr(0))
+
+// Тест 2: ошибка
+let result2 = safeDivide(10, 0)
+println("safeDivide(10, 0) = " + result2)
+println("isErr: " + result2.isErr() + ", default: " + result2.unwrapOr(-1))
+
+// Тест 3: цепочка обработки
+fn processValue(x) {
+    let divided = safeDivide(x, 3)
+    if divided.isOk() {
+        let val = divided.unwrap()
+        if val > 2 {
+            return Ok("Large value: " + val)
+        } else {
+            return Ok("Small value: " + val)
+        }
+    } else {
+        return Err("Processing failed")
+    }
+}
+
+let test1 = processValue(15)
+println("processValue(15) = " + test1)
+if test1.isOk() {
+    println("  Result: " + test1.unwrap())
+}
+
+let test2 = processValue(0) 
+println("processValue(0) = " + test2)
+println("  Default: " + test2.unwrapOr("No result"))
+
+println("=== Тесты завершены ===")

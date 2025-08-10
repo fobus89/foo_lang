@@ -24,7 +24,8 @@ func (s *StringFormatExpr) Eval() *Value {
 			continue
 		}
 
-		result.WriteString(part.Eval().String())
+		// Используем FormatValue для правильного форматирования массивов и объектов
+		result.WriteString(FormatValue(res.Any()))
 	}
 
 	return NewValue(result.String())

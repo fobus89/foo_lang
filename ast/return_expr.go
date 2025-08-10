@@ -10,7 +10,14 @@ func NewReturnExpr(expr Expr) *ReturnExpr {
 
 func (r *ReturnExpr) Eval() *Value {
 	if r.Expr == nil {
-		return nil
+		result := NewValue(nil)
+		result.SetReturn(true)
+		return result
 	}
-	return r.Expr.Eval()
+	result := r.Expr.Eval()
+	if result == nil {
+		result = NewValue(nil)
+	}
+	result.SetReturn(true)
+	return result
 }

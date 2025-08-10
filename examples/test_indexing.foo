@@ -1,0 +1,36 @@
+// Тестируем индексацию массивов
+let arr = [10, 20, 30, 40, 50]
+
+println("arr[0] = " + arr[0])
+println("arr[2] = " + arr[2]) 
+println("arr[4] = " + arr[4])
+
+// Тестируем индексацию с переменными
+let i = 1
+println("arr[i] = " + arr[i])
+
+// Тестируем индексацию объектов
+let obj = {
+    name: "test",
+    age: 25,
+    city: "Moscow"
+}
+
+println("obj['name'] = " + obj["name"])
+println("obj['age'] = " + obj["age"])
+
+// Комбинирование с другими операциями
+let data = {
+    numbers: [100, 200, 300]
+}
+
+println("data.numbers[1] = " + data.numbers[1])
+
+// Тест с вложенными объектами
+let nested = {
+    level1: {
+        level2: [1, 2, 3]
+    }
+}
+
+println("nested.level1.level2[2] = " + nested.level1.level2[2])

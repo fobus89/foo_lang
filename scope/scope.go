@@ -1,6 +1,9 @@
 package scope
 
-import "foo_lang/value"
+import (
+	"fmt"
+	"foo_lang/value"
+)
 
 // Scope представляет область видимости переменных
 type Scope struct {
@@ -52,13 +55,17 @@ func (s *Scope) Update(name string, val *value.Value) bool {
 
 // ScopeStack - стек областей видимости
 type ScopeStack struct {
-	current *Scope
+	current        *Scope
+	recursionDepth int
+	maxRecursion   int
 }
 
 // NewScopeStack создает новый стек с глобальной областью
 func NewScopeStack() *ScopeStack {
 	return &ScopeStack{
-		current: NewScope(nil), // глобальная область
+		current:        NewScope(nil), // глобальная область
+		recursionDepth: 0,
+		maxRecursion:   1000, // Максимальная глубина рекурсии
 	}
 }
 
@@ -92,6 +99,53 @@ func (ss *ScopeStack) Has(name string) bool {
 // Update обновляет существующую переменную
 func (ss *ScopeStack) Update(name string, val *value.Value) bool {
 	return ss.current.Update(name, val)
+}
+
+// PushFunction увеличивает счетчик рекурсии и создает новую область
+func (ss *ScopeStack) PushFunction() error {
+	ss.recursionDepth++
+	if ss.recursionDepth > ss.maxRecursion {
+		return fmt.Errorf("maximum recursion depth exceeded (%d)", ss.maxRecursion)
+	}
+	ss.Push()
+	return nil
+}
+
+// PopFunction уменьшает счетчик рекурсии и удаляет область
+func (ss *ScopeStack) PopFunction() {
+	ss.Pop()
+	if ss.recursionDepth > 0 {
+		ss.recursionDepth--
+	}
+}
+
+// SetMaxRecursion устанавливает максимальную глубину рекурсии
+func (ss *ScopeStack) SetMaxRecursion(max int) {
+	ss.maxRecursion = max
+}
+
+// GetRecursionDepth возвращает текущую глубину рекурсии
+func (ss *ScopeStack) GetRecursionDepth() int {
+	return ss.recursionDepth
+}
+
+// GetAll возвращает все переменные из всех областей видимости (для экспорта модулей)
+func (ss *ScopeStack) GetAll() map[string]*value.Value {
+	result := make(map[string]*value.Value)
+	
+	// Собираем все переменные, начиная с глобальной области
+	scope := ss.current
+	for scope != nil {
+		for name, val := range scope.vars {
+			// Переменные из более локальных областей имеют приоритет
+			if _, exists := result[name]; !exists {
+				result[name] = val
+			}
+		}
+		scope = scope.parent
+	}
+	
+	return result
 }
 
 // Глобальный стек областей видимости

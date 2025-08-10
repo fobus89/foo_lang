@@ -255,6 +255,14 @@ func (p *Parser) Statement() ast.Expr {
 		return p.EnumStatement()
 	}
 
+	if p.MatchAndNext(token.IMPORT) {
+		return p.ImportStatement()
+	}
+
+	if p.MatchAndNext(token.EXPORT) {
+		return p.ExportStatement()
+	}
+
 	return p.Expression()
 }
 
@@ -623,10 +631,9 @@ func (p *Parser) Unary() ast.Expr {
 	}
 
 	if p.MatchAndNext(token.NOT) {
-		var count int
+		count := 1 // First NOT is already consumed
 		{
 			for p.MatchAndNext(token.NOT) {
-				p.Next()
 				count++
 			}
 		}
@@ -660,6 +667,13 @@ func (p *Parser) Postfix() ast.Expr {
 				// Это доступ к свойству: obj.property
 				expr = ast.NewMemberExpr(expr, propTok.Value)
 			}
+		} else if p.MatchAndNext(token.LBRACK) {
+			// Индексация: arr[index] или obj["key"]
+			indexExpr := p.Expression()
+			if !p.MatchAndNext(token.RBRACK) {
+				p.error("expected ']'", p.Peek(0))
+			}
+			expr = ast.NewIndexExpr(expr, indexExpr)
 		} else if p.MatchAndNext(token.LPAREN) {
 			// Вызов функции только для VarExpr (переменных)
 			if varExpr, ok := expr.(*ast.VarExpr); ok {
@@ -708,7 +722,9 @@ func (p *Parser) Primary() ast.Expr {
 		raw := p.Peek(0).Value
 		p.Next()
 		return ast.NewLiteralString(raw)
-		// return p.format()
+
+	case token.INTERP_STRING:
+		return p.InterpolatedString()
 
 	case token.TRUE, token.FALSE:
 		p.Next()
@@ -729,6 +745,28 @@ func (p *Parser) Primary() ast.Expr {
 
 	case token.LBRACK:
 		return p.ArrayLiteral()
+
+	case token.OK:
+		p.Next()
+		if !p.MatchAndNext(token.LPAREN) {
+			p.error("expected '(' after Ok", p.Peek(0))
+		}
+		value := p.Expression()
+		if !p.MatchAndNext(token.RPAREN) {
+			p.error("expected ')' after Ok value", p.Peek(0))
+		}
+		return ast.NewOkExpr(value)
+
+	case token.ERR:
+		p.Next()
+		if !p.MatchAndNext(token.LPAREN) {
+			p.error("expected '(' after Err", p.Peek(0))
+		}
+		error := p.Expression()
+		if !p.MatchAndNext(token.RPAREN) {
+			p.error("expected ')' after Err value", p.Peek(0))
+		}
+		return ast.NewErrExpr(error)
 
 	case token.IDENT:
 		p.Next()
@@ -909,4 +947,196 @@ func (p *Parser) ArrayLiteral() ast.Expr {
 	}
 	
 	return ast.NewArrayExpr(elements)
+}
+
+func (p *Parser) InterpolatedString() ast.Expr {
+	raw := p.Peek(0).Value
+	p.Next()
+
+	var parts []ast.Expr
+	var buf strings.Builder
+	i := 0
+
+	for i < len(raw) {
+		if i < len(raw)-1 && raw[i] == '$' && raw[i+1] == '{' {
+			// Добавляем накопленный литерал
+			if buf.Len() > 0 {
+				parts = append(parts, ast.NewLiteralString(buf.String()))
+				buf.Reset()
+			}
+
+			// Пропускаем ${
+			i += 2
+
+			// Найти конец выражения }
+			j := i
+			braceCount := 1
+			for j < len(raw) && braceCount > 0 {
+				if raw[j] == '{' {
+					braceCount++
+				} else if raw[j] == '}' {
+					braceCount--
+				}
+				if braceCount > 0 {
+					j++
+				}
+			}
+
+			if braceCount > 0 {
+				p.error("unclosed ${ in string", p.Peek(0))
+			}
+
+			// Вырезаем выражение между ${ и }
+			exprStr := raw[i:j]
+			if len(exprStr) == 0 {
+				p.error("empty expression in string interpolation", p.Peek(0))
+			}
+
+			subParser := NewParser(exprStr)
+			exprs := subParser.Parse()
+
+			if len(exprs) != 1 {
+				p.error("invalid embedded expression in string", p.Peek(0))
+			}
+
+			parts = append(parts, exprs[0])
+
+			i = j + 1 // после }
+			continue
+		}
+
+		buf.WriteByte(raw[i])
+		i++
+	}
+
+	// Остаток как литерал
+	if buf.Len() > 0 {
+		parts = append(parts, ast.NewLiteralString(buf.String()))
+	}
+
+	// Если нет частей для интерполяции, возвращаем простую строку
+	if len(parts) == 1 {
+		if strExpr, ok := parts[0].(*ast.LiteralString); ok {
+			return strExpr
+		}
+	}
+
+	return ast.NewStringFormatExpr(parts)
+}
+
+// ImportStatement parses import statements:
+// import "./module.foo"
+// import { func1, var1 } from "./module.foo"  
+// import * as ModuleName from "./module.foo"
+func (p *Parser) ImportStatement() ast.Expr {
+	// import "./path"
+	if p.Match(token.STRING) {
+		path := p.Peek(0).Value
+		p.Next()
+		return ast.NewImportExpr(path)
+	}
+
+	// import { item1, item2 } from "./path"
+	if p.MatchAndNext(token.LBRACE) {
+		var items []string
+		
+		for !p.Match(token.RBRACE) {
+			if !p.Match(token.IDENT) {
+				p.error("expected identifier in import list", p.Peek(0))
+			}
+			items = append(items, p.Peek(0).Value)
+			p.Next()
+			
+			if !p.MatchAndNext(token.COMMA) {
+				break
+			}
+		}
+		
+		if !p.MatchAndNext(token.RBRACE) {
+			p.error("expected '}' after import list", p.Peek(0))
+		}
+		
+		if !p.MatchAndNext(token.FROM) {
+			p.error("expected 'from' after import list", p.Peek(0))
+		}
+		
+		if !p.Match(token.STRING) {
+			p.error("expected module path string", p.Peek(0))
+		}
+		
+		path := p.Peek(0).Value
+		p.Next()
+		
+		return ast.NewSelectiveImportExpr(path, items)
+	}
+
+	// import * as Name from "./path"
+	if p.MatchAllNext(token.MUL, token.AS) {
+		if !p.Match(token.IDENT) {
+			p.error("expected identifier after 'as'", p.Peek(0))
+		}
+		
+		alias := p.Peek(0).Value
+		p.Next()
+		
+		if !p.MatchAndNext(token.FROM) {
+			p.error("expected 'from' after alias", p.Peek(0))
+		}
+		
+		if !p.Match(token.STRING) {
+			p.error("expected module path string", p.Peek(0))
+		}
+		
+		path := p.Peek(0).Value
+		p.Next()
+		
+		return ast.NewAliasImportExpr(path, alias)
+	}
+
+	p.error("invalid import syntax", p.Peek(0))
+	return nil
+}
+
+// ExportStatement parses export statements:
+// export fn name() { }
+// export let variable = value
+// export enum Color { RED, GREEN, BLUE }
+func (p *Parser) ExportStatement() ast.Expr {
+	var declaration ast.Expr
+	var name string
+	
+	// export fn name() { }
+	if p.Match(token.FN) {
+		declaration = p.FunctionStatement()
+		// Extract function name from FuncStatment
+		if funcStmt, ok := declaration.(*ast.FuncStatment); ok {
+			name = funcStmt.Name()
+		} else {
+			p.error("invalid function declaration", p.Peek(0))
+		}
+	} else if p.MatchAll(token.LET, token.IDENT, token.EQ) {
+		// export let variable = value
+		p.NextN(2) // Skip LET and IDENT
+		name = p.Peek(-1).Value
+		p.Next() // Skip EQ
+		declaration = ast.NewLetExpr(name, p.Expression())
+	} else if p.MatchAll(token.CONST, token.IDENT, token.EQ) {
+		// export const variable = value
+		p.NextN(2) // Skip CONST and IDENT
+		name = p.Peek(-1).Value 
+		p.Next() // Skip EQ
+		declaration = ast.NewConstExpr(name, p.Expression())
+	} else if p.MatchAndNext(token.ENUM) {
+		// export enum Name { }
+		if !p.Match(token.IDENT) {
+			p.error("expected enum name", p.Peek(0))
+		}
+		name = p.Peek(0).Value // Get enum name before parsing
+		declaration = p.EnumStatement()
+	} else {
+		p.error("invalid export declaration", p.Peek(0))
+		return nil
+	}
+	
+	return ast.NewExportExpr(declaration, name)
 }

@@ -1,0 +1,40 @@
+// Тест рекурсивных функций
+fn factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+// Безопасный тест - малое число
+println("factorial(5) = " + factorial(5))
+
+// Более глубокая рекурсия для проверки переполнения
+println("factorial(10) = " + factorial(10))
+
+// Тест бесконечной рекурсии (закомментировано для безопасности)
+fn infiniteRecursion(x) {
+    return infiniteRecursion(x + 1)
+}
+
+// infiniteRecursion(1) // Это вызовет переполнение стека
+
+// Тест взаимной рекурсии
+fn isEven(n) {
+    if n == 0 {
+        return true
+    }
+    return isOdd(n - 1)
+}
+
+fn isOdd(n) {
+    if n == 0 {
+        return false  
+    }
+    return isEven(n - 1)
+}
+
+println("isEven(4) = " + isEven(4))
+println("isOdd(5) = " + isOdd(5))
+
+println("Рекурсивные функции работают!")

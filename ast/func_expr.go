@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"foo_lang/scope"
 )
 
 type FuncStatment struct {
@@ -19,7 +20,7 @@ func NewFuncStatment(funcName string, args []map[string]Expr, body Expr, isMacro
 		isMacro:  isMacro,
 	}
 
-	Container[funcName] = NewValue(f)
+	scope.GlobalScope.Set(funcName, NewValue(f))
 
 	return f
 }
@@ -41,7 +42,9 @@ func (f *FuncStatment) Params() []string {
 }
 
 func (f *FuncStatment) Eval() *Value {
-	return NewValue("this is macros")
+	// Function definitions don't return values, they register the function in scope
+	// The function is already registered in NewFuncStatment constructor
+	return nil
 }
 
 func (f *FuncStatment) IsMacro() bool {

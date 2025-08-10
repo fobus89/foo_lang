@@ -1,0 +1,28 @@
+// Модуль математических функций
+export fn add(a, b) {
+    return a + b
+}
+
+export fn subtract(a, b) {
+    return a - b
+}
+
+export fn multiply(a, b) {
+    return a * b
+}
+
+export fn divide(a, b) {
+    if b == 0 {
+        return Err("Division by zero")
+    }
+    return Ok(a / b)
+}
+
+export let PI = 3.14159
+export let E = 2.71828
+
+export enum MathConstants {
+    PI_VALUE,
+    E_VALUE,
+    GOLDEN_RATIO
+}

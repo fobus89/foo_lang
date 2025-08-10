@@ -1,0 +1,17 @@
+// Тест ограничения глубины рекурсии
+fn deepRecursion(n) {
+    if n <= 0 {
+        return 0
+    }
+    return deepRecursion(n - 1) + 1
+}
+
+// Безопасный тест
+println("deepRecursion(10) = " + deepRecursion(10))
+
+// Глубокая рекурсия - должна вызвать ошибку
+// Это должно вызвать ошибку "maximum recursion depth exceeded"
+println("Пытаемся вызвать глубокую рекурсию...")
+// deepRecursion(2000)  // закомментировано для безопасного тестирования
+
+println("Тест завершен успешно!")

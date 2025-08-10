@@ -1,0 +1,60 @@
+// Тест Result типа для обработки ошибок
+
+// Функция которая может завершиться с ошибкой
+fn divide(a, b) {
+    if b == 0 {
+        return Err("division by zero")
+    }
+    return Ok(a / b)
+}
+
+// Функция для парсинга числа
+fn parseInt(str) {
+    if str == "42" {
+        return Ok(42)
+    }
+    if str == "100" {
+        return Ok(100) 
+    }
+    return Err("invalid number format")
+}
+
+println("=== Тестируем Result тип ===")
+
+// Тестируем успешные случаи
+let result1 = divide(10, 2)
+println("divide(10, 2) = " + result1)
+println("isOk: " + result1.isOk())
+println("isErr: " + result1.isErr())
+
+if result1.isOk() {
+    println("Результат: " + result1.unwrap())
+}
+
+// Тестируем ошибки
+let result2 = divide(10, 0)
+println("divide(10, 0) = " + result2)
+println("isOk: " + result2.isOk())
+println("isErr: " + result2.isErr())
+
+// Используем unwrapOr для безопасного получения значения
+let safeValue = result2.unwrapOr(-1)
+println("Безопасное значение: " + safeValue)
+
+// Цепочки вызовов
+let parseResult = parseInt("42")
+println("parseInt('42') = " + parseResult)
+if parseResult.isOk() {
+    let value = parseResult.unwrap()
+    println("Распарсенное число: " + value)
+}
+
+let badParseResult = parseInt("abc")
+println("parseInt('abc') = " + badParseResult)
+let defaultNum = badParseResult.unwrapOr(0)
+println("Значение по умолчанию: " + defaultNum)
+
+println("=== Тесты Result завершены ===")
+
+// Тест unwrap с ошибкой (закомментировано для безопасности)
+// result2.unwrap() // Это вызовет panic

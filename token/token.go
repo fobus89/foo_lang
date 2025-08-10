@@ -12,6 +12,7 @@ const (
 	FLOAT       // 123.45
 	CHAR        // 'a'
 	STRING      // "abc"
+	INTERP_STRING // "hello ${name}"
 	MACROS
 	PRINT
 	PRINTLN
@@ -23,11 +24,18 @@ const (
 	FOR
 	FN
 	ENUM
+	RESULT
+	OK
+	ERR
 	TRUE
 	FALSE
 	RETURN
 	YIELD
 	BREAK
+	IMPORT
+	EXPORT
+	FROM
+	AS
 
 	operator_beg
 	ADD        // +

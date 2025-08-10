@@ -97,8 +97,15 @@ var keywords = MapType[string]{
 	"for":     token.FOR,
 	"fn":      token.FN,
 	"enum":    token.ENUM,
+	"Result":  token.RESULT,
+	"Ok":      token.OK,
+	"Err":     token.ERR,
 	"true":    token.TRUE,
 	"false":   token.FALSE,
+	"import":  token.IMPORT,
+	"export":  token.EXPORT,
+	"from":    token.FROM,
+	"as":      token.AS,
 }
 
 type Lexer struct {
@@ -311,6 +318,8 @@ func (l *Lexer) ReadStringFromat() token.TokenType {
 func (l *Lexer) ReadString() token.TokenType {
 	start := l.pos
 	l.Next()
+	
+	hasInterpolation := false
 
 	for l.HasNext() {
 
@@ -318,12 +327,21 @@ func (l *Lexer) ReadString() token.TokenType {
 			l.Next()
 			break
 		}
+		
+		// Проверяем на наличие ${
+		if l.Peek(0) == '$' && l.Peek(1) == '{' {
+			hasInterpolation = true
+		}
 
 		l.Next()
 	}
 
 	if start+1 == l.pos-1 {
-		return token.NewTokenType(token.STRING, "", l.line, l.col)
+		tokenType := token.STRING
+		if hasInterpolation {
+			tokenType = token.INTERP_STRING
+		}
+		return token.NewTokenType(tokenType, "", l.line, l.col)
 	}
 
 	str := l.Get(start+1, l.pos-1)
@@ -333,7 +351,12 @@ func (l *Lexer) ReadString() token.TokenType {
 		}
 	}
 
-	return token.NewTokenType(token.STRING, string(str), l.line, l.col)
+	tokenType := token.STRING
+	if hasInterpolation {
+		tokenType = token.INTERP_STRING
+	}
+
+	return token.NewTokenType(tokenType, string(str), l.line, l.col)
 }
 
 func (l *Lexer) ReadNumber() token.TokenType {

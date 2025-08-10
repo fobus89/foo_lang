@@ -32,13 +32,13 @@ func (n *PrintExpr) Eval() *Value {
 }
 
 func FormatValue(v any) string {
-	switch arr := v.(type) {
+	switch val := v.(type) {
 	case []any:
-		if len(arr) == 0 {
+		if len(val) == 0 {
 			return "[]"
 		}
 		result := "["
-		for i, item := range arr {
+		for i, item := range val {
 			if i > 0 {
 				result += ", "
 			}
@@ -46,6 +46,12 @@ func FormatValue(v any) string {
 		}
 		result += "]"
 		return result
+	case *ResultValue:
+		if val.IsOk() {
+			return fmt.Sprintf("Ok(%s)", FormatValue(val.GetValue().Any()))
+		} else {
+			return fmt.Sprintf("Err(%s)", FormatValue(val.GetValue().Any()))
+		}
 	default:
 		return fmt.Sprintf("%v", v)
 	}

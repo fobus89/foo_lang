@@ -1,0 +1,36 @@
+// Тестируем строковую интерполяцию
+let name = "Иван"
+let age = 25
+let city = "Москва"
+
+// Простая интерполяция
+println("Имя: ${name}")
+println("Возраст: ${age}")
+
+// Множественная интерполяция
+println("${name} живет в городе ${city} и ему ${age} лет")
+
+// Интерполяция с выражениями
+let x = 10
+let y = 5
+println("${x} + ${y} = ${x + y}")
+
+// Интерполяция с массивами
+let arr = [1, 2, 3]
+println("Массив: ${arr}, длина: ${arr.length()}")
+
+// Интерполяция с объектами
+let person = {
+    name: "Анна",
+    age: 30
+}
+println("Пользователь: ${person.name}, возраст: ${person.age}")
+
+// Сложная интерполяция
+let data = {
+    users: [
+        { name: "Петр", score: 100 },
+        { name: "Мария", score: 95 }
+    ]
+}
+println("Лучший игрок: ${data.users[0].name} с результатом ${data.users[0].score}")
