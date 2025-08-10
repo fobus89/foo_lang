@@ -177,7 +177,22 @@ func (p *Parser) Statement() ast.Expr {
 	}
 
 	if p.MatchAndNext(token.RETURN) {
-		return ast.NewReturnExpr(p.Statement())
+		// Parse multiple return values: return a, b, c
+		var returnValues []ast.Expr
+		returnValues = append(returnValues, p.Expression())
+		
+		// Check for additional return values
+		for p.MatchAndNext(token.COMMA) {
+			returnValues = append(returnValues, p.Expression())
+		}
+		
+		if len(returnValues) == 1 {
+			// Single return value
+			return ast.NewReturnExpr(returnValues[0])
+		} else {
+			// Multiple return values
+			return ast.NewReturnExpr(ast.NewMultiReturnExpr(returnValues))
+		}
 	}
 
 	if p.MatchAndNext(token.BREAK) {
@@ -211,9 +226,35 @@ func (p *Parser) Statement() ast.Expr {
 		return ast.NewConstExpr(ident, p.Expression())
 	}
 
-	if p.MatchAllNext(token.LET, token.IDENT, token.EQ) {
-		tok := p.Peek(-2)
-		ident := tok.Value
+	// Check for multiple variable assignment: let a, b, c = expr
+	if p.MatchAndNext(token.LET) {
+		var names []string
+		
+		// Parse first identifier
+		if !p.Match(token.IDENT) {
+			p.error("expected identifier after let", p.Peek(0))
+		}
+		names = append(names, p.Next().Value)
+		
+		// Check for additional identifiers
+		for p.MatchAndNext(token.COMMA) {
+			if !p.Match(token.IDENT) {
+				p.error("expected identifier after comma", p.Peek(0))
+			}
+			names = append(names, p.Next().Value)
+		}
+		
+		if !p.MatchAndNext(token.EQ) {
+			p.error("expected '=' after variable names", p.Peek(0))
+		}
+		
+		// Multiple assignment case
+		if len(names) > 1 {
+			return ast.NewMultiAssignExpr(names, p.Expression())
+		}
+		
+		// Single assignment case - keep existing logic
+		ident := names[0]
 
 		if p.MatchAllNext(token.AT, token.IDENT, token.LPAREN) {
 			return ast.NewLetExpr(ident, p.CallMacro())
@@ -366,7 +407,7 @@ func (p *Parser) FunctionStatement() ast.Expr {
 
 		key := argToken.Value
 		{
-			if p.Match(token.EQ) {
+			if p.MatchAndNext(token.EQ) {
 				args = append(args, map[string]ast.Expr{
 					key: p.Expression(),
 				})
