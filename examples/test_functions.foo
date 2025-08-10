@@ -1,0 +1,31 @@
+println("Тест функций:")
+
+fn add(a, b) {
+    return a + b
+}
+
+fn multiply(x, y) {
+    return x * y
+}
+
+fn greet(name) {
+    return "Привет, " + name + "!"
+}
+
+let sum = add(5, 3)
+println("5 + 3 = " + sum)
+
+let product = multiply(4, 7)
+println("4 * 7 = " + product)
+
+let greeting = greet("Мир")
+println(greeting)
+
+fn factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+println("5! = " + factorial(5))

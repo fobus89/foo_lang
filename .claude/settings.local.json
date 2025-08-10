@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(go run:*)"
+      "Bash(go run:*)",
+      "Bash(go test:*)",
+      "Bash(grep:*)",
+      "Bash(# Search for ''a'' as a separate word in simple_demo.foo\ngrep -n \"\"\\\\ba\\\\b\"\" \"\"D:\\dev\\go\\foo_lang_v2\\examples\\simple_demo.foo\"\" | head -10)"
     ],
     "deny": []
   }

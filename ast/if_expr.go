@@ -24,9 +24,11 @@ func (i *IfExpr) Eval() *Value {
 						val := stm.Eval()
 						val.SetReturn(true)
 						return val
+					case *BreakExpr:
+						return stm.Eval()
 					default:
 						result = stm.Eval()
-						if result != nil && (result.IsReturn() || result.IsYield()) {
+						if result != nil && (result.IsReturn() || result.IsYield() || result.IsBreak()) {
 							return result
 						}
 					}

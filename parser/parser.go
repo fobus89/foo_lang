@@ -181,7 +181,7 @@ func (p *Parser) Statement() ast.Expr {
 	}
 
 	if p.MatchAndNext(token.BREAK) {
-		return ast.NewBreakExpr(p.Statement())
+		return ast.NewBreakExpr(nil)
 	}
 
 	if p.MatchAndNext(token.YIELD) {
@@ -249,6 +249,10 @@ func (p *Parser) Statement() ast.Expr {
 
 	if p.Match(token.MATCH) {
 		return p.MatchStatement()
+	}
+
+	if p.MatchAndNext(token.ENUM) {
+		return p.EnumStatement()
 	}
 
 	return p.Expression()
@@ -615,7 +619,7 @@ func (p *Parser) Multiplication() ast.Expr {
 
 func (p *Parser) Unary() ast.Expr {
 	if p.MatchAndNext(token.SUB) {
-		return ast.NewUnaryOpExpr('-', p.Primary(), 0)
+		return ast.NewUnaryOpExpr('-', p.Postfix(), 0)
 	}
 
 	if p.MatchAndNext(token.NOT) {
@@ -626,10 +630,54 @@ func (p *Parser) Unary() ast.Expr {
 				count++
 			}
 		}
-		return ast.NewUnaryOpExpr('!', p.Primary(), count)
+		return ast.NewUnaryOpExpr('!', p.Postfix(), count)
 	}
 
-	return p.Primary()
+	return p.Postfix()
+}
+
+func (p *Parser) Postfix() ast.Expr {
+	expr := p.Primary()
+	
+	for {
+		if p.MatchAndNext(token.DOT) {
+			// Точечная нотация: obj.property или obj.method()
+			propTok := p.Next()
+			if propTok.Token != token.IDENT {
+				p.error("expected property name after '.'", propTok)
+			}
+			
+			// Проверяем, это вызов метода или доступ к свойству
+			if p.MatchAndNext(token.LPAREN) {
+				// Это вызов метода: obj.method(args)
+				var args []ast.Expr
+				for !p.MatchAndNext(token.RPAREN) {
+					args = append(args, p.Expression())
+					p.MatchAndNext(token.COMMA)
+				}
+				expr = ast.NewMethodCallExpr(expr, propTok.Value, args)
+			} else {
+				// Это доступ к свойству: obj.property
+				expr = ast.NewMemberExpr(expr, propTok.Value)
+			}
+		} else if p.MatchAndNext(token.LPAREN) {
+			// Вызов функции только для VarExpr (переменных)
+			if varExpr, ok := expr.(*ast.VarExpr); ok {
+				var args []ast.Expr
+				for !p.MatchAndNext(token.RPAREN) {
+					args = append(args, p.Expression())
+					p.MatchAndNext(token.COMMA)
+				}
+				expr = ast.NewFuncCallExpr(varExpr.Name, args)
+			} else {
+				p.error("cannot call non-function", p.Peek(-1))
+			}
+		} else {
+			break
+		}
+	}
+	
+	return expr
 }
 
 func (p *Parser) Primary() ast.Expr {
@@ -676,26 +724,72 @@ func (p *Parser) Primary() ast.Expr {
 		p.Next()
 		return expr
 
+	case token.LBRACE:
+		return p.ObjectLiteral()
+
+	case token.LBRACK:
+		return p.ArrayLiteral()
+
 	case token.IDENT:
 		p.Next()
-
-		if p.MatchAndNext(token.LPAREN) {
-
-			var args []ast.Expr
-
-			for !p.MatchAndNext(token.RPAREN) {
-				args = append(args, p.Expression())
-				p.MatchAndNext(token.COMMA)
-			}
-
-			return ast.NewFuncCallExpr(tok.Value, args)
-		}
-
 		return ast.NewVarExpr(tok.Value, nil)
 	}
 
 	p.error("unexpected token", tok)
 	return nil
+}
+
+// ObjectLiteral парсит объектные литералы {key: value, key2: value2}
+func (p *Parser) ObjectLiteral() ast.Expr {
+	if !p.MatchAndNext(token.LBRACE) {
+		p.error("expected '{'", p.Peek(0))
+	}
+
+	fields := make(map[string]ast.Expr)
+
+	// Пустой объект {}
+	if p.MatchAndNext(token.RBRACE) {
+		return ast.NewObjectExpr(fields)
+	}
+
+	for {
+		// Ожидаем идентификатор или строку как ключ
+		keyTok := p.Next()
+		var key string
+		
+		if keyTok.Token == token.IDENT {
+			key = keyTok.Value
+		} else if keyTok.Token == token.STRING {
+			key = keyTok.Value
+		} else {
+			p.error("expected property name", keyTok)
+		}
+
+		// Ожидаем двоеточие
+		if !p.MatchAndNext(token.COLON) {
+			p.error("expected ':'", p.Peek(0))
+		}
+
+		// Значение
+		value := p.Expression()
+		fields[key] = value
+
+		// Проверяем запятую или закрывающую скобку
+		if p.MatchAndNext(token.RBRACE) {
+			break
+		}
+		
+		if !p.MatchAndNext(token.COMMA) {
+			p.error("expected ',' or '}'", p.Peek(0))
+		}
+
+		// Если после запятой сразу закрывающая скобка - это нормально
+		if p.MatchAndNext(token.RBRACE) {
+			break
+		}
+	}
+
+	return ast.NewObjectExpr(fields)
 }
 
 func (p *Parser) format() ast.Expr {
@@ -749,4 +843,70 @@ func (p *Parser) format() ast.Expr {
 	}
 
 	return ast.NewStringFormatExpr(parts)
+}
+
+func (p *Parser) EnumStatement() ast.Expr {
+	if !p.Match(token.IDENT) {
+		p.error("expected enum name", p.Peek(0))
+	}
+	
+	enumName := p.Next().Value
+	
+	if !p.MatchAndNext(token.LBRACE) {
+		p.error("expected '{'", p.Peek(0))
+	}
+	
+	var values []string
+	
+	for !p.MatchAndNext(token.RBRACE) {
+		if !p.Match(token.IDENT) {
+			p.error("expected enum value", p.Peek(0))
+		}
+		
+		values = append(values, p.Next().Value)
+		
+		if p.MatchAndNext(token.RBRACE) {
+			break
+		}
+		
+		if !p.MatchAndNext(token.COMMA) {
+			p.error("expected ',' or '}'", p.Peek(0))
+		}
+		
+		if p.MatchAndNext(token.RBRACE) {
+			break
+		}
+	}
+	
+	return ast.NewEnumExpr(enumName, values)
+}
+
+func (p *Parser) ArrayLiteral() ast.Expr {
+	if !p.MatchAndNext(token.LBRACK) {
+		p.error("expected '['", p.Peek(0))
+	}
+	
+	var elements []ast.Expr
+	
+	if p.MatchAndNext(token.RBRACK) {
+		return ast.NewArrayExpr(elements)
+	}
+	
+	for {
+		elements = append(elements, p.Expression())
+		
+		if p.MatchAndNext(token.RBRACK) {
+			break
+		}
+		
+		if !p.MatchAndNext(token.COMMA) {
+			p.error("expected ',' or ']'", p.Peek(0))
+		}
+		
+		if p.MatchAndNext(token.RBRACK) {
+			break
+		}
+	}
+	
+	return ast.NewArrayExpr(elements)
 }

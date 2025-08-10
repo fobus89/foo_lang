@@ -96,6 +96,7 @@ var keywords = MapType[string]{
 	"else":    token.ELSE,
 	"for":     token.FOR,
 	"fn":      token.FN,
+	"enum":    token.ENUM,
 	"true":    token.TRUE,
 	"false":   token.FALSE,
 }
@@ -197,8 +198,42 @@ func (l *Lexer) Get(start, end int) []rune {
 }
 
 func (l *Lexer) SkipSpace() {
-	for unicode.IsSpace(l.Peek(0)) {
-		l.Next()
+	for {
+		// Пропускаем пробелы
+		if unicode.IsSpace(l.Peek(0)) {
+			l.Next()
+			continue
+		}
+		
+		// Пропускаем однострочные комментарии //
+		if l.Peek(0) == '/' && l.Peek(1) == '/' {
+			l.Next() // /
+			l.Next() // /
+			// Читаем до конца строки
+			for l.HasNext() && l.Peek(0) != '\n' {
+				l.Next()
+			}
+			continue
+		}
+		
+		// Пропускаем многострочные комментарии /* */
+		if l.Peek(0) == '/' && l.Peek(1) == '*' {
+			l.Next() // /
+			l.Next() // *
+			// Читаем до */
+			for l.HasNext() {
+				if l.Peek(0) == '*' && l.Peek(1) == '/' {
+					l.Next() // *
+					l.Next() // /
+					break
+				}
+				l.Next()
+			}
+			continue
+		}
+		
+		// Если не пробел и не комментарий - выходим
+		break
 	}
 }
 

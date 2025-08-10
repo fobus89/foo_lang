@@ -2,13 +2,14 @@ package test
 
 import (
 	"foo_lang/parser"
-	"foo_lang/value"
+	"foo_lang/scope"
 	"testing"
 )
 
-var Container = value.Container
-
 func TestLet(t *testing.T) {
+	// Clear scope and create new one
+	scope.GlobalScope = scope.NewScopeStack()
+
 	const code = `
 		let x = 1
 		let y = 2
@@ -20,10 +21,10 @@ func TestLet(t *testing.T) {
 		expr.Eval()
 	}
 
-	valX := Container["x"]
-	valY := Container["y"]
+	valX, okX := scope.GlobalScope.Get("x")
+	valY, okY := scope.GlobalScope.Get("y")
 
-	if valX == nil || valY == nil {
+	if !okX || !okY {
 		t.Errorf("expected x and y to be defined")
 		return
 	}
@@ -38,6 +39,9 @@ func TestLet(t *testing.T) {
 }
 
 func TestLetExpression(t *testing.T) {
+	// Clear scope and create new one
+	scope.GlobalScope = scope.NewScopeStack()
+
 	const code = `
 		let x = 1
 		let y = 2
@@ -50,9 +54,9 @@ func TestLetExpression(t *testing.T) {
 		expr.Eval()
 	}
 
-	valZ := Container["z"]
+	valZ, okZ := scope.GlobalScope.Get("z")
 
-	if valZ == nil {
+	if !okZ {
 		t.Errorf("expected z to be defined")
 		return
 	}

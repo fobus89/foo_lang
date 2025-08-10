@@ -1,0 +1,89 @@
+println("=== Демонстрация возможностей языка Foo ===")
+println("")
+
+println("1. Переменные и константы:")
+let x = 10
+const PI = 3.14159
+x = x + 5
+println("   x = " + x)
+println("   PI = " + PI)
+
+println("")
+println("2. Типы данных:")
+println("   Целое: " + 42)
+println("   Дробное: " + 3.14)
+println("   Строка: Hello, Foo!")
+println("   Логический true: " + true)
+println("   Логический false: " + false)
+
+println("")
+println("3. Арифметика:")
+println("   5 + 3 = " + (5 + 3))
+println("   10 - 4 = " + (10 - 4))
+println("   6 * 7 = " + (6 * 7))
+println("   15 / 3 = " + (15 / 3))
+println("   17 % 5 = " + (17 % 5))
+
+println("")
+println("4. Сравнения:")
+println("   5 > 3: " + (5 > 3))
+println("   5 == 5: " + (5 == 5))
+println("   3 != 3: " + (3 != 3))
+
+println("")
+println("5. Логика:")
+println("   true && false: " + (true && false))
+println("   true || false: " + (true || false))
+
+println("")
+println("6. Условия:")
+if x > 10 {
+    println("   x больше 10")
+} else {
+    println("   x не больше 10")
+}
+
+let result = x > 10 ? "больше" : "не больше"
+println("   Тернарный: x " + result + " 10")
+
+println("")
+println("7. Циклы:")
+print("   for: ")
+for let z = 0; z < 5; z++ {
+    print(z)
+    if z < 4 {
+        print(", ")
+    }
+}
+println("")
+
+println("")
+println("8. for-yield массивы:")
+const squares = for let a = 1; a <= 5; a++ {
+    yield a * a
+}
+println("   Квадраты 1-5: " + squares)
+
+const evens = for let b = 0; b < 10; b++ {
+    if b % 2 == 0 {
+        yield b
+    }
+}
+println("   Четные 0-9: " + evens)
+
+println("")
+println("9. Составные операторы:")
+let num = 10
+num += 5
+println("   10 += 5 = " + num)
+num *= 2
+println("   15 *= 2 = " + num)
+
+println("")
+println("10. Инкремент:")
+let cnt = 0
+cnt++
+println("   0++ = " + cnt)
+
+println("")
+println("=== Конец демонстрации ===")

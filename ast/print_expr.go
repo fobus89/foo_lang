@@ -20,7 +20,7 @@ func (n *PrintExpr) Eval() *Value {
 	}
 
 	val := n.Expr.Eval()
-	output := formatValue(val.Any())
+	output := FormatValue(val.Any())
 
 	if !n.isPrint {
 		fmt.Println(output)
@@ -31,7 +31,7 @@ func (n *PrintExpr) Eval() *Value {
 	return nil
 }
 
-func formatValue(v any) string {
+func FormatValue(v any) string {
 	switch arr := v.(type) {
 	case []any:
 		if len(arr) == 0 {

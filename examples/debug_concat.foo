@@ -1,0 +1,9 @@
+const arr = for let i = 0; i < 3; i++ {
+    yield i
+}
+
+println("Массив:")
+println(arr)
+
+println("Строка + массив:")
+println("arr = " + arr)

@@ -1,19 +1,19 @@
 package ast
 
+import "foo_lang/scope"
+
 type ConstExpr struct {
 	name string
 	expr Expr
 }
 
 func NewConstExpr(name string, expr Expr) *ConstExpr {
-
 	c := &ConstExpr{
 		name: name,
 		expr: expr,
 	}
 
 	c.define()
-
 	return c
 }
 
@@ -22,8 +22,7 @@ func (n *ConstExpr) Eval() *Value {
 }
 
 func (n *ConstExpr) define() {
-
-	if _, ok := Container[n.name]; ok {
+	if scope.GlobalScope.Has(n.name) {
 		panic("constant " + n.name + " is already defined")
 	}
 
@@ -32,6 +31,6 @@ func (n *ConstExpr) define() {
 	}
 
 	val := n.expr.Eval()
-
-	Container[n.name] = val
+	val.SetConst(true)
+	scope.GlobalScope.Set(n.name, val)
 }

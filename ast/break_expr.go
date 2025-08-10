@@ -9,8 +9,8 @@ func NewBreakExpr(expr Expr) *BreakExpr {
 }
 
 func (r *BreakExpr) Eval() *Value {
-	if r.Expr == nil {
-		return nil
-	}
-	return r.Expr.Eval()
+	// Break always returns nil but marks the value as a break
+	result := NewValue(nil)
+	result.SetBreak(true)
+	return result
 }

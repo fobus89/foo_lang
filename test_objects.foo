@@ -1,0 +1,29 @@
+// Тестируем enum
+enum Color { RED, GREEN, BLUE }
+
+// Тестируем объекты
+let obj = {
+    name: "test", 
+    value: 42
+}
+
+// Доступ к свойствам
+println(obj.name)
+println(obj.value)
+
+// Тестируем массивы и методы
+let arr = [1, 2, 3]
+println(arr.length())
+let arr2 = arr.push(4)
+println(arr2)
+
+// Тестируем enum значения
+let color = Color.RED
+println(color)
+
+/* 
+Цепочные вызовы работают отлично!
+Можно получить длину вложенного массива
+*/
+let data = { items: [1, 2, 3] }
+println(data.items.length())

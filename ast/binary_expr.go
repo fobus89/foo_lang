@@ -107,6 +107,15 @@ func (b *BinaryExpr) add(left, right *Value) *Value {
 		return NewValue(left.String() + right.String())
 	}
 
+	// Конкатенация строки с любым другим типом (включая массивы)
+	if left.IsString() {
+		return NewValue(left.String() + FormatValue(right.Any()))
+	}
+
+	if right.IsString() {
+		return NewValue(FormatValue(left.Any()) + right.String())
+	}
+
 	return nil
 }
 

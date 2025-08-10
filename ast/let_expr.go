@@ -1,5 +1,7 @@
 package ast
 
+import "foo_lang/scope"
+
 type LetExpr struct {
 	name string
 	expr Expr
@@ -13,12 +15,12 @@ func NewLetExpr(name string, expr Expr) *LetExpr {
 }
 
 func (n *LetExpr) Eval() *Value {
-
-	if _, ok := Container[n.name]; ok {
+	if scope.GlobalScope.Has(n.name) {
 		panic("variable " + n.name + " is already defined")
 	}
 
-	Container[n.name] = n.expr.Eval()
+	val := n.expr.Eval()
+	scope.GlobalScope.Set(n.name, val)
 
 	return nil
 }

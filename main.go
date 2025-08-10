@@ -18,7 +18,18 @@ func main() {
 		}
 	}()
 
-	mainFile, _ := os.ReadFile("examples/main.foo")
+	var mainFile []byte
+	var err error
+	
+	if len(os.Args) > 1 {
+		mainFile, err = os.ReadFile(os.Args[1])
+		if err != nil {
+			fmt.Printf("Error reading file: %v\n", err)
+			return
+		}
+	} else {
+		mainFile, _ = os.ReadFile("examples/main.foo")
+	}
 
 	exprs := parser.NewParser(mainFile).Parse()
 

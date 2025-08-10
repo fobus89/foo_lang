@@ -1,32 +1,33 @@
 package ast
 
+import "foo_lang/scope"
+
 type VarExpr struct {
-	name string
+	Name string
 	expr Expr
 }
 
 func NewVarExpr(name string, expr Expr) *VarExpr {
 	return &VarExpr{
-		name: name,
+		Name: name,
 		expr: expr,
 	}
 }
 
 func (n *VarExpr) Eval() *Value {
-
-	val, ok := Container[n.name]
-	{
-		if !ok {
-			panic("variable " + n.name + " is not defined")
-		}
-		if n.expr != nil && val.IsConst() {
-			panic("constant " + n.name + " is already defined")
-		}
+	val, ok := scope.GlobalScope.Get(n.Name)
+	if !ok {
+		panic("variable " + n.Name + " is not defined")
+	}
+	
+	if n.expr != nil && val.IsConst() {
+		panic("cannot assign to constant " + n.Name)
 	}
 
 	if n.expr != nil {
+		// Обновление существующей переменной
 		tmp := n.expr.Eval()
-		Container[n.name] = tmp
+		scope.GlobalScope.Update(n.Name, tmp)
 		return tmp
 	}
 

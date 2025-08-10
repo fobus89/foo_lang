@@ -22,6 +22,7 @@ const (
 	ELSE
 	FOR
 	FN
+	ENUM
 	TRUE
 	FALSE
 	RETURN

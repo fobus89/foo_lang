@@ -10,6 +10,7 @@ type Value struct {
 	isConst  bool
 	isReturn bool
 	isYield  bool
+	isBreak  bool
 	data     any
 }
 
@@ -300,4 +301,12 @@ func (n *Value) SetYield(yield bool) {
 
 func (n *Value) IsYield() bool {
 	return n.isYield
+}
+
+func (n *Value) SetBreak(brk bool) {
+	n.isBreak = brk
+}
+
+func (n *Value) IsBreak() bool {
+	return n.isBreak
 }

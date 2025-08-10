@@ -1,0 +1,106 @@
+let x = 10
+const PI = 3.14159
+x = x + 5
+println("x = " + x)
+println("PI = " + PI)
+
+let intNum = 42
+let floatNum = 3.14
+let str = "Hello, Foo!"
+let bool1 = true
+let bool2 = false
+
+println("\n--- Типы данных ---")
+println(intNum)
+println(floatNum)
+println(str)
+println(bool1)
+println(bool2)
+
+println("\n--- Арифметика ---")
+println("5 + 3 = " + (5 + 3))
+println("10 - 4 = " + (10 - 4))
+println("6 * 7 = " + (6 * 7))
+println("15 / 3 = " + (15 / 3))
+println("17 % 5 = " + (17 % 5))
+
+println("\n--- Сравнения ---")
+println("5 > 3: " + (5 > 3))
+println("2 < 8: " + (2 < 8))
+println("4 >= 4: " + (4 >= 4))
+println("7 <= 6: " + (7 <= 6))
+println("5 == 5: " + (5 == 5))
+println("3 != 3: " + (3 != 3))
+
+println("\n--- Логика ---")
+println("true && false: " + (true && false))
+println("true || false: " + (true || false))
+println("!true: " + !true)
+println("!false: " + !false)
+
+println("\n--- Условия ---")
+if x > 10 {
+    println("x больше 10")
+} else if x == 10 {
+    println("x равен 10")
+} else {
+    println("x меньше 10")
+}
+
+let result = x > 10 ? "больше" : "не больше"
+println("x " + result + " 10")
+
+println("\n--- Циклы ---")
+for let i = 0; i < 5; i++ {
+    print(i + " ")
+}
+println("")
+
+const squares = for let j = 1; j <= 5; j++ {
+    yield j * j
+}
+println("Квадраты: " + squares)
+
+const filtered = for let k = 0; k < 10; k++ {
+    if k > 6 {
+        break
+    }
+    if k % 2 == 0 {
+        yield k
+    }
+}
+println("Четные до 6: " + filtered)
+
+println("\n--- Составные присваивания ---")
+let num = 10
+num += 5
+println("num += 5: " + num)
+num -= 3
+println("num -= 3: " + num)
+num *= 2
+println("num *= 2: " + num)
+num /= 4
+println("num /= 4: " + num)
+num %= 3
+println("num %= 3: " + num)
+
+println("\n--- Инкремент/декремент ---")
+let counter = 0
+counter++
+println("counter++: " + counter)
+counter--
+println("counter--: " + counter)
+
+println("\n--- Вложенные структуры ---")
+for let m = 1; m <= 3; m++ {
+    for let n = 1; n <= 3; n++ {
+        if m * n > 4 {
+            print("* ")
+        } else {
+            print(m * n + " ")
+        }
+    }
+    println("")
+}
+
+println("\n--- Конец демонстрации ---")

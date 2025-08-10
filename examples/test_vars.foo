@@ -1,0 +1,20 @@
+let x = 10
+const PI = 3.14159
+
+println("После определения x и PI")
+
+const arr1 = for let a = 1; a <= 3; a++ {
+    yield a
+}
+
+println("Массив arr1:")
+println(arr1)
+
+const arr2 = for let b = 0; b < 3; b++ {
+    if b % 2 == 0 {
+        yield b
+    }
+}
+
+println("Массив arr2:")
+println(arr2)

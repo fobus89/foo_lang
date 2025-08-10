@@ -2,10 +2,13 @@ package test
 
 import (
 	"foo_lang/parser"
+	"foo_lang/scope"
 	"testing"
 )
 
 func TestIf(t *testing.T) {
+	// Clear scope and create new one
+	scope.GlobalScope = scope.NewScopeStack()
 
 	const code = `if true {1} else {2}`
 
@@ -22,6 +25,8 @@ func TestIf(t *testing.T) {
 }
 
 func TestIfElse(t *testing.T) {
+	// Clear scope and create new one
+	scope.GlobalScope = scope.NewScopeStack()
 
 	const code = `if false {1} else {2}`
 
@@ -38,6 +43,8 @@ func TestIfElse(t *testing.T) {
 }
 
 func TestIfExpression(t *testing.T) {
+	// Clear scope and create new one
+	scope.GlobalScope = scope.NewScopeStack()
 
 	const code = `if 1+2/2 {1} else {2}`
 
