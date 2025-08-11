@@ -1,6 +1,9 @@
 package ast
 
-import "foo_lang/scope"
+import (
+	"foo_lang/scope"
+	"foo_lang/value"
+)
 
 // EnumExpr представляет определение enum
 type EnumExpr struct {
@@ -16,17 +19,23 @@ func NewEnumExpr(name string, values []string) *EnumExpr {
 }
 
 func (e *EnumExpr) Eval() *Value {
-	// Создаём объект с enum значениями
+	// Создаём объект с enum значениями для обратной совместимости
 	enumObj := make(map[string]*Value)
 	
 	for i, value := range e.Values {
 		enumObj[value] = NewValue(int64(i))
 	}
 	
-	// Сохраняем enum в scope
+	// Создаем TypeInfo для enum
+	enumTypeInfo := NewEnumTypeInfo(e.Name, e.Values)
+	
+	// Сохраняем enum как объект для обычного использования
 	scope.GlobalScope.Set(e.Name, NewValue(enumObj))
 	
-	return nil
+	// ДОПОЛНИТЕЛЬНО: Сохраняем TypeInfo для использования в type() и макросах
+	scope.GlobalScope.Set(e.Name+"__TypeInfo", value.NewValue(enumTypeInfo))
+	
+	return value.NewValue(enumTypeInfo)
 }
 
 // EnumValueExpr представляет доступ к значению enum (Color.RED)

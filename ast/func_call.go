@@ -26,6 +26,18 @@ func (f *FuncCallExpr) Eval() *Value {
 		panic("function '" + f.funcName + "' is not defined")
 	}
 
+	// Проверяем на TypedClosure
+	if typedClosure, ok := val.Any().(*TypedClosure); ok {
+		// Вычисляем аргументы
+		evalArgs := make([]*Value, len(f.args))
+		for i, arg := range f.args {
+			evalArgs[i] = arg.Eval()
+		}
+		
+		// Вызываем типизированное замыкание
+		return typedClosure.Call(evalArgs)
+	}
+	
 	// Пробуем найти Callable объект (может быть FuncStatment или встроенная функция)
 	if callable, ok := val.Any().(Callable); ok {
 		// Вычисляем аргументы

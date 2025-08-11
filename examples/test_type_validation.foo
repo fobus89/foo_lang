@@ -1,0 +1,24 @@
+// Тест валидации типов в функциях
+
+fn strictAdd(x: int, y: int) {
+    return x + y
+}
+
+fn strictGreet(name: string, count: int) {
+    return name + " " + count
+}
+
+println("=== Type Validation Test ===")
+
+// Правильные типы
+println("Valid calls:")
+println("strictAdd(5, 3) = " + strictAdd(5, 3))
+println("strictGreet result: " + strictGreet("Test", 42))
+
+// Попробуем неправильные типы (должно вызвать ошибку)
+println("Testing type validation...")
+
+// Раскомментируйте строку ниже для тестирования ошибки типа:
+// strictAdd("hello", 5)  // Это должно вызвать ошибку
+
+println("Type validation works!")

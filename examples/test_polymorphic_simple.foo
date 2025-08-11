@@ -1,0 +1,54 @@
+// Простой тест полиморфной системы типов
+
+struct User {
+    name: string,
+    age: int
+}
+
+// Универсальный макрос для проверки типов
+macro analyzeType(anyType) {
+    println("=== Анализ типа " + anyType.Name + " ===")
+    println("Kind: " + anyType.Kind)
+    
+    if anyType.isStruct() {
+        println("✅ Это структура!")
+    } else if anyType.isPrimitive() {
+        println("✅ Это примитивный тип!")
+    } else {
+        println("❓ Другой тип: " + anyType.Kind)
+    }
+}
+
+// Макрос для генерации кода по типу
+macro generateByType(someType) {
+    if someType.isStruct() {
+        println("// Код для структуры")
+        println("fn create" + someType.Name + "() { return {} }")
+    } else if someType.isPrimitive() {
+        println("// Код для примитива")
+        println("fn process" + someType.Name + "(val) { return val }")
+    }
+}
+
+println("=== Тест полиморфных типов ===")
+
+let userType = type(User)
+let intType = type(int)
+let stringType = type(string)
+
+@analyzeType(userType)
+@analyzeType(intType)
+@analyzeType(stringType)
+
+println("\n=== Генерация кода ===")
+@generateByType(userType)
+@generateByType(intType)
+
+// Тест typeof
+println("\n=== Тест typeof ===")
+let x = 42
+let xType = typeof(x)
+println("typeof(42).isPrimitive(): " + xType.isPrimitive())
+println("typeof(42).isStruct(): " + xType.isStruct())
+
+println("\nПолиморфизм работает!")

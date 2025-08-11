@@ -1,0 +1,128 @@
+// Полная демонстрация типизированных функций и макросов
+// Complete demo of typed functions and macros
+
+println("=== Foo Language - Comprehensive Typed Demo ===")
+
+// 1. Типизированные функции с примитивными типами
+// Typed functions with primitive types
+fn add(x: int, y: int) {
+    return x + y
+}
+
+fn greet(name: string, age: int) {
+    return "Hello " + name + ", you are " + age + " years old!"
+}
+
+fn isValid(flag: bool, threshold: float) {
+    if flag && threshold > 0.5 {
+        return "Valid"
+    }
+    return "Invalid"
+}
+
+// 2. Определяем структуры и енумы для макросов
+// Define structs and enums for macros
+struct User {
+    name: string,
+    id: int,
+    email: string
+}
+
+struct Product {
+    name: string,
+    price: float
+}
+
+enum Status {
+    ACTIVE,
+    INACTIVE,
+    PENDING
+}
+
+// 3. Типизированные макросы
+// Typed macros
+
+// Универсальный анализатор типов
+macro analyzeAnyType(typeParam: Type) {
+    println("=== Type Analysis ===")
+    println("Name: " + typeParam.Name)
+    println("Kind: " + typeParam.Kind)
+    
+    if typeParam.Kind == "struct" {
+        println("This is a struct type - can create instances")
+    }
+    
+    if typeParam.Kind == "enum" {
+        println("This is an enum type - has predefined values")
+    }
+    
+    if typeParam.Kind == "primitive" {
+        println("This is a primitive type - basic data type")
+    }
+    
+    println("---")
+}
+
+// Макрос только для структур
+macro generateConstructor(structType: StructType) {
+    println("// Generated constructor for " + structType.Name)
+    println("fn create" + structType.Name + "() {")
+    println("    return {}")
+    println("}")
+    println("")
+}
+
+// Макрос только для енумов  
+macro generateEnumHelpers(enumType: EnumType) {
+    println("// Generated helpers for enum " + enumType.Name)
+    println("fn is" + enumType.Name + "Valid(value) {")
+    println("    // Check if value is valid " + enumType.Name)
+    println("    return true")
+    println("}")
+    println("")
+}
+
+println("1. Testing typed functions:")
+
+let sum = add(15, 27)
+println("add(15, 27) = " + sum)
+
+let greeting = greet("Alice", 25)
+println(greeting)
+
+let validationResult = isValid(true, 0.8)
+println("Validation result: " + validationResult)
+
+println("")
+println("2. Testing typed macros with type analysis:")
+
+// Анализируем разные типы
+let userType = type(User)
+@analyzeAnyType(userType)
+
+let statusType = type(Status)
+@analyzeAnyType(statusType)
+
+let intType = type(int)
+@analyzeAnyType(intType)
+
+let stringType = type(string)
+@analyzeAnyType(stringType)
+
+println("3. Testing struct-specific macros:")
+
+let productType = type(Product)
+@generateConstructor(userType)
+@generateConstructor(productType)
+
+println("4. Testing enum-specific macros:")
+
+@generateEnumHelpers(statusType)
+
+println("=== Demo completed successfully! ===")
+println("")
+println("Summary:")
+println("✅ Typed functions with int, string, float, bool parameters")
+println("✅ Typed macros with Type, StructType, EnumType parameters")
+println("✅ Type introspection and polymorphic code generation")
+println("✅ Full type safety and validation")

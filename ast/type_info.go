@@ -33,6 +33,22 @@ func (ti *TypeInfo) GetProperty(name string) *value.Value {
 		return value.NewValue(&GetFieldTypeMethod{typeInfo: ti})
 	case "HasField":
 		return value.NewValue(&HasFieldMethod{typeInfo: ti})
+	// Полиморфные методы проверки типа
+	case "isStruct":
+		return value.NewValue(&IsStructMethod{typeInfo: ti})
+	case "isFunction":
+		return value.NewValue(&IsFunctionMethod{typeInfo: ti})
+	case "isEnum":
+		return value.NewValue(&IsEnumMethod{typeInfo: ti})
+	case "isPrimitive":
+		return value.NewValue(&IsPrimitiveMethod{typeInfo: ti})
+	// Методы преобразования
+	case "toStruct":
+		return value.NewValue(&ToStructMethod{typeInfo: ti})
+	case "toFunction":
+		return value.NewValue(&ToFunctionMethod{typeInfo: ti})
+	case "toEnum":
+		return value.NewValue(&ToEnumMethod{typeInfo: ti})
 	default:
 		return nil
 	}
@@ -91,6 +107,94 @@ func (m *HasFieldMethod) Call(args []*value.Value) *value.Value {
 	return value.NewValue(m.typeInfo.HasField(fieldName))
 }
 
+// Полиморфные методы проверки типов
+type IsStructMethod struct {
+	typeInfo *TypeInfo
+}
+
+func (m *IsStructMethod) Call(args []*value.Value) *value.Value {
+	if len(args) != 0 {
+		panic("isStruct() expects no arguments")
+	}
+	return value.NewValue(m.typeInfo.Kind == "struct")
+}
+
+type IsFunctionMethod struct {
+	typeInfo *TypeInfo
+}
+
+func (m *IsFunctionMethod) Call(args []*value.Value) *value.Value {
+	if len(args) != 0 {
+		panic("isFunction() expects no arguments")
+	}
+	return value.NewValue(m.typeInfo.Kind == "function")
+}
+
+type IsEnumMethod struct {
+	typeInfo *TypeInfo
+}
+
+func (m *IsEnumMethod) Call(args []*value.Value) *value.Value {
+	if len(args) != 0 {
+		panic("isEnum() expects no arguments")
+	}
+	return value.NewValue(m.typeInfo.Kind == "enum")
+}
+
+type IsPrimitiveMethod struct {
+	typeInfo *TypeInfo
+}
+
+func (m *IsPrimitiveMethod) Call(args []*value.Value) *value.Value {
+	if len(args) != 0 {
+		panic("isPrimitive() expects no arguments")
+	}
+	return value.NewValue(m.typeInfo.Kind == "primitive")
+}
+
+// Методы преобразования (для безопасного кастинга)
+type ToStructMethod struct {
+	typeInfo *TypeInfo
+}
+
+func (m *ToStructMethod) Call(args []*value.Value) *value.Value {
+	if len(args) != 0 {
+		panic("toStruct() expects no arguments")
+	}
+	if m.typeInfo.Kind != "struct" {
+		panic("cannot convert " + m.typeInfo.Kind + " to struct")
+	}
+	return value.NewValue(m.typeInfo)
+}
+
+type ToFunctionMethod struct {
+	typeInfo *TypeInfo
+}
+
+func (m *ToFunctionMethod) Call(args []*value.Value) *value.Value {
+	if len(args) != 0 {
+		panic("toFunction() expects no arguments")
+	}
+	if m.typeInfo.Kind != "function" {
+		panic("cannot convert " + m.typeInfo.Kind + " to function")
+	}
+	return value.NewValue(m.typeInfo)
+}
+
+type ToEnumMethod struct {
+	typeInfo *TypeInfo
+}
+
+func (m *ToEnumMethod) Call(args []*value.Value) *value.Value {
+	if len(args) != 0 {
+		panic("toEnum() expects no arguments")
+	}
+	if m.typeInfo.Kind != "enum" {
+		panic("cannot convert " + m.typeInfo.Kind + " to enum")
+	}
+	return value.NewValue(m.typeInfo)
+}
+
 // NewStructTypeInfo создает информацию о структуре
 func NewStructTypeInfo(name string, fields map[string]*TypeInfo) *TypeInfo {
 	return &TypeInfo{
@@ -124,6 +228,41 @@ func NewPrimitiveTypeInfo(name string) *TypeInfo {
 	return &TypeInfo{
 		Kind: "primitive",
 		Name: name,
+	}
+}
+
+// Специализированные типы для типизированных параметров макросов
+
+// FnType представляет специализированный тип функции для макросов
+type FnType struct {
+	*TypeInfo
+}
+
+func NewFnType(name string, params []*TypeInfo, returnType *TypeInfo) *FnType {
+	return &FnType{
+		TypeInfo: NewFunctionTypeInfo(name, params, returnType),
+	}
+}
+
+// StructType представляет специализированный тип структуры для макросов  
+type StructType struct {
+	*TypeInfo
+}
+
+func NewStructType(name string, fields map[string]*TypeInfo) *StructType {
+	return &StructType{
+		TypeInfo: NewStructTypeInfo(name, fields),
+	}
+}
+
+// EnumType представляет специализированный тип enum для макросов
+type EnumType struct {
+	*TypeInfo
+}
+
+func NewEnumType(name string, values []string) *EnumType {
+	return &EnumType{
+		TypeInfo: NewEnumTypeInfo(name, values),
 	}
 }
 
@@ -281,6 +420,11 @@ func NewTypeExpr(typeName string) *TypeExpr {
 }
 
 func (t *TypeExpr) Eval() *value.Value {
+	// Сначала проверяем специальный ключ для TypeInfo у enum
+	if typeInfoValue, found := scope.GlobalScope.Get(t.TypeName + "__TypeInfo"); found {
+		return typeInfoValue
+	}
+	
 	// Получаем информацию о типе из scope
 	typeValue, found := scope.GlobalScope.Get(t.TypeName)
 	if !found {
@@ -301,5 +445,11 @@ func (t *TypeExpr) Eval() *value.Value {
 		}
 	}
 	
+	// Если это уже TypeInfo, возвращаем как есть
+	if _, ok := typeValue.Any().(*TypeInfo); ok {
+		return typeValue
+	}
+	
+	// Иначе это обычное значение - возвращаем как есть
 	return typeValue
 }

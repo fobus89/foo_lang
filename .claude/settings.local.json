@@ -15,7 +15,11 @@
       "Bash(./foo_lang.exe examples/test_macros_simple.foo)",
       "Bash(./foo_lang.exe examples/test_types_simple.foo)",
       "Bash(./foo_lang.exe examples/test_types_basic.foo)",
-      "Bash(./foo_lang.exe examples/test_advanced_macros.foo)"
+      "Bash(./foo_lang.exe examples/test_advanced_macros.foo)",
+      "Bash(./foo_lang.exe examples/test_polymorphic_types.foo)",
+      "Bash(./foo_lang.exe:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

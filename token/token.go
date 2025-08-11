@@ -19,6 +19,14 @@ const (
 	TYPEOF        // typeof
 	STRUCT        // struct
 	TYPE          // type
+	EXPR          // Expr
+	FNTYPE        // FnType
+	STRUCTTYPE    // StructType
+	ENUMTYPE      // EnumType
+	INT_TYPE      // int (как тип параметра)
+	STRING_TYPE   // string (как тип параметра)
+	FLOAT_TYPE    // float (как тип параметра)  
+	BOOL_TYPE     // bool (как тип параметра)
 	PRINT
 	PRINTLN
 	LET

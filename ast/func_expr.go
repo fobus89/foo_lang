@@ -5,11 +5,51 @@ import (
 	"foo_lang/scope"
 )
 
+// FuncParam представляет типизированный параметр функции
+type FuncParam struct {
+	Name     string
+	TypeName string // "int", "string", "float", "bool", или пустая строка для нетипизированного
+	Default  Expr   // Значение по умолчанию (может быть nil)
+}
+
 type FuncStatment struct {
 	funcName string
 	args     []map[string]Expr
 	body     Expr
 	isMacro  bool
+}
+
+// TypedFuncStatement представляет функцию с типизированными параметрами
+type TypedFuncStatement struct {
+	FuncName string
+	Params   []FuncParam
+	Body     Expr
+}
+
+func NewTypedFuncStatement(funcName string, params []FuncParam, body Expr) *TypedFuncStatement {
+	return &TypedFuncStatement{
+		FuncName: funcName,
+		Params:   params,
+		Body:     body,
+	}
+}
+
+func (f *TypedFuncStatement) Eval() *Value {
+	// Преобразуем типизированные параметры в старый формат для совместимости с замыканиями
+	args := make([]map[string]Expr, len(f.Params))
+	for i, param := range f.Params {
+		argMap := make(map[string]Expr)
+		argMap[param.Name] = param.Default // Если Default nil, это будет nil
+		args[i] = argMap
+	}
+	
+	// Создаем замыкание с типизированными параметрами
+	closure := NewTypedClosure(f.FuncName, f.Params, f.Body)
+	
+	// Регистрируем замыкание в области видимости
+	scope.GlobalScope.Set(f.FuncName, NewValue(closure))
+	
+	return NewValue(nil)
 }
 
 func NewFuncStatment(funcName string, args []map[string]Expr, body Expr, isMacro bool) *FuncStatment {

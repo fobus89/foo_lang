@@ -52,6 +52,52 @@ func (m *MethodCallExpr) Eval() *Value {
 			}
 			fieldName := m.Args[0].Eval().String()
 			return NewValue(typeInfo.HasField(fieldName))
+		// Полиморфные методы проверки типов
+		case "isStruct":
+			if len(m.Args) != 0 {
+				panic("isStruct() expects no arguments")
+			}
+			return NewValue(typeInfo.Kind == "struct")
+		case "isFunction":
+			if len(m.Args) != 0 {
+				panic("isFunction() expects no arguments")
+			}
+			return NewValue(typeInfo.Kind == "function")
+		case "isEnum":
+			if len(m.Args) != 0 {
+				panic("isEnum() expects no arguments")
+			}
+			return NewValue(typeInfo.Kind == "enum")
+		case "isPrimitive":
+			if len(m.Args) != 0 {
+				panic("isPrimitive() expects no arguments")
+			}
+			return NewValue(typeInfo.Kind == "primitive")
+		// Методы преобразования
+		case "toStruct":
+			if len(m.Args) != 0 {
+				panic("toStruct() expects no arguments")
+			}
+			if typeInfo.Kind != "struct" {
+				panic("cannot convert " + typeInfo.Kind + " to struct")
+			}
+			return NewValue(typeInfo)
+		case "toFunction":
+			if len(m.Args) != 0 {
+				panic("toFunction() expects no arguments")
+			}
+			if typeInfo.Kind != "function" {
+				panic("cannot convert " + typeInfo.Kind + " to function")
+			}
+			return NewValue(typeInfo)
+		case "toEnum":
+			if len(m.Args) != 0 {
+				panic("toEnum() expects no arguments")
+			}
+			if typeInfo.Kind != "enum" {
+				panic("cannot convert " + typeInfo.Kind + " to enum")
+			}
+			return NewValue(typeInfo)
 		}
 	}
 	

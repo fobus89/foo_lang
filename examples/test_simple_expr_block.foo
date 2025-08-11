@@ -1,0 +1,13 @@
+// Тест простого Expr блока
+
+macro testExpr() {
+    println("Macro-time execution")
+    
+    Expr {
+        println("Code generation")
+    }
+}
+
+@testExpr()
+
+println("Done!")

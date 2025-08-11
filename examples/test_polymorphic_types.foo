@@ -1,0 +1,123 @@
+// Демонстрация полиморфной системы типов
+
+// Определяем разные типы
+struct User {
+    name: string,
+    age: int
+}
+
+enum Status {
+    ACTIVE,
+    INACTIVE,
+    PENDING
+}
+
+fn testFunction(x, y) {
+    return x + y
+}
+
+// Универсальный макрос для анализа любого типа
+macro showTypeInfo(anyType) {
+    println("=== Анализ типа ===")
+    println("Name: " + anyType.Name)
+    println("Kind: " + anyType.Kind)
+    
+    // Полиморфная проверка типов
+    if anyType.isStruct() {
+        println("✅ Это структура!")
+        let structType = anyType.toStruct()
+        println("Поля структуры доступны")
+    } else if anyType.isEnum() {
+        println("✅ Это enum!")
+        let enumType = anyType.toEnum()
+        println("Значения enum доступны")
+    } else if anyType.isFunction() {
+        println("✅ Это функция!")
+        let funcType = anyType.toFunction()
+        println("Информация о функции доступна")
+    } else if anyType.isPrimitive() {
+        println("✅ Это примитивный тип!")
+        println("Базовый тип: " + anyType.Name)
+    } else {
+        println("❓ Неизвестный тип")
+    }
+    
+    println("")
+}
+
+// Макрос для генерации кода в зависимости от типа
+macro generateCode(someType, name) {
+    if someType.isStruct() {
+        println("// Генерируем код для структуры " + name)
+        println("fn create" + name + "() {")
+        println("    return {}")
+        println("}")
+    } else if someType.isEnum() {
+        println("// Генерируем код для enum " + name)
+        println("fn get" + name + "Values() {")
+        println("    return [\"ACTIVE\", \"INACTIVE\", \"PENDING\"]")
+        println("}")
+    } else if someType.isFunction() {
+        println("// Генерируем код для функции " + name)
+        println("fn wrap" + name + "(args) {")
+        println("    return " + name + "(args)")
+        println("}")
+    } else {
+        println("// Неподдерживаемый тип для генерации: " + someType.Kind)
+    }
+}
+
+println("=== Демонстрация полиморфной системы типов ===")
+
+// Получаем типы разных конструкций
+let userType = type(User)
+let statusType = type(Status)
+let intType = type(int)
+let stringType = type(string)
+
+// Показываем информацию о каждом типе
+@showTypeInfo(userType)
+@showTypeInfo(statusType) 
+@showTypeInfo(intType)
+@showTypeInfo(stringType)
+
+println("=== Генерация кода на основе типов ===")
+
+// Генерируем код в зависимости от типа
+@generateCode(userType, "User")
+@generateCode(statusType, "Status")
+@generateCode(intType, "Int")
+
+// Демонстрация typeof с полиморфизмом
+println("=== Анализ значений через typeof ===")
+
+let x = 42
+let str = "hello"
+let obj = {name: "test", age: 25}
+
+let xType = typeof(x)
+let strType = typeof(str)
+let objType = typeof(obj)
+
+println("typeof(42).isPrimitive(): " + xType.isPrimitive())
+println("typeof(\"hello\").isPrimitive(): " + strType.isPrimitive())
+println("typeof(obj).isStruct(): " + objType.isStruct())
+
+// Условная обработка типов
+macro processAnyValue(value) {
+    let valueType = typeof(value)
+    
+    if valueType.isPrimitive() {
+        println("Обрабатываем примитивное значение: " + value)
+    } else if valueType.isStruct() {
+        println("Обрабатываем объект со структурой")
+    } else {
+        println("Обрабатываем неизвестный тип")
+    }
+}
+
+@processAnyValue(42)
+@processAnyValue("test")
+@processAnyValue(obj)
+
+println("\nПолиморфная система типов работает!")

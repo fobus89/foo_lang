@@ -6,34 +6,63 @@ import (
 	"foo_lang/value"
 )
 
-// Macro представляет определение макроса
+// MacroParam представляет типизированный параметр макроса
+type MacroParam struct {
+	Name     string
+	TypeName string // "Type", "FnType", "StructType", "EnumType", или пустая строка для нетипизированного
+}
+
+// Macro представляет определение макроса с поддержкой macro-time execution
 type Macro struct {
-	Name   string
-	Params []string
-	Body   Expr // AST тело макроса
+	Name         string
+	Params       []MacroParam // Типизированные параметры
+	MacroTime    []Expr       // Код, выполняющийся во время макро-времени
+	CodeGenBody  Expr         // Expr блок для генерации кода
 }
 
-// MacroDefExpr представляет определение макроса
+// MacroDefExpr представляет определение макроса с поддержкой macro-time и code-gen
 type MacroDefExpr struct {
-	Name   string
-	Params []string
-	Body   Expr
+	Name        string
+	Params      []MacroParam // Типизированные параметры
+	MacroTime   []Expr       // Выполняется во время компиляции макроса
+	CodeGenBody Expr         // Expr {} блок для генерации кода
 }
 
-func NewMacroDefExpr(name string, params []string, body Expr) *MacroDefExpr {
+func NewMacroDefExpr(name string, params []MacroParam, macroTime []Expr, codeGen Expr) *MacroDefExpr {
 	return &MacroDefExpr{
-		Name:   name,
-		Params: params,
-		Body:   body,
+		Name:        name,
+		Params:      params,
+		MacroTime:   macroTime,
+		CodeGenBody: codeGen,
 	}
+}
+
+// NewSimpleMacroDefExpr создает макрос с единым телом (для обратной совместимости)
+func NewSimpleMacroDefExpr(name string, params []MacroParam, body Expr) *MacroDefExpr {
+	return &MacroDefExpr{
+		Name:        name,
+		Params:      params,
+		MacroTime:   nil,       // Нет macro-time кода
+		CodeGenBody: body,      // Все тело как генерация кода
+	}
+}
+
+// NewLegacyMacroDefExpr создает макрос из строковых параметров (для обратной совместимости) 
+func NewLegacyMacroDefExpr(name string, paramNames []string, body Expr) *MacroDefExpr {
+	params := make([]MacroParam, len(paramNames))
+	for i, paramName := range paramNames {
+		params[i] = MacroParam{Name: paramName, TypeName: ""} // Нетипизированный параметр
+	}
+	return NewSimpleMacroDefExpr(name, params, body)
 }
 
 func (m *MacroDefExpr) Eval() *value.Value {
 	// Сохраняем макрос в текущей области видимости
 	macro := &Macro{
-		Name:   m.Name,
-		Params: m.Params,
-		Body:   m.Body,
+		Name:        m.Name,
+		Params:      m.Params,
+		MacroTime:   m.MacroTime,
+		CodeGenBody: m.CodeGenBody,
 	}
 	
 	// Сохраняем макрос как специальное значение в scope
@@ -78,19 +107,68 @@ func (m *MacroCallExpr) Eval() *value.Value {
 	scope.GlobalScope.Push()
 	defer scope.GlobalScope.Pop()
 	
-	// Связываем параметры с аргументами
+	// Связываем параметры с аргументами с проверкой типов
 	for i, param := range macro.Params {
 		// Вычисляем аргументы перед передачей в макрос
-		// В будущем можно добавить возможность передавать AST для метапрограммирования
 		argValue := m.Args[i].Eval()
-		scope.GlobalScope.Set(param, argValue)
+		
+		// Проверяем тип параметра, если указан
+		if param.TypeName != "" {
+			if err := validateMacroParameterType(argValue, param.TypeName); err != nil {
+				panic(fmt.Sprintf("macro '%s' parameter '%s': %s", m.Name, param.Name, err.Error()))
+			}
+		}
+		
+		scope.GlobalScope.Set(param.Name, argValue)
 	}
 	
-	// Выполняем тело макроса
-	// В будущем здесь должна быть более сложная логика для манипуляции AST
-	result := macro.Body.Eval()
+	// ФАЗА 1: Выполняем macro-time код
+	if macro.MacroTime != nil {
+		for _, stmt := range macro.MacroTime {
+			stmt.Eval()
+		}
+	}
 	
-	return result
+	// ФАЗА 2: Генерируем и выполняем код из Expr блока
+	if macro.CodeGenBody != nil {
+		result := macro.CodeGenBody.Eval()
+		return result
+	}
+	
+	// Если нет кода для генерации, возвращаем nil
+	return value.NewValue(nil)
+}
+
+// validateMacroParameterType проверяет соответствие типа аргумента ожидаемому типу параметра макроса
+func validateMacroParameterType(argValue *value.Value, expectedTypeName string) error {
+	// Получаем TypeInfo из аргумента
+	typeInfo, ok := argValue.Any().(*TypeInfo)
+	if !ok {
+		return fmt.Errorf("expected TypeInfo, got %T", argValue.Any())
+	}
+	
+	switch expectedTypeName {
+	case "Type":
+		// Type принимает любой тип
+		return nil
+	case "FnType":
+		if typeInfo.Kind != "function" {
+			return fmt.Errorf("expected function type, got %s", typeInfo.Kind)
+		}
+		return nil
+	case "StructType":
+		if typeInfo.Kind != "struct" {
+			return fmt.Errorf("expected struct type, got %s", typeInfo.Kind)
+		}
+		return nil
+	case "EnumType":
+		if typeInfo.Kind != "enum" {
+			return fmt.Errorf("expected enum type, got %s", typeInfo.Kind)
+		}
+		return nil
+	default:
+		return fmt.Errorf("unknown type constraint: %s", expectedTypeName)
+	}
 }
 
 // QuoteExpr представляет оператор quote для создания AST
@@ -137,6 +215,36 @@ func (e *ExpandExpr) Eval() *value.Value {
 	// Если результат - это AST, выполняем его
 	if expr, ok := result.Any().(Expr); ok {
 		return expr.Eval()
+	}
+	
+	return result
+}
+
+// ExprBlockExpr представляет блок Expr {} для генерации кода в макросах
+type ExprBlockExpr struct {
+	Statements []Expr
+}
+
+func NewExprBlockExpr(statements []Expr) *ExprBlockExpr {
+	return &ExprBlockExpr{Statements: statements}
+}
+
+func (e *ExprBlockExpr) Eval() *value.Value {
+	// Выполняем все выражения в блоке для генерации кода
+	var result *value.Value = value.NewValue(nil) // Инициализируем значением по умолчанию
+	
+	for _, stmt := range e.Statements {
+		result = stmt.Eval()
+		
+		// Проверяем специальные флаги (если result не nil)
+		if result != nil && (result.IsReturn() || result.IsBreak()) {
+			break
+		}
+	}
+	
+	// Всегда возвращаем непустое значение
+	if result == nil {
+		return value.NewValue(nil)
 	}
 	
 	return result

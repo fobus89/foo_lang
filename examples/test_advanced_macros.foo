@@ -1,59 +1,53 @@
-// Продвинутые макросы с типами
+// Тест продвинутых макросов с macro-time выполнением и Expr блоками
 
 struct User {
     name: string,
-    age: int,
-    email: string
+    age: int
 }
 
-// Макрос для генерации простого геттера
-macro generateGetter(structType, fieldName) {
-    println("// Геттер для поля " + fieldName)
-    println("fn get" + fieldName + "(obj) {")
-    println("    return obj." + fieldName)  
-    println("}")
-}
-
-// Макрос для генерации сеттера
-macro generateSetter(structType, fieldName) {
-    println("// Сеттер для поля " + fieldName)
-    println("fn set" + fieldName + "(obj, value) {")
-    println("    obj." + fieldName + " = value")
-    println("}")
-}
-
-// Макрос для информации о типе
-macro showTypeInfo(structType) {
-    println("=== Информация о типе " + structType.Name + " ===")
-    println("Kind: " + structType.Kind)
-    println("Name: " + structType.Name)
+// Макрос с macro-time анализом и генерацией кода
+macro analyzeAndGenerate(typeInfo) {
+    // Macro-time: анализируем тип во время компиляции
+    println("=== MACRO-TIME ANALYSIS ===")
+    println("Analyzing type: " + typeInfo.Name)
+    println("Type kind: " + typeInfo.Kind)
     
-    if structType.Kind == "struct" {
-        println("Fields:")
-        // TODO: реализовать итерацию по полям
-        println("  - name")
-        println("  - age") 
-        println("  - email")
+    if typeInfo.isStruct() {
+        println("Found struct with fields")
+    }
+    
+    // Expr блок: генерируем код
+    Expr {
+        println("=== GENERATED CODE ===")
+        if typeInfo.isStruct() {
+            println("// Generated constructor for " + typeInfo.Name)
+            println("fn create" + typeInfo.Name + "() {")
+            println("    return {}")
+            println("}")
+        }
     }
 }
 
-println("=== Демонстрация продвинутых макросов ===")
+// Макрос только с macro-time кодом (без генерации)
+macro showTypeAnalysis(someType) {
+    println("=== TYPE ANALYSIS (MACRO-TIME ONLY) ===")
+    println("Type: " + someType.Name)
+    println("Is struct: " + someType.isStruct())
+    println("Is primitive: " + someType.isPrimitive())
+}
+
+println("=== Тестирование продвинутых макросов ===")
 
 let userType = type(User)
+let intType = type(int)
 
-// Показываем информацию о типе
-@showTypeInfo(userType)
+// Вызываем макрос с macro-time + code generation
+@analyzeAndGenerate(userType)
 
-println("\n=== Генерируем код ===")
+println()
 
-// Генерируем геттеры и сеттеры
-@generateGetter(userType, "name")
-@generateSetter(userType, "name")
+// Вызываем макрос только с macro-time
+@showTypeAnalysis(userType)
+@showTypeAnalysis(intType)
 
-@generateGetter(userType, "age")
-@generateSetter(userType, "age")
-
-@generateGetter(userType, "email")
-@generateSetter(userType, "email")
-
-println("\nПродвинутые макросы работают!")
+println("\nТест завершен!")

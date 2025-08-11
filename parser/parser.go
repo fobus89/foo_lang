@@ -137,6 +137,10 @@ func (p *Parser) Statement() ast.Expr {
 
 
 	if p.Match(token.FN) {
+		// Проверяем, есть ли типизированные параметры (например, fn func_name(param: int))
+		if p.hasTypedParameters() {
+			return p.TypedFunctionStatement()
+		}
 		return p.FunctionStatement()
 	}
 
@@ -351,14 +355,40 @@ func (p *Parser) MacroDefinition() ast.Expr {
 		p.error("expected '(' after macro name", p.Peek(0))
 	}
 
-	var params []string
+	var params []ast.MacroParam
 	for !p.Match(token.RPAREN) {
 		if !p.Match(token.IDENT) {
 			p.error("expected parameter name", p.Peek(0))
 		}
 		
-		params = append(params, p.Peek(0).Value)
+		paramName := p.Peek(0).Value
 		p.Next()
+		
+		var typeName string
+		// Проверяем на типизированный параметр: paramName: Type
+		if p.Match(token.COLON) {
+			p.Next() // consume ':'
+			
+			// Ожидаем тип параметра
+			currentToken := p.Peek(0)
+			if p.Match(token.TYPE) {
+				typeName = "Type"
+				p.Next()
+			} else if p.Match(token.FNTYPE) {
+				typeName = "FnType" 
+				p.Next()
+			} else if p.Match(token.STRUCTTYPE) {
+				typeName = "StructType"
+				p.Next()
+			} else if p.Match(token.ENUMTYPE) {
+				typeName = "EnumType"
+				p.Next()
+			} else {
+				p.error("expected type annotation (Type, FnType, StructType, EnumType)", currentToken)
+			}
+		}
+		
+		params = append(params, ast.MacroParam{Name: paramName, TypeName: typeName})
 		
 		if p.Match(token.COMMA) {
 			p.Next()
@@ -371,9 +401,47 @@ func (p *Parser) MacroDefinition() ast.Expr {
 		p.error("expected ')'", p.Peek(0))
 	}
 
-	body := p.BlockStatement()
+	if !p.MatchAndNext(token.LBRACE) {
+		p.error("expected '{' after macro parameters", p.Peek(0))
+	}
+
+	// Парсим macro-time код до Expr блока
+	var macroTimeStatements []ast.Expr
+	var codeGenBody ast.Expr
+
+	// Парсим все выражения до Expr блока или конца макроса
+	for !p.Match(token.RBRACE) && !p.Match(token.EXPR) {
+		stmt := p.Statement()
+		macroTimeStatements = append(macroTimeStatements, stmt)
+	}
+
+	// Если есть Expr блок
+	if p.Match(token.EXPR) {
+		p.Next() // consume 'Expr'
+		
+		if !p.MatchAndNext(token.LBRACE) {
+			p.error("expected '{' after 'Expr'", p.Peek(0))
+		}
+		
+		// Парсим содержимое Expr блока
+		var exprStatements []ast.Expr
+		for !p.Match(token.RBRACE) {
+			stmt := p.Statement()
+			exprStatements = append(exprStatements, stmt)
+		}
+		
+		if !p.MatchAndNext(token.RBRACE) {
+			p.error("expected '}' after Expr block", p.Peek(0))
+		}
+		
+		codeGenBody = ast.NewExprBlockExpr(exprStatements)
+	}
+
+	if !p.MatchAndNext(token.RBRACE) {
+		p.error("expected '}' after macro body", p.Peek(0))
+	}
 	
-	return ast.NewMacroDefExpr(name, params, body)
+	return ast.NewMacroDefExpr(name, params, macroTimeStatements, codeGenBody)
 }
 
 func (p *Parser) StructDefinition() ast.Expr {
@@ -1289,4 +1357,105 @@ func (p *Parser) AnonymousFunction() ast.Expr {
 	}
 
 	return ast.NewAnonymousFunc(args, body)
+}
+
+// hasTypedParameters проверяет, есть ли типизированные параметры в функции
+func (p *Parser) hasTypedParameters() bool {
+	// Сохраняем текущую позицию парсера
+	savedPos := p.pos
+	defer func() { p.pos = savedPos }()
+	
+	// Пропускаем fn и имя функции
+	if !p.MatchAllNext(token.FN, token.IDENT, token.LPAREN) {
+		return false
+	}
+	
+	// Ищем параметры с двоеточиями (param: type)
+	for !p.Match(token.RPAREN) && p.pos < len(p.tokens) {
+		if p.Match(token.IDENT) {
+			p.Next()
+			if p.Match(token.COLON) {
+				return true // Найден типизированный параметр
+			}
+		}
+		p.Next()
+	}
+	
+	return false
+}
+
+// TypedFunctionStatement парсит функцию с типизированными параметрами
+func (p *Parser) TypedFunctionStatement() ast.Expr {
+	if !p.MatchAndNext(token.FN) {
+		p.error("expected 'fn'", p.Peek(0))
+	}
+	
+	if !p.Match(token.IDENT) {
+		p.error("expected function name", p.Peek(0))
+	}
+	
+	funcName := p.Peek(0).Value
+	p.Next()
+	
+	if !p.MatchAndNext(token.LPAREN) {
+		p.error("expected '(' after function name", p.Peek(0))
+	}
+	
+	var params []ast.FuncParam
+	for !p.Match(token.RPAREN) {
+		if !p.Match(token.IDENT) {
+			p.error("expected parameter name", p.Peek(0))
+		}
+		
+		paramName := p.Peek(0).Value
+		p.Next()
+		
+		var typeName string
+		var defaultValue ast.Expr
+		
+		// Проверяем на типизированный параметр: paramName: type
+		if p.Match(token.COLON) {
+			p.Next() // consume ':'
+			
+			// Ожидаем примитивный тип как идентификатор
+			if p.Match(token.IDENT) {
+				typeValue := p.Peek(0).Value
+				switch typeValue {
+				case "int", "string", "float", "bool":
+					typeName = typeValue
+					p.Next()
+				default:
+					p.error("expected primitive type (int, string, float, bool)", p.Peek(0))
+				}
+			} else {
+				p.error("expected primitive type (int, string, float, bool)", p.Peek(0))
+			}
+		}
+		
+		// Проверяем на значение по умолчанию: param = default
+		if p.Match(token.EQ) {
+			p.Next()
+			defaultValue = p.Expression()
+		}
+		
+		params = append(params, ast.FuncParam{
+			Name:     paramName,
+			TypeName: typeName,
+			Default:  defaultValue,
+		})
+		
+		if p.Match(token.COMMA) {
+			p.Next()
+		} else if !p.Match(token.RPAREN) {
+			p.error("expected ',' or ')'", p.Peek(0))
+		}
+	}
+	
+	if !p.MatchAndNext(token.RPAREN) {
+		p.error("expected ')'", p.Peek(0))
+	}
+	
+	body := p.BlockStatement()
+	
+	return ast.NewTypedFuncStatement(funcName, params, body)
 }

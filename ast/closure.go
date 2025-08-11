@@ -15,6 +15,14 @@ type Closure struct {
 	isMacro      bool
 }
 
+// TypedClosure представляет типизированное замыкание
+type TypedClosure struct {
+	funcName     string
+	params       []FuncParam
+	body         Expr
+	capturedVars map[string]*value.Value  // Захваченные переменные
+}
+
 // NewClosure создает новое замыкание с захватом переменных из текущей области
 func NewClosure(funcName string, args []map[string]Expr, body Expr, isMacro bool) *Closure {
 	// Захватываем все переменные из текущей области видимости
@@ -149,4 +157,112 @@ func (c *Closure) IsMacro() bool {
 // GetCapturedVars возвращает захваченные переменные (для отладки)
 func (c *Closure) GetCapturedVars() map[string]*value.Value {
 	return c.capturedVars
+}
+
+// NewTypedClosure создает новое типизированное замыкание
+func NewTypedClosure(funcName string, params []FuncParam, body Expr) *TypedClosure {
+	// Захватываем все переменные из текущей области видимости
+	capturedVars := make(map[string]*value.Value)
+	
+	// Пока используем простое решение - не захватываем переменные для типизированных функций
+	// В будущем можно добавить анализ свободных переменных
+	
+	return &TypedClosure{
+		funcName:     funcName,
+		params:       params,
+		body:         body,
+		capturedVars: capturedVars,
+	}
+}
+
+// Call вызывает типизированное замыкание
+func (tc *TypedClosure) Call(args []*value.Value) *value.Value {
+	// Проверяем количество аргументов
+	requiredArgs := 0
+	for _, param := range tc.params {
+		if param.Default == nil {
+			requiredArgs++
+		}
+	}
+	
+	if len(args) < requiredArgs {
+		panic(fmt.Sprintf("function '%s' requires at least %d arguments, got %d", tc.funcName, requiredArgs, len(args)))
+	}
+	
+	if len(args) > len(tc.params) {
+		panic(fmt.Sprintf("function '%s' accepts at most %d arguments, got %d", tc.funcName, len(tc.params), len(args)))
+	}
+	
+	// Создаем новую область видимости
+	scope.GlobalScope.Push()
+	defer scope.GlobalScope.Pop()
+	
+	// Восстанавливаем захваченные переменные
+	for name, val := range tc.capturedVars {
+		scope.GlobalScope.Set(name, val)
+	}
+	
+	// Устанавливаем параметры функции с проверкой типов
+	for i, param := range tc.params {
+		var argValue *value.Value
+		
+		if i < len(args) {
+			argValue = args[i]
+			
+			// Проверяем тип параметра, если указан
+			if param.TypeName != "" {
+				if err := validateFunctionParameterType(argValue, param.TypeName); err != nil {
+					panic(fmt.Sprintf("function '%s' parameter '%s': %s", tc.funcName, param.Name, err.Error()))
+				}
+			}
+		} else if param.Default != nil {
+			// Используем значение по умолчанию
+			argValue = param.Default.Eval()
+		} else {
+			panic(fmt.Sprintf("missing required argument: %s", param.Name))
+		}
+		
+		scope.GlobalScope.Set(param.Name, argValue)
+	}
+	
+	// Выполняем тело функции
+	if bodyStm, ok := tc.body.(*BodyExpr); ok {
+		for _, stmt := range bodyStm.Statments {
+			result := stmt.Eval()
+			if result.IsReturn() {
+				return result
+			}
+		}
+		return value.NewValue(nil)
+	} else {
+		return tc.body.Eval()
+	}
+}
+
+// validateFunctionParameterType проверяет соответствие типа аргумента ожидаемому примитивному типу
+func validateFunctionParameterType(argValue *value.Value, expectedTypeName string) error {
+	switch expectedTypeName {
+	case "int":
+		if !argValue.IsInt64() {
+			return fmt.Errorf("expected int, got %T", argValue.Any())
+		}
+		return nil
+	case "string":
+		if !argValue.IsString() {
+			return fmt.Errorf("expected string, got %T", argValue.Any())
+		}
+		return nil
+	case "float":
+		if !argValue.IsFloat64() && !argValue.IsInt64() { // int может быть приведен к float
+			return fmt.Errorf("expected float, got %T", argValue.Any())
+		}
+		return nil
+	case "bool":
+		if !argValue.IsBool() {
+			return fmt.Errorf("expected bool, got %T", argValue.Any())
+		}
+		return nil
+	default:
+		return fmt.Errorf("unknown type constraint: %s", expectedTypeName)
+	}
 }

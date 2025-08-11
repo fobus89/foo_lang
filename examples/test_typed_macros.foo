@@ -1,0 +1,117 @@
+// Тест типизированных макросов с параметрами Type, StructType, FnType
+
+struct User {
+    name: string,
+    age: int,
+    email: string
+}
+
+struct Product {
+    title: string,
+    price: float,
+    inStock: bool
+}
+
+enum Status {
+    ACTIVE,
+    INACTIVE,
+    PENDING
+}
+
+fn calculateDistance(x1, y1, x2, y2) {
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
+}
+
+// Макрос, принимающий любой тип
+macro analyzeAnyType(typeParam: Type) {
+    println("=== Universal Type Analysis ===")
+    println("Type: " + typeParam.Name)
+    println("Kind: " + typeParam.Kind)
+    
+    if typeParam.isStruct() {
+        println("✅ This is a struct type")
+    } else if typeParam.isPrimitive() {
+        println("✅ This is a primitive type")
+    } else if typeParam.isFunction() {
+        println("✅ This is a function type")
+    } else if typeParam.isEnum() {
+        println("✅ This is an enum type")
+    }
+}
+
+// Макрос, принимающий только структуры
+macro generateStructUtils(structParam: StructType) {
+    println("=== Struct-Only Macro ===")
+    println("Processing struct: " + structParam.Name)
+    
+    Expr {
+        println("// Generated utilities for " + structParam.Name)
+        println("fn create" + structParam.Name + "() {")
+        println("    return {}")
+        println("}")
+        
+        println("fn validate" + structParam.Name + "(obj) {")
+        println("    // Add validation logic")
+        println("    return true") 
+        println("}")
+        
+        println("fn serialize" + structParam.Name + "(obj) {")
+        println("    return JSON.stringify(obj)")
+        println("}")
+    }
+}
+
+// Макрос, принимающий только функции
+macro analyzeFunctionType(fnParam: FnType) {
+    println("=== Function-Only Macro ===")
+    println("Function: " + fnParam.Name)
+    
+    Expr {
+        println("// Function wrapper for " + fnParam.Name)
+        println("fn wrap" + fnParam.Name + "(args) {")
+        println("    let result = " + fnParam.Name + "(args)")
+        println("    return result")
+        println("}")
+    }
+}
+
+// Макрос, принимающий только enum
+macro generateEnumUtils(enumParam: EnumType) {
+    println("=== Enum-Only Macro ===") 
+    println("Enum: " + enumParam.Name)
+    
+    Expr {
+        println("// Enum utilities for " + enumParam.Name)
+        println("fn is" + enumParam.Name + "(value, variant) {")
+        println("    return value == variant")
+        println("}")
+    }
+}
+
+println("=== Testing Typed Macros ===")
+
+// Получаем типы
+let userType = type(User)
+let productType = type(Product)
+let statusType = type(Status)
+let intType = type(int)
+let stringType = type(string)
+let distanceType = type(calculateDistance)
+
+println("\n1. Universal type analyzer:")
+@analyzeAnyType(userType)
+@analyzeAnyType(intType)
+@analyzeAnyType(distanceType)
+@analyzeAnyType(statusType)
+
+println("\n2. Struct-only macro:")
+@generateStructUtils(userType)
+@generateStructUtils(productType)
+
+println("\n3. Function-only macro:")
+@analyzeFunctionType(distanceType)
+
+println("\n4. Enum-only macro:")
+@generateEnumUtils(statusType)
+
+println("\n=== All typed macro tests completed! ===")

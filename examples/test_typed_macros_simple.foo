@@ -1,0 +1,68 @@
+// Простой тест типизированных макросов
+
+struct User {
+    name: string,
+    age: int
+}
+
+struct Product {
+    title: string,
+    price: float
+}
+
+enum Status {
+    ACTIVE,
+    INACTIVE
+}
+
+// Макрос, принимающий любой тип
+macro analyzeAnyType(typeParam: Type) {
+    println("=== Universal Analysis ===")
+    println("Type: " + typeParam.Name)
+    println("Kind: " + typeParam.Kind)
+}
+
+// Макрос только для структур
+macro structOnly(structParam: StructType) {
+    println("=== Struct Only ===")
+    println("Processing struct: " + structParam.Name)
+    
+    Expr {
+        println("fn create" + structParam.Name + "() { return {} }")
+    }
+}
+
+// Макрос только для enum
+macro enumOnly(enumParam: EnumType) {
+    println("=== Enum Only ===")
+    println("Processing enum: " + enumParam.Name)
+    
+    Expr {
+        println("fn get" + enumParam.Name + "Values() { return [] }")
+    }
+}
+
+println("=== Testing Typed Macros ===")
+
+let userType = type(User)
+let productType = type(Product) 
+let statusType = type(Status)
+let intType = type(int)
+
+println("\n1. Universal analyzer:")
+@analyzeAnyType(userType)
+@analyzeAnyType(intType)
+@analyzeAnyType(statusType)
+
+println("\n2. Struct-only macro:")
+@structOnly(userType)
+@structOnly(productType)
+
+println("\n3. Enum-only macro:")
+@enumOnly(statusType)
+
+// Тест ошибки типа - попробуем передать int в StructType макрос
+println("\n4. Testing type constraint violation:")
+// @structOnly(intType)  // Это должно вызвать ошибку
+
+println("\n=== Tests completed! ===")

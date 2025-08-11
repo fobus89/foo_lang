@@ -90,7 +90,12 @@ var keywords = MapType[string]{
 	"unquote": token.UNQUOTE,
 	"typeof":  token.TYPEOF,
 	"struct":  token.STRUCT,
-	"type":    token.TYPE,
+	"type":       token.TYPE,
+	"Expr":       token.EXPR,
+	"Type":       token.TYPE,        // Алиас для type  
+	"FnType":     token.FNTYPE,
+	"StructType": token.STRUCTTYPE,
+	"EnumType":   token.ENUMTYPE,
 	"let":     token.LET,
 	"const":   token.CONST,
 	"match":   token.MATCH,
