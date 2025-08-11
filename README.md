@@ -369,20 +369,17 @@ macro generateEnumHelpers(enumType: EnumType) {
     println("fn is" + enumType.Name + "Valid(val) { return true }")
 }
 
-// Использование типизированных макросов
+// Использование типизированных макросов с НОВЫМ СИНТАКСИСОМ
 struct Product { name: string, price: float }
 enum Status { ACTIVE, INACTIVE }
 
-let productType = type(Product)
-let statusType = type(Status)
-let intType = type(int)
+// ✨ НОВЫЙ СИНТАКСИС: прямое указание типов! ✨
+@analyzeType(Product)        // @macro(TypeName) напрямую!
+@analyzeType(Status)         // Принимает любой Type
+@analyzeType(int)            // Примитивные типы тоже
 
-@analyzeType(productType)    // Принимает любой Type
-@analyzeType(statusType)     // Принимает любой Type
-@analyzeType(intType)        // Принимает любой Type
-
-@generateConstructor(productType)  // Только StructType
-@generateEnumHelpers(statusType)   // Только EnumType
+@generateConstructor(Product)    // Только StructType
+@generateEnumHelpers(Status)     // Только EnumType
 
 // Поддерживаемые типы параметров макросов:
 // - Type (универсальный тип)

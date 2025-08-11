@@ -1,0 +1,91 @@
+// ФИНАЛЬНАЯ ДЕМОНСТРАЦИЯ: новый синтаксис типизированных макросов
+// FINAL DEMO: new syntax for typed macros
+
+println("🎯 === ФИНАЛЬНАЯ ДЕМОНСТРАЦИЯ НОВЫХ ВОЗМОЖНОСТЕЙ === 🎯")
+println("")
+
+// ========== ОПРЕДЕЛЕНИЯ ==========
+struct User {
+    name: string,
+    age: int,
+    email: string
+}
+
+struct Product {
+    title: string,
+    price: float
+}
+
+enum Status {
+    ACTIVE,
+    INACTIVE,
+    PENDING
+}
+
+// ========== ТИПИЗИРОВАННЫЕ ФУНКЦИИ ==========
+println("1️⃣ ТИПИЗИРОВАННЫЕ ФУНКЦИИ:")
+
+fn calculateTotal(price: float, tax: float) {
+    return price * (1.0 + tax)
+}
+
+fn formatUser(name: string, age: int) {
+    return name + " (" + age + " лет)"
+}
+
+println("• calculateTotal(100.0, 0.2) = " + calculateTotal(100.0, 0.2))
+println("• formatUser = " + formatUser("Анна", 28))
+println("")
+
+// ========== ТИПИЗИРОВАННЫЕ МАКРОСЫ С НОВЫМ СИНТАКСИСОМ ==========
+println("2️⃣ ТИПИЗИРОВАННЫЕ МАКРОСЫ:")
+
+// Универсальный макрос
+macro universalGenerator(anyType: Type) {
+    println("🔧 Универсальная генерация для: " + anyType.Name + " (" + anyType.Kind + ")")
+    
+    if anyType.isStruct() {
+        println("   → Генерируем CRUD для структуры")
+        println("   fn create" + anyType.Name + "() { return {} }")
+        println("   fn update" + anyType.Name + "(obj, data) { return obj }")
+    } else if anyType.isPrimitive() {
+        println("   → Генерируем утилиты для примитива")
+        println("   fn validate" + anyType.Name + "(val) { return val != null }")
+    }
+    println("")
+}
+
+// Макрос только для структур
+macro structOnlyMacro(structType: StructType) {
+    println("🏗️ Структура: " + structType.Name)
+    println("   fn serialize" + structType.Name + "(obj) { return JSON.stringify(obj) }")
+    println("")
+}
+
+println("✨ НОВЫЙ СИНТАКСИС: @macro(TypeName) напрямую!")
+println("")
+
+// ✅ РАБОТАЕТ ОТЛИЧНО: структуры и примитивы
+@universalGenerator(User)           // Новый синтаксис для структур
+@universalGenerator(Product)        // Новый синтаксис для структур
+@universalGenerator(int)            // Новый синтаксис для примитивов
+@universalGenerator(string)         // Новый синтаксис для примитивов
+
+@structOnlyMacro(User)              // Специализированные макросы работают
+@structOnlyMacro(Product)
+
+// 📝 ДЛЯ ENUM: используем старый синтаксис (пока)
+println("📝 Для enum пока используем старый синтаксис:")
+let statusType = type(Status)
+@universalGenerator(statusType)
+
+println("========================================")
+println("🎉 УСПЕШНО РЕАЛИЗОВАНО:")
+println("✅ Типизированные функции (int, string, float, bool)")
+println("✅ Новый синтаксис макросов @macro(StructName)")
+println("✅ Новый синтаксис макросов @macro(PrimitiveType)")  
+println("✅ Специализированные макросы (StructType, EnumType)")
+println("✅ Полиморфная система типов")
+println("✅ Полная совместимость со старым синтаксисом")
+println("")
+println("🚀 FOO LANG V2 ГОТОВ К ИСПОЛЬЗОВАНИЮ!")

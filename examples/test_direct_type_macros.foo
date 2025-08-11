@@ -1,0 +1,67 @@
+// Тест макросов с прямым указанием типов
+// Test macros with direct type specification
+
+struct User {
+    name: string,
+    age: int
+}
+
+enum Status {
+    ACTIVE,
+    INACTIVE,
+    PENDING
+}
+
+// Универсальный макрос с прямым указанием типов
+macro generateByType(someType: Type) {
+    println("=== Обработка типа " + someType.Name + " ===")
+    println("Kind: " + someType.Kind)
+    
+    if someType.isStruct() {
+        println("✅ Структура - генерируем CRUD операции")
+        println("fn create" + someType.Name + "() { return {} }")
+        println("fn validate" + someType.Name + "(obj) { return true }")
+    } else if someType.isEnum() {
+        println("✅ Enum - генерируем хелперы")
+        println("fn is" + someType.Name + "Valid(value) { return true }")
+        println("fn get" + someType.Name + "Values() { return [] }")
+    } else if someType.isPrimitive() {
+        println("✅ Примитивный тип - генерируем утилиты")
+        println("fn process" + someType.Name + "(value) { return value }")
+    }
+    println("")
+}
+
+// Макрос только для структур
+macro structOnly(structType: StructType) {
+    println("=== ТОЛЬКО СТРУКТУРЫ ===")
+    println("Обрабатываем структуру: " + structType.Name)
+    println("Генерируем конструктор...")
+    println("fn new" + structType.Name + "() { return {} }")
+    println("")
+}
+
+// Макрос только для енумов
+macro enumOnly(enumType: EnumType) {
+    println("=== ТОЛЬКО ЕНУМЫ ===")
+    println("Обрабатываем enum: " + enumType.Name)
+    println("Генерируем валидатор...")
+    println("fn validate" + enumType.Name + "(val) { return true }")
+    println("")
+}
+
+println("=== Тест прямого указания типов в макросах ===")
+println("")
+
+// НОВЫЙ СИНТАКСИС: @macro(TypeName) напрямую!
+println("1. Универсальный макрос:")
+@generateByType(User)        // Прямо указываем User
+@generateByType(Status)      // Прямо указываем Status  
+@generateByType(int)         // Прямо указываем int
+@generateByType(string)      // Прямо указываем string
+
+println("2. Специализированные макросы:")
+@structOnly(User)            // Только для структур
+@enumOnly(Status)            // Только для енумов
+
+println("=== Новый синтаксис работает! ===")

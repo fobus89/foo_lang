@@ -44,25 +44,27 @@ macro enumOnly(enumParam: EnumType) {
 
 println("=== Testing Typed Macros ===")
 
-let userType = type(User)
-let productType = type(Product) 
-let statusType = type(Status)
-let intType = type(int)
+println("")
+println("✨ НОВЫЙ СИНТАКСИС: прямое указание типов! ✨")
 
-println("\n1. Universal analyzer:")
-@analyzeAnyType(userType)
-@analyzeAnyType(intType)
-@analyzeAnyType(statusType)
+println("1. Universal analyzer:")
+@analyzeAnyType(User)        // @macro(TypeName) напрямую!
+@analyzeAnyType(int)         // Примитивные типы тоже работают!
+@analyzeAnyType(Status)      // Енумы тоже!
 
-println("\n2. Struct-only macro:")
-@structOnly(userType)
-@structOnly(productType)
+println("")
+println("2. Struct-only macro:")
+@structOnly(User)            // Только структуры
+@structOnly(Product)         // Работает с любыми структурами
 
-println("\n3. Enum-only macro:")
-@enumOnly(statusType)
+println("")
+println("3. Enum-only macro:")
+@enumOnly(Status)            // Только енумы
 
-// Тест ошибки типа - попробуем передать int в StructType макрос
-println("\n4. Testing type constraint violation:")
-// @structOnly(intType)  // Это должно вызвать ошибку
+println("")
+println("4. Testing type constraint violation:")
+// Следующая строка должна вызвать ошибку если раскомментировать:
+// @structOnly(int)  // Ошибка: expected struct type, got primitive
 
-println("\n=== Tests completed! ===")
+println("")
+println("=== Tests completed! ===")

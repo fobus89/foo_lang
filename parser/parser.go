@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"foo_lang/ast"
 	"foo_lang/lexer"
+	"foo_lang/scope"
 	"foo_lang/token"
 	"slices"
 	"strconv"
@@ -869,7 +870,20 @@ func (p *Parser) Primary() ast.Expr {
 		
 		var args []ast.Expr
 		for !p.Match(token.RPAREN) {
-			args = append(args, p.Expression())
+			// В макросах пытаемся сначала интерпретировать IDENT как TypeName
+			// Если это не тип, то используем обычное выражение
+			if p.Match(token.IDENT) {
+				identName := p.Peek(0).Value
+				if p.isTypeName(identName) {
+					p.Next() // consume identifier
+					args = append(args, ast.NewTypeNameExpr(identName))
+				} else {
+					args = append(args, p.Expression())
+				}
+			} else {
+				args = append(args, p.Expression())
+			}
+			
 			if p.Match(token.COMMA) {
 				p.Next()
 			} else if !p.Match(token.RPAREN) {
@@ -1458,4 +1472,24 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 	body := p.BlockStatement()
 	
 	return ast.NewTypedFuncStatement(funcName, params, body)
+}
+
+// isTypeName проверяет, является ли идентификатор именем типа
+func (p *Parser) isTypeName(name string) bool {
+	// Примитивные типы
+	switch name {
+	case "int", "string", "float", "bool":
+		return true
+	}
+	
+	// Проверяем, есть ли такой тип в scope (структуры, енумы)
+	// Ищем либо TypeInfo, либо определение типа
+	if _, exists := scope.GlobalScope.Get(name + "__TypeInfo"); exists {
+		return true
+	}
+	if _, exists := scope.GlobalScope.Get(name); exists {
+		return true
+	}
+	
+	return false
 }

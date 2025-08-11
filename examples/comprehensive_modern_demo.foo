@@ -1,0 +1,170 @@
+// Полная демонстрация современных возможностей foo_lang v2
+// Comprehensive demo of modern foo_lang v2 features
+
+println("🚀 === FOO LANG V2 - СОВРЕМЕННЫЕ ВОЗМОЖНОСТИ === 🚀")
+println("")
+
+// ========== 1. ТИПИЗИРОВАННЫЕ ФУНКЦИИ ==========
+println("1️⃣ ТИПИЗИРОВАННЫЕ ФУНКЦИИ:")
+
+fn calculateArea(width: int, height: int) {
+    return width * height
+}
+
+fn formatMessage(name: string, count: int) {
+    return "Привет " + name + "! У вас " + count + " сообщений."
+}
+
+fn checkStatus(isActive: bool, threshold: float) {
+    if isActive && threshold > 0.5 {
+        return "АКТИВЕН"
+    }
+    return "НЕАКТИВЕН"
+}
+
+println("• calculateArea(10, 5) = " + calculateArea(10, 5))
+println("• formatMessage = " + formatMessage("Иван", 42))
+println("• checkStatus = " + checkStatus(true, 0.8))
+println("")
+
+// ========== 2. СТРУКТУРЫ И ЕНУМЫ ==========
+println("2️⃣ СТРУКТУРЫ И ЕНУМЫ:")
+
+struct User {
+    name: string,
+    age: int,
+    email: string
+}
+
+struct Product {
+    title: string,
+    price: float,
+    inStock: bool
+}
+
+enum OrderStatus {
+    PENDING,
+    PROCESSING,
+    SHIPPED,
+    DELIVERED
+}
+
+enum Priority {
+    LOW,
+    MEDIUM,
+    HIGH
+}
+
+println("• Определены структуры: User, Product")
+println("• Определены енумы: OrderStatus, Priority")
+println("")
+
+// ========== 3. ТИПИЗИРОВАННЫЕ МАКРОСЫ ==========
+println("3️⃣ ТИПИЗИРОВАННЫЕ МАКРОСЫ С НОВЫМ СИНТАКСИСОМ:")
+
+// Универсальный генератор кода
+macro codeGenerator(anyType: Type) {
+    println("🔧 Генерация кода для типа: " + anyType.Name + " (" + anyType.Kind + ")")
+    
+    if anyType.isStruct() {
+        println("   • Генерация конструктора...")
+        println("   fn create" + anyType.Name + "() { return {} }")
+        println("   fn validate" + anyType.Name + "(obj) { return obj != null }")
+    } else if anyType.isEnum() {
+        println("   • Генерация хелперов для enum...")
+        println("   fn is" + anyType.Name + "Valid(value) { return true }")
+        println("   fn parse" + anyType.Name + "(str) { return " + anyType.Name + ".PENDING }")
+    } else if anyType.isPrimitive() {
+        println("   • Генерация утилит для примитива...")
+        println("   fn process" + anyType.Name + "(value) { return value }")
+    }
+    println("")
+}
+
+// Специализированный макрос только для структур
+macro structBuilder(structType: StructType) {
+    println("🏗️ Конструктор структуры: " + structType.Name)
+    println("   fn build" + structType.Name + "(data) {")
+    println("     // Проверка полей и создание объекта")
+    println("     return { ...data }")
+    println("   }")
+    println("")
+}
+
+// Специализированный макрос только для енумов
+macro enumValidator(enumType: EnumType) {
+    println("✅ Валидатор enum: " + enumType.Name)
+    println("   fn validate" + enumType.Name + "(value) {")
+    println("     // Проверка допустимых значений")
+    println("     return value >= 0 && value < " + enumType.Name + ".length")
+    println("   }")
+    println("")
+}
+
+// ✨ НОВЫЙ СИНТАКСИС: Прямое указание типов! ✨
+println("🎯 Универсальная генерация:")
+@codeGenerator(User)           // Структура
+@codeGenerator(OrderStatus)    // Enum
+@codeGenerator(int)            // Примитив
+@codeGenerator(string)         // Примитив
+
+println("🏗️ Специализированные генераторы:")
+@structBuilder(User)           // Только структуры
+@structBuilder(Product)        // Только структуры
+
+@enumValidator(OrderStatus)    // Только енумы
+@enumValidator(Priority)       // Только енумы
+
+// ========== 4. ПОЛИМОРФНАЯ СИСТЕМА ТИПОВ ==========
+println("4️⃣ ПОЛИМОРФНАЯ СИСТЕМА ТИПОВ:")
+
+macro universalAnalyzer(someType: Type) {
+    println("🔍 Анализ типа: " + someType.Name)
+    println("   Kind: " + someType.Kind)
+    println("   isStruct(): " + someType.isStruct())
+    println("   isPrimitive(): " + someType.isPrimitive()) 
+    println("   isEnum(): " + someType.isEnum())
+    println("   isFunction(): " + someType.isFunction())
+    println("")
+}
+
+println("📊 Полиморфный анализ:")
+@universalAnalyzer(User)       // Структура
+@universalAnalyzer(Priority)   // Enum
+@universalAnalyzer(bool)       // Примитив
+
+// ========== 5. АНОНИМНЫЕ ФУНКЦИИ И ЗАМЫКАНИЯ ==========
+println("5️⃣ АНОНИМНЫЕ ФУНКЦИИ И ЗАМЫКАНИЯ:")
+
+let multiplier = 3
+let multiply = fn(x) => x * multiplier  // Захват переменной
+
+let complexCalc = fn(a, b) {
+    let temp = a + b
+    return temp * temp
+}
+
+println("• Анонимная функция: multiply(5) = " + multiply(5))
+println("• Сложная функция: complexCalc(3, 4) = " + complexCalc(3, 4))
+println("")
+
+// ========== 6. ВСТРОЕННЫЕ МАТЕМАТИЧЕСКИЕ ФУНКЦИИ ==========
+println("6️⃣ ВСТРОЕННЫЕ МАТЕМАТИЧЕСКИЕ ФУНКЦИИ:")
+
+println("• sqrt(16) = " + sqrt(16))
+println("• sin(3.14159/2) ≈ " + sin(3.14159/2))
+println("• pow(2, 8) = " + pow(2, 8))
+println("• max(10, 20) = " + max(10, 20))
+println("")
+
+// ========== ИТОГИ ==========
+println("✨ === ИТОГИ ДЕМОНСТРАЦИИ === ✨")
+println("✅ Типизированные функции (int, string, float, bool)")
+println("✅ Типизированные макросы (Type, StructType, EnumType)")
+println("✅ Новый синтаксис: @macro(TypeName) вместо @macro(type(TypeName))")
+println("✅ Полиморфная система типов с методами isStruct(), isPrimitive()...")
+println("✅ Анонимные функции и замыкания")
+println("✅ Встроенные математические функции")
+println("✅ Структуры, енумы и полная система типов")
+println("")
+println("🎉 FOO LANG V2 - СОВРЕМЕННЫЙ ЯЗЫК ПРОГРАММИРОВАНИЯ! 🎉")

@@ -19,7 +19,8 @@
       "Bash(./foo_lang.exe examples/test_polymorphic_types.foo)",
       "Bash(./foo_lang.exe:*)",
       "Bash(find:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

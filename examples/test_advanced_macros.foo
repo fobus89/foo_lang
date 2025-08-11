@@ -44,7 +44,7 @@ let intType = type(int)
 // Вызываем макрос с macro-time + code generation
 @analyzeAndGenerate(userType)
 
-println()
+println("")
 
 // Вызываем макрос только с macro-time
 @showTypeAnalysis(userType)
