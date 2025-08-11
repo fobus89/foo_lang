@@ -9,7 +9,8 @@
       "Bash(rm:*)",
       "Bash(mkdir:*)",
       "Bash(go:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(del test_increment.foo test_compound.foo)"
     ],
     "deny": []
   }
