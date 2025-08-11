@@ -1,0 +1,58 @@
+// Демонстрация замыканий
+
+println("=== Тест замыканий ===")
+
+// Пример 1: Базовое замыкание
+println("\n1. Базовое замыкание:")
+let x = 100
+
+fn inner() {
+    return x + 10  // x захвачена из внешней области
+}
+
+let result1 = inner()
+println("x + 10 = " + result1)  // Должно быть 110
+
+// Пример 2: Замыкание с изменением переменной  
+println("\n2. Замыкание с изменением:")
+let counter = 0
+
+fn increment() {
+    counter = counter + 1
+    return counter
+}
+
+println("Первый вызов: " + increment())  // 1
+println("Второй вызов: " + increment())  // 2 
+println("Третий вызов: " + increment()) // 3
+
+// Пример 3: Замыкание с параметрами
+println("\n3. Замыкание с параметрами:")
+let multiplier = 5
+
+fn createMultiplier() {
+    fn multiply(x) {
+        return x * multiplier  // захватывает multiplier
+    }
+    return multiply
+}
+
+// Пока что функции нельзя возвращать, поэтому используем прямой вызов
+fn multiply(x) {
+    return x * multiplier
+}
+
+println("5 * 7 = " + multiply(7))  // 35
+
+// Пример 4: Математические функции в замыканиях
+println("\n4. Математические функции в замыканиях:")
+let radius = 10
+
+fn calculateArea() {
+    let pi = 3.14159
+    return pi * pow(radius, 2)  // использует math функции и захваченный radius
+}
+
+println("Площадь круга радиусом " + radius + " = " + calculateArea())
+
+println("\n=== Замыкания работают! ===")

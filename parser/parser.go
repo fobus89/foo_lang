@@ -809,6 +809,13 @@ func (p *Parser) Primary() ast.Expr {
 		}
 		return ast.NewErrExpr(error)
 
+	case token.FN:
+		// Проверяем на анонимную функцию: fn(args) => body
+		if p.MatchAll(token.FN, token.LPAREN) {
+			return p.AnonymousFunction()
+		}
+		break
+		
 	case token.IDENT:
 		p.Next()
 		return ast.NewVarExpr(tok.Value, nil)
@@ -1180,4 +1187,59 @@ func (p *Parser) ExportStatement() ast.Expr {
 	}
 	
 	return ast.NewExportExpr(declaration, name)
+}
+
+// AnonymousFunction парсит анонимную функцию: fn(x, y) => x + y или fn(x, y) { return x + y }
+func (p *Parser) AnonymousFunction() ast.Expr {
+	if !p.MatchAndNext(token.FN) {
+		p.error("expected 'fn'", p.Peek(0))
+	}
+
+	if !p.MatchAndNext(token.LPAREN) {
+		p.error("expected '(' after 'fn'", p.Peek(0))
+	}
+
+	// Парсим параметры функции
+	var args []map[string]ast.Expr
+
+	for !p.Match(token.RPAREN) {
+		if !p.Match(token.IDENT) {
+			p.error("expected parameter name", p.Peek(0))
+		}
+
+		key := p.Peek(0).Value
+		p.Next()
+
+		// Проверяем на параметр по умолчанию
+		if p.MatchAndNext(token.EQ) {
+			args = append(args, map[string]ast.Expr{
+				key: p.Expression(),
+			})
+		} else {
+			args = append(args, map[string]ast.Expr{
+				key: nil,
+			})
+		}
+
+		p.MatchAndNext(token.COMMA)
+	}
+
+	if !p.MatchAndNext(token.RPAREN) {
+		p.error("expected ')'", p.Peek(0))
+	}
+
+	// Проверяем тип тела функции
+	var body ast.Expr
+
+	if p.MatchAndNext(token.EQ_GT) {
+		// Стрелочная функция: fn(x) => x * 2
+		body = p.Expression()
+	} else if p.Match(token.LBRACE) {
+		// Блочная функция: fn(x) { return x * 2 }
+		body = p.BlockStatement()
+	} else {
+		p.error("expected '=>' or '{'", p.Peek(0))
+	}
+
+	return ast.NewAnonymousFunc(args, body)
 }

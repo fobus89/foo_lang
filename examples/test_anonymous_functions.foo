@@ -1,0 +1,89 @@
+// Демонстрация анонимных функций в foo_lang
+
+println("=== Анонимные функции (Lambda) ===")
+
+// 1. Простые стрелочные функции
+println("\n1. Стрелочные функции:")
+let add = fn(x, y) => x + y
+let square = fn(n) => n * n
+let double = fn(x) => x * 2
+
+println("add(5, 3) = " + add(5, 3))
+println("square(7) = " + square(7))
+println("double(6) = " + double(6))
+
+// 2. Анонимные функции с блоками
+println("\n2. Блочные анонимные функции:")
+let factorial = fn(n) {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+println("factorial(5) = " + factorial(5))
+
+// 3. Анонимные функции с параметрами по умолчанию
+println("\n3. Параметры по умолчанию:")
+let greet = fn(name, prefix = "Hello", suffix = "!") => prefix + ", " + name + suffix
+
+println(greet("World"))
+println(greet("Alice", "Hi"))
+println(greet("Bob", "Hey", "!!!"))
+
+// 4. Функции как переменные
+println("\n4. Функции как переменные:")
+let addFunc = fn(a, b) => a + b
+let subtractFunc = fn(a, b) => a - b
+let multiplyFunc = fn(a, b) => a * b
+let divideFunc = fn(a, b) => b != 0 ? a / b : 0
+
+println("10 + 5 = " + addFunc(10, 5))
+println("10 - 5 = " + subtractFunc(10, 5))
+println("10 * 5 = " + multiplyFunc(10, 5))
+println("10 / 5 = " + divideFunc(10, 5))
+
+// 5. Анонимные функции с замыканиями
+println("\n5. Замыкания в анонимных функциях:")
+let counter = 0
+
+let increment = fn() {
+    counter = counter + 1
+    return counter
+}
+
+let decrement = fn() {
+    counter = counter - 1
+    return counter
+}
+
+println("Счетчик: " + increment())  // 1
+println("Счетчик: " + increment())  // 2
+println("Счетчик: " + increment())  // 3
+println("Счетчик: " + decrement())  // 2
+
+// 6. Анонимные функции с математическими операциями
+println("\n6. Математические анонимные функции:")
+let distance = fn(x1, y1, x2, y2) => sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
+let area = fn(radius) => 3.14159 * pow(radius, 2)
+let circleInfo = fn(r) {
+    let a = area(r)
+    let c = 2 * 3.14159 * r
+    return "Радиус: " + r + ", Площадь: " + a + ", Длина окружности: " + c
+}
+
+println("Расстояние от (0,0) до (3,4): " + distance(0, 0, 3, 4))
+println("Площадь круга с радиусом 5: " + area(5))
+println(circleInfo(3))
+
+// 7. Функции высшего порядка (функции, возвращающие функции)
+println("\n7. Функции высшего порядка:")
+let multiplier = fn(factor) => fn(x) => x * factor
+
+let double2 = multiplier(2)
+let triple = multiplier(3)
+
+println("double2(7) = " + double2(7))
+println("triple(4) = " + triple(4))
+
+println("\n=== Анонимные функции успешно демонстрированы! ===")

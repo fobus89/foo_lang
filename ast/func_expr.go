@@ -20,7 +20,11 @@ func NewFuncStatment(funcName string, args []map[string]Expr, body Expr, isMacro
 		isMacro:  isMacro,
 	}
 
-	scope.GlobalScope.Set(funcName, NewValue(f))
+	// Создаем замыкание для захвата переменных из текущей области видимости
+	closure := NewClosure(funcName, args, body, isMacro)
+	
+	// Регистрируем замыкание в области видимости
+	scope.GlobalScope.Set(funcName, NewValue(closure))
 
 	return f
 }

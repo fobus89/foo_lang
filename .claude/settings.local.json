@@ -8,7 +8,8 @@
       "Bash(mv:*)",
       "Bash(rm:*)",
       "Bash(mkdir:*)",
-      "Bash(go:*)"
+      "Bash(go:*)",
+      "Bash(wc:*)"
     ],
     "deny": []
   }
