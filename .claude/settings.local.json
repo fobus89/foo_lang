@@ -20,7 +20,8 @@
       "Bash(./foo_lang.exe:*)",
       "Bash(find:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(del examplestest_json_macros.foo)"
     ],
     "deny": []
   }

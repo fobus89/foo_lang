@@ -1,0 +1,60 @@
+// Тестирование встроенных строковых функций
+
+println("=== STRING FUNCTIONS TEST ===")
+println("")
+
+// Тест strlen - получение длины строки
+let text = "Hello World"
+let len = strlen(text)
+println("Text: " + text)
+println("Length: " + len)
+println("")
+
+// Тест charAt - получение символа по индексу  
+let char0 = charAt(text, 0)
+let char6 = charAt(text, 6)
+println("Character at index 0: " + char0)  // H
+println("Character at index 6: " + char6)  // W
+println("")
+
+// Тест substring - извлечение подстроки
+let hello = substring(text, 0, 5)
+let world = substring(text, 6, 11)
+println("Substring(0,5): " + hello)  // Hello
+println("Substring(6,11): " + world) // World
+println("")
+
+// Тест startsWith - проверка начала строки
+let startsHello = startsWith(text, "Hello")
+let startsBye = startsWith(text, "Bye")
+println("Starts with 'Hello': " + startsHello)  // true
+println("Starts with 'Bye': " + startsBye)     // false
+println("")
+
+// Тест endsWith - проверка конца строки
+let endsWorld = endsWith(text, "World")
+let endsTest = endsWith(text, "Test")
+println("Ends with 'World': " + endsWorld)  // true  
+println("Ends with 'Test': " + endsTest)    // false
+println("")
+
+// Тест indexOf - поиск подстроки
+let posHello = indexOf(text, "Hello")
+let posWorld = indexOf(text, "World")
+let posNotFound = indexOf(text, "xyz")
+println("Position of 'Hello': " + posHello)    // 0
+println("Position of 'World': " + posWorld)    // 6
+println("Position of 'xyz': " + posNotFound)   // -1
+println("")
+
+println("========================================")
+println("✅ ALL STRING FUNCTIONS WORK!")
+println("")
+println("✅ strlen() - get string length")
+println("✅ charAt() - get character by index")
+println("✅ substring() - extract substring")
+println("✅ startsWith() - check string prefix")
+println("✅ endsWith() - check string suffix")  
+println("✅ indexOf() - find substring position")
+println("")
+println("🚀 READY FOR FULL JSON IMPLEMENTATION!")

@@ -1,0 +1,10 @@
+// Отладка - посмотрим какой тип у чисел
+
+println("=== TYPE DEBUG ===")
+
+let num = 42
+let decimal = 3.14
+let text = "hello"
+let flag = true
+
+// Попробуем добавить отладочную информацию в метод

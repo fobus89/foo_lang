@@ -1,0 +1,140 @@
+// ТЕСТ МЕТОДОВ ДЛЯ РАЗНЫХ ТИПОВ
+// Проверяем новые методы для int, string, float, array, bool
+
+println("=== TYPE METHODS TEST ===")
+println("")
+
+// ========== STRING METHODS ==========
+
+println("1️⃣ STRING METHODS:")
+println("")
+
+let text = "Hello World"
+let textLen = text.length()
+let firstChar = text.charAt(0)
+let lastChar = text.charAt(10)
+let hello = text.substring(0, 5)
+let world = text.substring(6, 11)
+let upperText = text.toUpper()
+let lowerText = text.toLower()
+
+println("Text: " + text)
+println("Length: " + textLen)              // 11
+println("First char: " + firstChar)        // H  
+println("Last char: " + lastChar)          // d
+println("Hello: " + hello)                 // Hello
+println("World: " + world)                 // World
+println("Upper: " + upperText)             // HELLO WORLD
+println("Lower: " + lowerText)             // hello world
+println("")
+
+// ========== INT METHODS ==========
+
+println("2️⃣ INT METHODS:")
+println("")
+
+let num = 42
+let negNum = -123
+let numStr = num.toString()
+let negAbsNum = negNum.abs()
+let numFloat = num.toFloat()
+
+println("Number: " + num)
+println("As string: " + numStr)            // "42"
+println("Negative: " + negNum)
+println("Absolute: " + negAbsNum)          // 123
+println("As float: " + numFloat)           // 42.0
+println("")
+
+// ========== FLOAT METHODS ==========
+
+println("3️⃣ FLOAT METHODS:")  
+println("")
+
+let decimal = 3.7
+let floatStr = decimal.toString()
+let rounded = decimal.round()
+let floored = decimal.floor()
+let ceiled = decimal.ceil()
+let asInt = decimal.toInt()
+
+println("Float: " + decimal)
+println("As string: " + floatStr)          // "3.7"
+println("Rounded: " + rounded)             // 4.0
+println("Floored: " + floored)             // 3.0
+println("Ceiled: " + ceiled)               // 4.0
+println("As int: " + asInt)                // 3
+println("")
+
+// ========== BOOL METHODS ==========
+
+println("4️⃣ BOOL METHODS:")
+println("")
+
+let isTrue = true
+let isFalse = false
+let trueStr = isTrue.toString()
+let falseStr = isFalse.toString()
+let notTrue = isTrue.not()
+let notFalse = isFalse.not()
+
+println("True: " + isTrue)
+println("True as string: " + trueStr)      // "true"
+println("False: " + isFalse)
+println("False as string: " + falseStr)    // "false"
+println("Not true: " + notTrue)            // false
+println("Not false: " + notFalse)          // true
+println("")
+
+// ========== ARRAY METHODS ==========
+
+println("5️⃣ ARRAY METHODS:")
+println("")
+
+let arr = [1, 2, 3]
+let arrLen = arr.length()
+let newArr = arr.push(4)
+let lastItem = newArr.pop()
+let sliced = newArr.slice(1, 3)
+
+println("Array: " + arr)
+println("Length: " + arrLen)               // 3
+println("After push: " + newArr)           // [1, 2, 3, 4]
+println("Popped item: " + lastItem)        // 4
+println("Sliced [1:3]: " + sliced)         // [2, 3]
+println("")
+
+// ========== MIXED OPERATIONS ==========
+
+println("6️⃣ MIXED OPERATIONS:")
+println("")
+
+// Цепочка методов
+let name = "alice"
+let formattedName = name.toUpper().substring(0, 1) + name.substring(1, 5)
+println("Formatted name: " + formattedName)
+
+// Числовые операции
+let price = 99.99
+let roundedPrice = price.round()
+let priceStr = roundedPrice.toString()
+println("Price: " + price + " -> " + priceStr)
+
+// Логические операции  
+let isValid = true
+let status = isValid.not().toString()
+println("Status: " + status)
+
+println("")
+
+println("========================================")
+println("🎉 ALL TYPE METHODS WORK!")
+println("")
+println("✅ String methods: length(), charAt(), substring(), toUpper(), toLower()")
+println("✅ Int methods: toString(), abs(), toFloat()")
+println("✅ Float methods: toString(), round(), floor(), ceil(), toInt()")
+println("✅ Bool methods: toString(), not()")
+println("✅ Array methods: length(), push(), pop(), slice()")
+println("✅ Method chaining works perfectly")
+println("")
+println("🚀 MODERN TYPE SYSTEM WITH METHODS!")

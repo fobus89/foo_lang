@@ -1,5 +1,11 @@
 package ast
 
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
 // MethodCallExpr представляет вызов метода объекта (object.method(args))
 type MethodCallExpr struct {
 	Object     Expr
@@ -143,9 +149,191 @@ func (m *MethodCallExpr) Eval() *Value {
 				panic("length() expects no arguments")
 			}
 			return NewValue(int64(len(arr)))
+		case "pop":
+			if len(m.Args) != 0 {
+				panic("pop() expects no arguments")
+			}
+			if len(arr) == 0 {
+				panic("pop() called on empty array")
+			}
+			return NewValue(arr[len(arr)-1])
+		case "slice":
+			if len(m.Args) != 2 {
+				panic("slice() expects exactly 2 arguments")
+			}
+			start := int(m.Args[0].Eval().Int64())
+			end := int(m.Args[1].Eval().Int64())
+			if start < 0 || end > len(arr) || start > end {
+				panic("slice() index out of bounds")
+			}
+			return NewValue(arr[start:end])
 		}
 	}
 	
-	// Для других объектов - пока просто ошибка
-	panic("method '" + m.MethodName + "' not supported on this type")
+	// Методы для строк
+	if str, ok := obj.Any().(string); ok {
+		switch m.MethodName {
+		case "length":
+			if len(m.Args) != 0 {
+				panic("string.length() expects no arguments")
+			}
+			return NewValue(int64(len(str)))
+		case "charAt":
+			if len(m.Args) != 1 {
+				panic("string.charAt() expects exactly 1 argument")
+			}
+			index := int(m.Args[0].Eval().Int64())
+			if index < 0 || index >= len(str) {
+				panic("string.charAt() index out of bounds")
+			}
+			return NewValue(string(str[index]))
+		case "substring":
+			if len(m.Args) != 2 {
+				panic("string.substring() expects exactly 2 arguments")
+			}
+			start := int(m.Args[0].Eval().Int64())
+			end := int(m.Args[1].Eval().Int64())
+			if start < 0 {
+				start = 0
+			}
+			if end > len(str) {
+				end = len(str)
+			}
+			if start > end {
+				start = end
+			}
+			return NewValue(str[start:end])
+		case "toUpper":
+			if len(m.Args) != 0 {
+				panic("string.toUpper() expects no arguments")
+			}
+			return NewValue(strings.ToUpper(str))
+		case "toLower":
+			if len(m.Args) != 0 {
+				panic("string.toLower() expects no arguments")
+			}
+			return NewValue(strings.ToLower(str))
+		}
+	}
+	
+	// Методы для int64
+	if num, ok := obj.Any().(int64); ok {
+		switch m.MethodName {
+		case "toString":
+			if len(m.Args) != 0 {
+				panic("int.toString() expects no arguments")
+			}
+			return NewValue(strconv.FormatInt(num, 10))
+		case "abs":
+			if len(m.Args) != 0 {
+				panic("int.abs() expects no arguments")
+			}
+			if num < 0 {
+				return NewValue(-num)
+			}
+			return NewValue(num)
+		case "toFloat":
+			if len(m.Args) != 0 {
+				panic("int.toFloat() expects no arguments")
+			}
+			return NewValue(float64(num))
+		}
+	}
+	
+	// Методы для int (32-bit)
+	if num, ok := obj.Any().(int); ok {
+		switch m.MethodName {
+		case "toString":
+			if len(m.Args) != 0 {
+				panic("int.toString() expects no arguments")
+			}
+			return NewValue(strconv.Itoa(num))
+		case "abs":
+			if len(m.Args) != 0 {
+				panic("int.abs() expects no arguments")
+			}
+			if num < 0 {
+				return NewValue(-num)
+			}
+			return NewValue(num)
+		case "toFloat":
+			if len(m.Args) != 0 {
+				panic("int.toFloat() expects no arguments")
+			}
+			return NewValue(float64(num))
+		}
+	}
+	
+	// Методы для float64 (все числа в foo_lang)
+	if num, ok := obj.Any().(float64); ok {
+		switch m.MethodName {
+		case "toString":
+			if len(m.Args) != 0 {
+				panic("number.toString() expects no arguments")
+			}
+			return NewValue(strconv.FormatFloat(num, 'f', -1, 64))
+		case "round":
+			if len(m.Args) != 0 {
+				panic("number.round() expects no arguments")
+			}
+			return NewValue(float64(int(num + 0.5)))
+		case "floor":
+			if len(m.Args) != 0 {
+				panic("number.floor() expects no arguments")
+			}
+			return NewValue(float64(int(num)))
+		case "ceil":
+			if len(m.Args) != 0 {
+				panic("number.ceil() expects no arguments")
+			}
+			if num == float64(int(num)) {
+				return NewValue(num)
+			}
+			return NewValue(float64(int(num) + 1))
+		case "toInt":
+			if len(m.Args) != 0 {
+				panic("number.toInt() expects no arguments")
+			}
+			return NewValue(int64(num))
+		// Добавляем методы которые были для int
+		case "abs":
+			if len(m.Args) != 0 {
+				panic("number.abs() expects no arguments")
+			}
+			if num < 0 {
+				return NewValue(-num)
+			}
+			return NewValue(num)
+		case "toFloat":
+			if len(m.Args) != 0 {
+				panic("number.toFloat() expects no arguments")
+			}
+			return NewValue(num)  // уже float64
+		case "isInteger":
+			if len(m.Args) != 0 {
+				panic("number.isInteger() expects no arguments")
+			}
+			return NewValue(num == float64(int64(num)))
+		}
+	}
+	
+	// Методы для bool
+	if b, ok := obj.Any().(bool); ok {
+		switch m.MethodName {
+		case "toString":
+			if len(m.Args) != 0 {
+				panic("bool.toString() expects no arguments")
+			}
+			return NewValue(strconv.FormatBool(b))
+		case "not":
+			if len(m.Args) != 0 {
+				panic("bool.not() expects no arguments")
+			}
+			return NewValue(!b)
+		}
+	}
+	
+	// Отладка: покажем тип объекта
+	objType := fmt.Sprintf("%T", obj.Any())
+	panic("method '" + m.MethodName + "' not supported on type: " + objType)
 }

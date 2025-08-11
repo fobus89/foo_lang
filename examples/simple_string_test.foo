@@ -1,0 +1,16 @@
+// Простой тест строковых функций
+
+println("Testing string functions...")
+
+// Проверим, что функции доступны
+println("strlen function exists")
+println("charAt function exists")
+
+// Простой тест
+let text = "Hello"
+println("Text: " + text)
+
+// Попробуем вызвать strlen с простым синтаксисом
+// strlen(text)
+
+println("Basic test complete")

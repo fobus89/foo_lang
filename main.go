@@ -49,6 +49,9 @@ func main() {
 	// Инициализируем встроенные математические функции
 	builtin.InitializeMathFunctions(scope.GlobalScope)
 	
+	// Инициализируем встроенные строковые функции
+	builtin.InitializeStringFunctions(scope.GlobalScope)
+	
 	exprs := parser.NewParser(mainFile).Parse()
 
 	for _, expr := range exprs {
