@@ -20,7 +20,7 @@ func NewExportExpr(declaration Expr, name string) *ExportExpr {
 
 func (e *ExportExpr) Eval() *Value {
 	// Execute the declaration first
-	result := e.Declaration.Eval()
+	e.Declaration.Eval()
 	
 	// Mark this item as exported in the module's export table
 	// For now, store in a special scope with "__export_" prefix
@@ -31,5 +31,6 @@ func (e *ExportExpr) Eval() *Value {
 		}
 	}
 	
-	return result
+	// Export statements always return nil
+	return nil
 }
