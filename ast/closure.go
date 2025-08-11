@@ -175,8 +175,13 @@ func NewTypedClosure(funcName string, params []FuncParam, body Expr) *TypedClosu
 	}
 }
 
-// Call вызывает типизированное замыкание
-func (tc *TypedClosure) Call(args []*value.Value) *value.Value {
+// Name возвращает имя типизированной функции
+func (tc *TypedClosure) Name() string {
+	return tc.funcName
+}
+
+// Call вызывает типизированное замыкание  
+func (tc *TypedClosure) Call(args []*Value) *Value {
 	// Проверяем количество аргументов
 	requiredArgs := 0
 	for _, param := range tc.params {
@@ -204,7 +209,7 @@ func (tc *TypedClosure) Call(args []*value.Value) *value.Value {
 	
 	// Устанавливаем параметры функции с проверкой типов
 	for i, param := range tc.params {
-		var argValue *value.Value
+		var argValue *Value
 		
 		if i < len(args) {
 			argValue = args[i]
@@ -233,14 +238,14 @@ func (tc *TypedClosure) Call(args []*value.Value) *value.Value {
 				return result
 			}
 		}
-		return value.NewValue(nil)
+		return NewValue(nil)
 	} else {
 		return tc.body.Eval()
 	}
 }
 
 // validateFunctionParameterType проверяет соответствие типа аргумента ожидаемому примитивному типу
-func validateFunctionParameterType(argValue *value.Value, expectedTypeName string) error {
+func validateFunctionParameterType(argValue *Value, expectedTypeName string) error {
 	switch expectedTypeName {
 	case "int":
 		if !argValue.IsInt64() {

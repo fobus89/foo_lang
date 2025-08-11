@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"foo_lang/scope"
+	"foo_lang/value"
 )
 
 // FuncParam представляет типизированный параметр функции
@@ -21,21 +22,28 @@ type FuncStatment struct {
 
 // TypedFuncStatement представляет функцию с типизированными параметрами
 type TypedFuncStatement struct {
-	FuncName string
-	Params   []FuncParam
-	Body     Expr
+	FuncName   string
+	Params     []FuncParam
+	Body       Expr
+	ReturnType string // Тип возвращаемого значения
+}
+
+// TypeConstraint представляет ограничение типа в generic функции
+type TypeConstraint struct {
+	TypeName   string   // Имя параметра типа, например "T"
+	Constraints []string // Ограничения, например ["Drawable", "Moveable"]
 }
 
 // GenericFuncStatement представляет generic функцию с параметрами типов
 type GenericFuncStatement struct {
 	FuncName      string
-	TypeParams    []string      // Список параметров типов, например ["T", "U"]
-	Params        []FuncParam   // Обычные параметры функции
-	ReturnType    string        // Тип возвращаемого значения
+	TypeParams    []TypeConstraint // Параметры типов с ограничениями, например [{TypeName: "T", Constraints: ["Drawable"]}]
+	Params        []FuncParam      // Обычные параметры функции
+	ReturnType    string           // Тип возвращаемого значения
 	Body          Expr
 }
 
-func NewGenericFuncStatement(funcName string, typeParams []string, params []FuncParam, returnType string, body Expr) *GenericFuncStatement {
+func NewGenericFuncStatement(funcName string, typeParams []TypeConstraint, params []FuncParam, returnType string, body Expr) *GenericFuncStatement {
 	return &GenericFuncStatement{
 		FuncName:   funcName,
 		TypeParams: typeParams,
@@ -45,28 +53,55 @@ func NewGenericFuncStatement(funcName string, typeParams []string, params []Func
 	}
 }
 
-func NewTypedFuncStatement(funcName string, params []FuncParam, body Expr) *TypedFuncStatement {
+// Создает простой параметр типа без ограничений (для обратной совместимости)
+func NewSimpleTypeParam(typeName string) TypeConstraint {
+	return TypeConstraint{
+		TypeName:   typeName,
+		Constraints: []string{},
+	}
+}
+
+// Создает параметр типа с ограничениями
+func NewConstrainedTypeParam(typeName string, constraints []string) TypeConstraint {
+	return TypeConstraint{
+		TypeName:   typeName,
+		Constraints: constraints,
+	}
+}
+
+func NewTypedFuncStatement(funcName string, params []FuncParam, body Expr, returnType string) *TypedFuncStatement {
 	return &TypedFuncStatement{
-		FuncName: funcName,
-		Params:   params,
-		Body:     body,
+		FuncName:   funcName,
+		Params:     params,
+		Body:       body,
+		ReturnType: returnType,
 	}
 }
 
 func (f *TypedFuncStatement) Eval() *Value {
-	// Преобразуем типизированные параметры в старый формат для совместимости с замыканиями
-	args := make([]map[string]Expr, len(f.Params))
-	for i, param := range f.Params {
-		argMap := make(map[string]Expr)
-		argMap[param.Name] = param.Default // Если Default nil, это будет nil
-		args[i] = argMap
-	}
-	
 	// Создаем замыкание с типизированными параметрами
 	closure := NewTypedClosure(f.FuncName, f.Params, f.Body)
 	
-	// Регистрируем замыкание в области видимости
-	scope.GlobalScope.Set(f.FuncName, NewValue(closure))
+	// Создаем сигнатуру для перегрузки
+	signature := CreateSignatureFromFunction(f.FuncName, f.Params, "")
+	
+	// Пытаемся зарегистрировать как перегруженную функцию
+	err := RegisterOverloadedMethod(signature, closure)
+	if err != nil {
+		// Если это метод интерфейса, не выдаем ошибку
+		// Методы интерфейсов могут иметь одинаковые имена и сигнатуры
+		if !isInterfaceMethod(f.FuncName) {
+			panic(fmt.Sprintf("Function overload error: %v", err))
+		}
+	}
+	
+	// Также регистрируем в обычном scope для обратной совместимости
+	// (если это первая функция с таким именем)
+	if existingValue, exists := scope.GlobalScope.Get(f.FuncName); !exists {
+		scope.GlobalScope.Set(f.FuncName, NewValue(closure))
+	} else if existingValue == nil {
+		scope.GlobalScope.Set(f.FuncName, NewValue(closure))
+	}
 	
 	return NewValue(nil)
 }
@@ -190,8 +225,13 @@ func (g *GenericFuncStatement) Call(args []*Value) *Value {
 	for i, param := range g.Params {
 		argValue := args[i]
 		
-		// TODO: Добавить проверку типов с учетом generic параметров
-		// Пока просто устанавливаем значение
+		// Проверяем ограничения типов, если они есть
+		if param.TypeName != "" {
+			if err := g.validateTypeConstraints(param.TypeName, argValue); err != nil {
+				panic(fmt.Sprintf("Type constraint violation in function '%s': %v", g.FuncName, err))
+			}
+		}
+		
 		scope.GlobalScope.Set(param.Name, argValue)
 	}
 
@@ -217,4 +257,70 @@ func (g *GenericFuncStatement) Call(args []*Value) *Value {
 // Name для интерфейса Callable
 func (g *GenericFuncStatement) Name() string {
 	return g.FuncName
+}
+
+// validateTypeConstraints проверяет, соответствует ли значение ограничениям типа
+func (g *GenericFuncStatement) validateTypeConstraints(paramType string, val *Value) error {
+	// Находим ограничения для данного типа
+	var constraints []string
+	for _, typeParam := range g.TypeParams {
+		if typeParam.TypeName == paramType {
+			constraints = typeParam.Constraints
+			break
+		}
+	}
+	
+	// Если ограничений нет, проверка пройдена
+	if len(constraints) == 0 {
+		return nil
+	}
+	
+	// Проверяем каждое ограничение
+	for _, constraint := range constraints {
+		if !g.checkInterfaceConstraint(constraint, val) {
+			return fmt.Errorf("value does not satisfy interface constraint '%s'", constraint)
+		}
+	}
+	
+	return nil
+}
+
+// checkInterfaceConstraint проверяет, реализует ли тип данный интерфейс
+func (g *GenericFuncStatement) checkInterfaceConstraint(interfaceName string, val *Value) bool {
+	// Получаем определение интерфейса
+	interfaceDef := GetInterface(interfaceName)
+	if interfaceDef == nil {
+		// Если интерфейс не найден, считаем ограничение не выполненным
+		return false
+	}
+	
+	// Определяем тип значения
+	var typeName string
+	valueType := value.GetValueTypeName(val)
+	
+	if valueType == "struct" {
+		if structObj, ok := val.Any().(*StructObject); ok {
+			typeName = structObj.TypeInfo.Name
+		} else {
+			return false
+		}
+	} else {
+		// Для примитивных типов используем их тип
+		typeName = valueType
+	}
+	
+	// Проверяем, есть ли реализация интерфейса для данного типа
+	return TypeImplementsInterface(typeName, interfaceName)
+}
+
+// isInterfaceMethod проверяет, является ли функция методом интерфейса
+// Методы интерфейсов имеют общие имена и могут дублироваться для разных типов
+func isInterfaceMethod(methodName string) bool {
+	// Проверяем все зарегистрированные интерфейсы
+	for _, interfaceDef := range registeredInterfaces {
+		if interfaceDef.HasMethod(methodName) {
+			return true
+		}
+	}
+	return false
 }

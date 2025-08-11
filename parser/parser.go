@@ -275,6 +275,18 @@ func (p *Parser) Statement() ast.Expr {
 		return p.ExportStatement()
 	}
 
+	if p.MatchAndNext(token.EXTENSION) {
+		return p.ExtensionStatement()
+	}
+
+	if p.MatchAndNext(token.INTERFACE) {
+		return p.InterfaceStatement()
+	}
+
+	if p.MatchAndNext(token.IMPL) {
+		return p.ImplStatement()
+	}
+
 	return p.Expression()
 }
 
@@ -761,6 +773,58 @@ func (p *Parser) Postfix() ast.Expr {
 				expr = ast.NewFuncCallExpr(varExpr.Name, args)
 			} else {
 				p.error("cannot call non-function", p.Peek(-1))
+			}
+		} else if p.MatchAndNext(token.LBRACE) {
+			// Создание экземпляра структуры: TypeName{field: value, ...}
+			// Только для VarExpr (имен типов), не для строк или других выражений
+			// И только если следующий токен выглядит как поле структуры
+			if varExpr, ok := expr.(*ast.VarExpr); ok && p.isStructInstantiation() {
+				fields := make(map[string]ast.Expr)
+				
+				// Пустой объект {}
+				if p.MatchAndNext(token.RBRACE) {
+					expr = ast.NewStructInstanceExpr(varExpr.Name, fields)
+				} else {
+					// Парсим поля структуры
+					for {
+						// Ожидаем идентификатор как ключ поля
+						keyTok := p.Next()
+						var key string
+						
+						if keyTok.Token == token.IDENT {
+							key = keyTok.Value
+						} else if keyTok.Token == token.STRING {
+							key = keyTok.Value
+						} else {
+							p.error("expected field name", keyTok)
+						}
+
+						// Ожидаем двоеточие
+						if !p.MatchAndNext(token.COLON) {
+							p.error("expected ':'", p.Peek(0))
+						}
+
+						// Значение поля
+						value := p.Expression()
+						fields[key] = value
+
+						// Проверяем запятую или закрывающую скобку
+						if p.MatchAndNext(token.RBRACE) {
+							break
+						}
+						
+						if !p.MatchAndNext(token.COMMA) {
+							p.error("expected ',' or '}'", p.Peek(0))
+						}
+					}
+					
+					expr = ast.NewStructInstanceExpr(varExpr.Name, fields)
+				}
+			} else {
+				// Если это не VarExpr (например, строка "struct"), отменяем разбор структуры
+				// Возвращаем токен LBRACE обратно в поток
+				p.pos--
+				break
 			}
 		} else {
 			break
@@ -1373,6 +1437,139 @@ func (p *Parser) AnonymousFunction() ast.Expr {
 	return ast.NewAnonymousFunc(args, body)
 }
 
+func (p *Parser) ExtensionStatement() ast.Expr {
+	// extension TypeName { methods }
+	
+	if !p.Match(token.IDENT) {
+		p.error("expected type name after 'extension'", p.Peek(0))
+	}
+	
+	typeName := p.Next().Value
+	
+	if !p.MatchAndNext(token.LBRACE) {
+		p.error("expected '{' after type name", p.Peek(0))
+	}
+	
+	var methods []*ast.ExtensionMethodInfo
+	
+	// Парсим методы внутри блока extension
+	for !p.Match(token.RBRACE) {
+		if p.Match(token.FN) {
+			p.Next() // consume 'fn'
+			
+			// Парсим имя метода
+			if !p.Match(token.IDENT) {
+				p.error("expected method name", p.Peek(0))
+			}
+			methodName := p.Next().Value
+			
+			// Проверяем на generic параметры <T>
+			var genericParams []string
+			if p.MatchAndNext(token.LT) {
+				for !p.Match(token.GT) {
+					if !p.Match(token.IDENT) {
+						p.error("expected generic parameter name", p.Peek(0))
+					}
+					genericParams = append(genericParams, p.Next().Value)
+					p.MatchAndNext(token.COMMA)
+				}
+				if !p.MatchAndNext(token.GT) {
+					p.error("expected '>' after generic parameters", p.Peek(0))
+				}
+			}
+			
+			if !p.MatchAndNext(token.LPAREN) {
+				p.error("expected '(' after method name", p.Peek(0))
+			}
+			
+			// Парсим параметры метода (без this, он добавится автоматически)
+			var params []string
+			var defaults []ast.Expr
+			var paramTypes []string
+			
+			for !p.Match(token.RPAREN) {
+				if !p.Match(token.IDENT) {
+					p.error("expected parameter name", p.Peek(0))
+				}
+				
+				paramName := p.Next().Value
+				params = append(params, paramName)
+				
+				// Проверяем на типизацию параметра
+				if p.MatchAndNext(token.COLON) {
+					if p.MatchAnyNext(token.INT_TYPE, token.STRING_TYPE, token.FLOAT_TYPE, token.BOOL_TYPE) {
+						paramTypes = append(paramTypes, p.Peek(-1).Value)
+					} else if p.Match(token.IDENT) {
+						paramTypes = append(paramTypes, p.Next().Value)
+					} else {
+						p.error("expected type after ':'", p.Peek(0))
+					}
+				} else {
+					paramTypes = append(paramTypes, "")
+				}
+				
+				// Проверяем на параметр по умолчанию
+				if p.MatchAndNext(token.EQ) {
+					defaults = append(defaults, p.Expression())
+				} else {
+					defaults = append(defaults, nil)
+				}
+				
+				p.MatchAndNext(token.COMMA)
+			}
+			
+			if !p.MatchAndNext(token.RPAREN) {
+				p.error("expected ')'", p.Peek(0))
+			}
+			
+			// Проверяем на типизированный возврат
+			var returnType string
+			if p.MatchAndNext(token.SUB) {
+				if !p.MatchAndNext(token.GT) {
+					p.error("expected '>' after '-'", p.Peek(0))
+				}
+				if p.MatchAnyNext(token.INT_TYPE, token.STRING_TYPE, token.FLOAT_TYPE, token.BOOL_TYPE) {
+					returnType = p.Peek(-1).Value
+				} else if p.Match(token.IDENT) {
+					returnType = p.Next().Value
+				} else {
+					p.error("expected return type", p.Peek(0))
+				}
+			}
+			
+			// Парсим тело метода
+			if !p.Match(token.LBRACE) {
+				p.error("expected '{' for method body", p.Peek(0))
+			}
+			body := p.BlockStatement()
+			
+			// Создаем метод
+			method := &ast.ExtensionMethodInfo{
+				Name: methodName,
+				Params: params,
+				Defaults: defaults,
+				Body: body,
+				GenericParams: genericParams,
+				ParamTypes: paramTypes,
+				ReturnType: returnType,
+			}
+			
+			methods = append(methods, method)
+		} else {
+			p.error("expected method definition inside extension", p.Peek(0))
+		}
+	}
+	
+	if !p.MatchAndNext(token.RBRACE) {
+		p.error("expected '}' to close extension", p.Peek(0))
+	}
+	
+	return &ast.ExtensionExpr{
+		TypeName: typeName,
+		Methods: methods,
+	}
+}
+
 // hasTypedParameters проверяет, есть ли типизированные параметры или generic параметры
 func (p *Parser) hasTypedParameters() bool {
 	// Сохраняем текущую позицию парсера
@@ -1421,8 +1618,8 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 	funcName := p.Peek(0).Value
 	p.Next()
 	
-	// Проверяем на generic параметры <T, U, ...>
-	var typeParams []string
+	// Проверяем на generic параметры <T, U, T: Interface, ...>
+	var typeParams []ast.TypeConstraint
 	if p.Match(token.LT) {
 		p.Next() // consume '<'
 		
@@ -1431,8 +1628,33 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 				p.error("expected type parameter name", p.Peek(0))
 			}
 			
-			typeParams = append(typeParams, p.Peek(0).Value)
+			typeName := p.Peek(0).Value
 			p.Next()
+			
+			var constraints []string
+			// Проверяем на ограничения: T: Interface1 + Interface2
+			if p.Match(token.COLON) {
+				p.Next() // consume ':'
+				
+				for {
+					if !p.Match(token.IDENT) {
+						p.error("expected constraint interface name", p.Peek(0))
+					}
+					
+					constraints = append(constraints, p.Peek(0).Value)
+					p.Next()
+					
+					// Проверяем на дополнительные ограничения через +
+					if p.Match(token.ADD) {
+						p.Next() // consume '+'
+						continue
+					} else {
+						break
+					}
+				}
+			}
+			
+			typeParams = append(typeParams, ast.NewConstrainedTypeParam(typeName, constraints))
 			
 			if p.Match(token.COMMA) {
 				p.Next()
@@ -1533,7 +1755,7 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 		return ast.NewGenericFuncStatement(funcName, typeParams, params, returnType, body)
 	}
 	
-	return ast.NewTypedFuncStatement(funcName, params, body)
+	return ast.NewTypedFuncStatement(funcName, params, body, returnType)
 }
 
 // isTypeName проверяет, является ли идентификатор именем типа
@@ -1557,11 +1779,222 @@ func (p *Parser) isTypeName(name string) bool {
 }
 
 // isGenericType проверяет, является ли имя generic типом (T, U, K и т.д.)
-func (p *Parser) isGenericType(name string, typeParams []string) bool {
+func (p *Parser) isGenericType(name string, typeParams []ast.TypeConstraint) bool {
 	for _, param := range typeParams {
-		if name == param {
+		if name == param.TypeName {
 			return true
 		}
 	}
+	return false
+}
+
+// InterfaceStatement парсит определение интерфейса
+// interface InterfaceName { методы }
+func (p *Parser) InterfaceStatement() ast.Expr {
+	// Ожидаем имя интерфейса
+	if !p.Match(token.IDENT) {
+		p.error("expected interface name", p.Peek(0))
+	}
+	
+	interfaceName := p.Peek(0).Value
+	p.Next()
+	
+	// Ожидаем открывающую скобку
+	if !p.MatchAndNext(token.LBRACE) {
+		p.error("expected '{' after interface name", p.Peek(0))
+	}
+	
+	var methods []ast.InterfaceMethod
+	
+	// Парсим методы интерфейса
+	for !p.Match(token.RBRACE) {
+		method := p.parseInterfaceMethod()
+		methods = append(methods, method)
+	}
+	
+	// Ожидаем закрывающую скобку
+	if !p.MatchAndNext(token.RBRACE) {
+		p.error("expected '}' after interface methods", p.Peek(0))
+	}
+	
+	return ast.NewInterfaceDefinition(interfaceName, methods)
+}
+
+// parseInterfaceMethod парсит метод интерфейса
+func (p *Parser) parseInterfaceMethod() ast.InterfaceMethod {
+	// Ожидаем fn
+	if !p.MatchAndNext(token.FN) {
+		p.error("expected 'fn' for interface method", p.Peek(0))
+	}
+	
+	// Имя метода
+	if !p.Match(token.IDENT) {
+		p.error("expected method name", p.Peek(0))
+	}
+	
+	methodName := p.Peek(0).Value
+	p.Next()
+	
+	// Параметры
+	if !p.MatchAndNext(token.LPAREN) {
+		p.error("expected '(' after method name", p.Peek(0))
+	}
+	
+	var params []ast.FuncParam
+	
+	// Парсим параметры
+	if !p.Match(token.RPAREN) {
+		params = p.parseInterfaceParams()
+	}
+	
+	if !p.MatchAndNext(token.RPAREN) {
+		p.error("expected ')' after method parameters", p.Peek(0))
+	}
+	
+	// Возвращаемый тип (опционально)
+	var returnType string
+	if p.Match(token.SUB) && p.Peek(1).Token == token.GT {
+		p.Next() // consume '-'
+		p.Next() // consume '>'
+		
+		if p.Match(token.IDENT) {
+			returnType = p.Peek(0).Value
+			p.Next()
+		} else {
+			p.error("expected return type after '->'", p.Peek(0))
+		}
+	}
+	
+	return ast.InterfaceMethod{
+		Name:       methodName,
+		Params:     params,
+		ReturnType: returnType,
+	}
+}
+
+// ImplStatement парсит блок реализации интерфейса
+// impl InterfaceName for TypeName { методы }
+func (p *Parser) ImplStatement() ast.Expr {
+	// Ожидаем имя интерфейса
+	if !p.Match(token.IDENT) {
+		p.error("expected interface name after 'impl'", p.Peek(0))
+	}
+	
+	interfaceName := p.Peek(0).Value
+	p.Next()
+	
+	// Ожидаем 'for'
+	if !p.Match(token.FOR) {
+		p.error("expected 'for' after interface name", p.Peek(0))
+	}
+	p.Next()
+	
+	// Ожидаем имя типа
+	if !p.Match(token.IDENT) {
+		p.error("expected type name after 'for'", p.Peek(0))
+	}
+	
+	typeName := p.Peek(0).Value
+	p.Next()
+	
+	// Ожидаем открывающую скобку
+	if !p.MatchAndNext(token.LBRACE) {
+		p.error("expected '{' after type name", p.Peek(0))
+	}
+	
+	var methods []*ast.TypedFuncStatement
+	
+	// Парсим реализации методов
+	for !p.Match(token.RBRACE) {
+		// Ожидаем fn
+		if !p.Match(token.FN) {
+			p.error("expected 'fn' for method implementation", p.Peek(0))
+		}
+		
+		// Парсим типизированную функцию
+		method := p.TypedFunctionStatement()
+		if typedFunc, ok := method.(*ast.TypedFuncStatement); ok {
+			methods = append(methods, typedFunc)
+		} else {
+			p.error("expected typed function in impl block", p.Peek(0))
+		}
+	}
+	
+	// Ожидаем закрывающую скобку
+	if !p.MatchAndNext(token.RBRACE) {
+		p.error("expected '}' after impl methods", p.Peek(0))
+	}
+	
+	return ast.NewImplBlock(interfaceName, typeName, methods)
+}
+
+// parseInterfaceParams парсит параметры методов интерфейса
+func (p *Parser) parseInterfaceParams() []ast.FuncParam {
+	var params []ast.FuncParam
+	
+	for !p.Match(token.RPAREN) {
+		if !p.Match(token.IDENT) {
+			p.error("expected parameter name", p.Peek(0))
+		}
+		
+		paramName := p.Peek(0).Value
+		p.Next()
+		
+		var typeName string
+		var defaultValue ast.Expr
+		
+		// Проверяем на тип параметра: param: type
+		if p.Match(token.COLON) {
+			p.Next()
+			
+			if p.Match(token.IDENT) {
+				typeValue := p.Peek(0).Value
+				if p.isTypeName(typeValue) {
+					typeName = typeValue
+					p.Next()
+				} else {
+					p.error("expected type name", p.Peek(0))
+				}
+			} else {
+				p.error("expected type name", p.Peek(0))
+			}
+		}
+		
+		params = append(params, ast.FuncParam{
+			Name:     paramName,
+			TypeName: typeName,
+			Default:  defaultValue,
+		})
+		
+		if p.Match(token.COMMA) {
+			p.Next()
+		} else if !p.Match(token.RPAREN) {
+			p.error("expected ',' or ')'", p.Peek(0))
+		}
+	}
+	
+	return params
+}
+
+// isStructInstantiation проверяет, является ли текущая конструкция созданием экземпляра структуры
+func (p *Parser) isStructInstantiation() bool {
+	// Если следующий токен RBRACE, это пустая структура {}
+	if p.Peek(0).Token == token.RBRACE {
+		return true
+	}
+	
+	// Если следующий токен IDENT и после него ':' или '=', это поле структуры
+	if p.Peek(0).Token == token.IDENT {
+		nextTok := p.Peek(1).Token
+		return nextTok == token.COLON || nextTok == token.EQ
+	}
+	
+	// Если следующий токен STRING и после него ':' или '=', это поле структуры
+	if p.Peek(0).Token == token.STRING {
+		nextTok := p.Peek(1).Token
+		return nextTok == token.COLON || nextTok == token.EQ
+	}
+	
+	// Во всех остальных случаях это не создание структуры
 	return false
 }

@@ -1,0 +1,54 @@
+// Полная демонстрация типизированных функций в foo_lang
+
+println("=== Typed Functions Demo ===")
+
+// Функции с разными типами параметров и возвратов
+fn add(a: int, b: int) -> int {
+    return a + b
+}
+
+fn multiply(a: float, b: float) -> float {
+    return a * b
+}
+
+fn greet(name: string) -> string {
+    return "Hello, " + name + "!"
+}
+
+fn isPositive(n: int) -> bool {
+    return n > 0
+}
+
+// Функция с несколькими типами параметров
+fn formatNumber(value: int, prefix: string) -> string {
+    return prefix + value.toString()
+}
+
+// Функция без параметров с возвратом
+fn getPi() -> float {
+    return 3.14159
+}
+
+// Тестируем все функции
+println("\n=== Testing Typed Functions ===")
+
+let sum = add(10, 5)
+println("add(10, 5) = " + sum.toString())
+
+let product = multiply(2.5, 4.0)
+println("multiply(2.5, 4.0) = " + product.toString())
+
+let message = greet("Foo Lang")
+println("greet('Foo Lang') = " + message)
+
+let negative_three = -3
+let positive = isPositive(negative_three)
+println("isPositive(-3) = " + positive.toString())
+
+let formatted = formatNumber(42, "Number: ")
+println("formatNumber(42, 'Number: ') = " + formatted)
+
+let pi = getPi()
+println("getPi() = " + pi.toString())
+
+println("\n=== All Typed Functions Work! ===")

@@ -1,0 +1,88 @@
+// Тест Generic функций с ограничениями типов в foo_lang
+
+println("=== Generic Type Constraints Test ===")
+
+// Определяем интерфейсы
+interface Drawable {
+    fn draw()
+    fn getArea() -> float
+}
+
+interface Moveable {
+    fn move(x: float, y: float)
+    fn getPosition() -> string
+}
+
+println("Interfaces defined!")
+
+// Определяем структуру
+struct Circle {
+    radius: float,
+    x: float,
+    y: float
+}
+
+println("Struct Circle defined!")
+
+// Реализуем интерфейсы для Circle
+impl Drawable for Circle {
+    fn draw() {
+        println("Drawing circle at (" + this.x.toString() + ", " + this.y.toString() + 
+                ") with radius " + this.radius.toString())
+    }
+    
+    fn getArea() -> float {
+        return 3.14159 * this.radius * this.radius
+    }
+}
+
+impl Moveable for Circle {
+    fn move(dx: float, dy: float) {
+        println("Moving circle by (" + dx.toString() + ", " + dy.toString() + ")")
+    }
+    
+    fn getPosition() -> string {
+        return "(" + this.x.toString() + ", " + this.y.toString() + ")"
+    }
+}
+
+println("Interfaces implemented for Circle!")
+
+// Generic функция с ограничением - принимает только типы, реализующие Drawable
+fn drawShape<T: Drawable>(shape: T) {
+    println("Drawing shape of type " + typeof(shape))
+    shape.draw()
+    println("Area: " + shape.getArea().toString())
+}
+
+println("Generic function with constraint defined!")
+
+// Generic функция с множественными ограничениями
+fn moveAndDraw<T: Drawable + Moveable>(shape: T, dx: float, dy: float) {
+    println("=== Moving and Drawing Shape ===")
+    println("Current position: " + shape.getPosition())
+    shape.move(dx, dy)
+    shape.draw()
+    println("Area: " + shape.getArea().toString())
+}
+
+println("Generic function with multiple constraints defined!")
+
+// Тестируем
+let circle = Circle{radius: 5.0, x: 10.0, y: 20.0}
+
+println("\n=== Debug circle type ===")
+println("Circle type: " + typeof(circle))
+
+// Попробуем вызвать методы напрямую для проверки  
+println("Testing direct method call:")
+circle.draw()
+println("Area: " + circle.getArea().toString())
+
+println("\n=== Testing single constraint ===")
+drawShape(circle)
+
+println("\n=== Testing multiple constraints ===")
+moveAndDraw(circle, 5.0, -3.0)
+
+println("\n=== Generic Type Constraints Complete ===")

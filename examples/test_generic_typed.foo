@@ -1,0 +1,29 @@
+// Generic функции с типизированными параметрами
+
+println("=== Generic + Typed Functions ===")
+
+// Generic функция без ограничений
+fn identity<T>(value: T) -> T {
+    return value
+}
+
+// Generic функция с типизированными параметрами
+fn process<T>(item: T, count: int) -> T {
+    println("Processing item " + count.toString() + " times")
+    return item
+}
+
+// Тестируем
+let num = identity(42)
+println("identity(42) = " + num.toString())
+
+let text = identity("Hello")
+println("identity('Hello') = " + text)
+
+let result = process("Test", 3)
+println("process('Test', 3) = " + result)
+
+let number_result = process(100, 2)
+println("process(100, 2) = " + number_result.toString())
+
+println("\n=== Generic + Typed Functions Work! ===")

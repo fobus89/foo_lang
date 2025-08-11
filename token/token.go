@@ -49,6 +49,9 @@ const (
 	EXPORT
 	FROM
 	AS
+	EXTENSION
+	INTERFACE
+	IMPL
 
 	operator_beg
 	ADD        // +

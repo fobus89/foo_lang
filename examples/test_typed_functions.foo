@@ -1,76 +1,13 @@
-// Тест типизированных функций с проверкой типов параметров
-
-// Функция с типизированными параметрами
-fn add(x: int, y: int) {
-    return x + y
+fn add(a: int, b: int) -> int {
+    return a + b
 }
 
-// Функция с типизированными параметрами разных типов
-fn greet(name: string, age: int, isActive: bool) {
-    let status = isActive ? "active" : "inactive"
-    return "Hello " + name + ", age " + age + ", status: " + status
+fn greet(name: string) -> string {
+    return "Hello, " + name
 }
 
-// Функция с типизированными параметрами и значениями по умолчанию
-fn multiply(a: int, b: int = 2) {
-    return a * b
-}
+let result = add(5, 3)
+println("5 + 3 = " + result.toString())
 
-// Функция с float параметрами
-fn calculateArea(width: float, height: float) {
-    return width * height
-}
-
-// Функция с смешанными типами
-fn processData(id: int, name: string, score: float, enabled: bool = true) {
-    println("Processing data:")
-    println("  ID: " + id)
-    println("  Name: " + name) 
-    println("  Score: " + score)
-    println("  Enabled: " + enabled)
-    return {id: id, name: name, score: score, enabled: enabled}
-}
-
-println("=== Testing Typed Functions ===")
-
-// Тест 1: Базовая арифметика
-println("\n1. Basic arithmetic:")
-let sum1 = add(5, 3)
-let sum2 = add(10, 20)
-println("add(5, 3) = " + sum1)
-println("add(10, 20) = " + sum2)
-
-// Тест 2: Смешанные типы
-println("\n2. Mixed types:")
-let greeting1 = greet("Alice", 25, true)
-let greeting2 = greet("Bob", 30, false)
-println(greeting1)
-println(greeting2)
-
-// Тест 3: Значения по умолчанию
-println("\n3. Default values:")
-let mult1 = multiply(5)      // Использует b = 2 по умолчанию
-let mult2 = multiply(5, 3)   // Передает явно b = 3
-println("multiply(5) = " + mult1)
-println("multiply(5, 3) = " + mult2)
-
-// Тест 4: Float параметры
-println("\n4. Float parameters:")
-let area1 = calculateArea(5.5, 3.2)
-let area2 = calculateArea(10.0, 7.5)
-println("calculateArea(5.5, 3.2) = " + area1)
-println("calculateArea(10.0, 7.5) = " + area2)
-
-// Тест 5: Комплексная функция
-println("\n5. Complex function:")
-let data1 = processData(1, "John", 95.5, true)
-let data2 = processData(2, "Jane", 87.2)  // enabled = true по умолчанию
-
-// Тест 6: Ошибки типов (закомментированы, чтобы не ломать выполнение)
-println("\n6. Type validation working!")
-println("The following would cause type errors:")
-println("// add(\"hello\", 5)        // Error: expected int, got string")
-println("// greet(123, \"age\", true) // Error: wrong types")
-println("// multiply(3.14, 2)      // Error: expected int, got float")
-
-println("\n=== All typed function tests completed! ===")
+let greeting = greet("World")
+println(greeting)

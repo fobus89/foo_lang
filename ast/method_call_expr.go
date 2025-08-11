@@ -4,7 +4,23 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"foo_lang/value"
+	"foo_lang/scope"
 )
+
+// StructObject представляет экземпляр структуры
+type StructObject struct {
+	TypeInfo *TypeInfo
+	Fields   map[string]*Value
+}
+
+// NewStructObject создает новый экземпляр структуры
+func NewStructObject(typeInfo *TypeInfo, fields map[string]*Value) *StructObject {
+	return &StructObject{
+		TypeInfo: typeInfo,
+		Fields:   fields,
+	}
+}
 
 // MethodCallExpr представляет вызов метода объекта (object.method(args))
 type MethodCallExpr struct {
@@ -23,6 +39,31 @@ func NewMethodCallExpr(object Expr, methodName string, args []Expr) *MethodCallE
 
 func (m *MethodCallExpr) Eval() *Value {
 	obj := m.Object.Eval()
+	
+	// Методы для экземпляров структур
+	if structObj, ok := obj.Any().(*StructObject); ok {
+		// Проверяем все зарегистрированные интерфейсы для этого типа
+		for _, interfaceName := range getImplementedInterfaces(structObj.TypeInfo.Name) {
+			if impl := GetImplementation(structObj.TypeInfo.Name, interfaceName); impl != nil {
+				// Ищем метод в реализации
+				for _, method := range impl.Methods {
+					if method.FuncName == m.MethodName {
+						// Вычисляем аргументы
+						args := make([]*Value, len(m.Args))
+						for i, arg := range m.Args {
+							args[i] = arg.Eval()
+						}
+						
+						// Вызываем метод с 'this' контекстом
+						return callMethodWithContext(method, obj, args)
+					}
+				}
+			}
+		}
+		
+		// Если метод не найден в интерфейсах, возможно это доступ к полю
+		panic("method '" + m.MethodName + "' not found for struct " + structObj.TypeInfo.Name)
+	}
 	
 	// Методы для TypeInfo
 	if typeInfo, ok := obj.Any().(*TypeInfo); ok {
@@ -409,7 +450,119 @@ func (m *MethodCallExpr) Eval() *Value {
 		}
 	}
 	
+	// Проверяем extension методы
+	typeName := value.GetValueTypeName(obj)
+	if extensionMethod, ok := value.GetExtensionMethod(typeName, m.MethodName); ok {
+		if wrapper, ok := extensionMethod.(*ExtensionMethodWrapper); ok {
+			// Вычисляем аргументы
+			args := make([]*Value, len(m.Args))
+			for i, arg := range m.Args {
+				args[i] = arg.Eval()
+			}
+			// Вызываем extension метод с receiver (this) как первым аргументом
+			return wrapper.Call(obj, args)
+		}
+	}
+	
+	// Проверяем interface методы
+	if typeInfo, ok := obj.Any().(*TypeInfo); ok {
+		// Для объекта структуры, ищем методы интерфейса
+		if impl := GetImplementation(typeInfo.Name, ""); impl != nil {
+			// Ищем метод в реализации
+			for _, method := range impl.Methods {
+				if method.FuncName == m.MethodName {
+					// Вычисляем аргументы
+					args := make([]*Value, len(m.Args))
+					for i, arg := range m.Args {
+						args[i] = arg.Eval()
+					}
+					
+					// Создаем временную область видимости для метода
+					// TODO: Нужно установить 'this' как текущий объект
+					
+					// Пока что вызываем метод как обычную функцию  
+					closure := NewTypedClosure(method.FuncName, method.Params, method.Body)
+					return closure.Call(args)
+				}
+			}
+		}
+	}
+	
+	// Если объект - это экземпляр структуры (не TypeInfo), попробуем найти его тип
+	if typeInfo := getObjectTypeInfo(obj); typeInfo != nil {
+		// Проверяем все зарегистрированные интерфейсы для этого типа
+		for _, interfaceName := range getImplementedInterfaces(typeInfo.Name) {
+			if impl := GetImplementation(typeInfo.Name, interfaceName); impl != nil {
+				// Ищем метод в реализации
+				for _, method := range impl.Methods {
+					if method.FuncName == m.MethodName {
+						// Вычисляем аргументы
+						args := make([]*Value, len(m.Args))
+						for i, arg := range m.Args {
+							args[i] = arg.Eval()
+						}
+						
+						// Вызываем метод с 'this' контекстом
+						return callMethodWithContext(method, obj, args)
+					}
+				}
+			}
+		}
+	}
+	
 	// Отладка: покажем тип объекта
 	objType := fmt.Sprintf("%T", obj.Any())
 	panic("method '" + m.MethodName + "' not supported on type: " + objType)
+}
+
+// getObjectTypeInfo пытается определить TypeInfo для объекта
+func getObjectTypeInfo(obj *Value) *TypeInfo {
+	// Если объект - это StructObject, получаем его TypeInfo
+	if structObj, ok := obj.Any().(*StructObject); ok {
+		return structObj.TypeInfo
+	}
+	return nil
+}
+
+// getImplementedInterfaces возвращает список интерфейсов, реализованных типом
+func getImplementedInterfaces(typeName string) []string {
+	var interfaces []string
+	for interfaceName := range interfaceImplementations[typeName] {
+		interfaces = append(interfaces, interfaceName)
+	}
+	return interfaces
+}
+
+// callMethodWithContext вызывает метод интерфейса с установленным 'this' контекстом
+func callMethodWithContext(method *TypedFuncStatement, thisObj *Value, args []*Value) *Value {
+	// Создаем временную область видимости
+	scope.GlobalScope.Push()
+	defer scope.GlobalScope.Pop()
+	
+	// Устанавливаем 'this' в области видимости
+	scope.GlobalScope.Set("this", thisObj)
+	
+	// Устанавливаем параметры метода
+	for i, param := range method.Params {
+		if i < len(args) {
+			scope.GlobalScope.Set(param.Name, args[i])
+		} else if param.Default != nil {
+			scope.GlobalScope.Set(param.Name, param.Default.Eval())
+		} else {
+			panic(fmt.Sprintf("missing required argument: %s", param.Name))
+		}
+	}
+	
+	// Выполняем тело метода
+	if bodyStm, ok := method.Body.(*BodyExpr); ok {
+		for _, stmt := range bodyStm.Statments {
+			result := stmt.Eval()
+			if result != nil && result.IsReturn() {
+				return result
+			}
+		}
+		return NewValue(nil)
+	} else {
+		return method.Body.Eval()
+	}
 }

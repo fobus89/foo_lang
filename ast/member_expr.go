@@ -16,6 +16,14 @@ func NewMemberExpr(object Expr, property string) *MemberExpr {
 func (m *MemberExpr) Eval() *Value {
 	obj := m.Object.Eval()
 	
+	// Проверяем, является ли объект экземпляром структуры
+	if structObj, ok := obj.Any().(*StructObject); ok {
+		if value, exists := structObj.Fields[m.Property]; exists {
+			return value
+		}
+		panic("field '" + m.Property + "' does not exist in struct " + structObj.TypeInfo.Name)
+	}
+	
 	// Проверяем, является ли объект TypeInfo
 	if typeInfo, ok := obj.Any().(*TypeInfo); ok {
 		property := typeInfo.GetProperty(m.Property)

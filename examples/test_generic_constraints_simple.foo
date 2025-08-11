@@ -1,0 +1,55 @@
+// Простой пример Generic ограничений типов
+
+println("=== Simple Generic Constraints Demo ===")
+
+// Интерфейс для фигур
+interface Shape {
+    fn area() -> float
+    fn name() -> string
+}
+
+// Структуры  
+struct Rectangle {
+    width: float,
+    height: float
+}
+
+struct Circle {
+    radius: float
+}
+
+// Реализации интерфейса
+impl Shape for Rectangle {
+    fn area() -> float {
+        return this.width * this.height
+    }
+    
+    fn name() -> string {
+        return "Rectangle"
+    }
+}
+
+impl Shape for Circle {
+    fn area() -> float {
+        return 3.14159 * this.radius * this.radius
+    }
+    
+    fn name() -> string {
+        return "Circle"  
+    }
+}
+
+// Generic функция с ограничением типа
+fn printShapeInfo<T: Shape>(shape: T) {
+    println(shape.name() + " area: " + shape.area().toString())
+}
+
+// Тестируем
+let rect = Rectangle{width: 10.0, height: 5.0}
+let circle = Circle{radius: 3.0}
+
+println("\n=== Testing Generic Constraints ===")
+printShapeInfo(rect)
+printShapeInfo(circle)
+
+println("\n=== Generic Constraints Work! ===")

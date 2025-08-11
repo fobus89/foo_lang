@@ -1,0 +1,33 @@
+// Тест интерфейсов с реализацией в foo_lang
+
+println("=== Interface Implementation Test ===")
+
+// Определяем интерфейс
+interface Drawable {
+    fn draw()
+    fn getArea() -> float
+}
+
+println("Interface Drawable defined!")
+
+// Определяем структуру
+struct Circle {
+    radius: float
+}
+
+println("Struct Circle defined!")
+
+// Реализуем интерфейс для структуры
+impl Drawable for Circle {
+    fn draw() {
+        println("Drawing a circle with radius " + this.radius.toString())
+    }
+    
+    fn getArea() -> float {
+        return 3.14159 * this.radius * this.radius
+    }
+}
+
+println("Interface implemented for Circle!")
+
+println("=== Test Complete ===")

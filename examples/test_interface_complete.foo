@@ -1,0 +1,96 @@
+// Полный пример интерфейсов в foo_lang
+
+println("=== Complete Interface System Demo ===")
+
+// Определяем интерфейсы
+interface Drawable {
+    fn draw()
+    fn getArea() -> float
+}
+
+interface Moveable {
+    fn move(x: float, y: float)
+    fn getPosition() -> string
+}
+
+println("Interfaces defined!")
+
+// Определяем структуры (упрощенные для демонстрации)
+struct Circle {
+    radius: float,
+    x: float,
+    y: float
+}
+
+struct Rectangle {
+    width: float,
+    height: float,
+    x: float,
+    y: float
+}
+
+println("Structs defined!")
+
+// Реализация интерфейса Drawable для Circle
+impl Drawable for Circle {
+    fn draw() {
+        println("Drawing circle at (" + this.x.toString() + ", " + this.y.toString() + ") with radius " + this.radius.toString())
+    }
+    
+    fn getArea() -> float {
+        return 3.14159 * this.radius * this.radius
+    }
+}
+
+// Реализация интерфейса Moveable для Circle  
+impl Moveable for Circle {
+    fn move(dx: float, dy: float) {
+        // Простая демонстрация без изменения состояния
+        println("Moving circle by " + dx.toString() + ", " + dy.toString())
+    }
+    
+    fn getPosition() -> string {
+        return "(" + this.x.toString() + ", " + this.y.toString() + ")"
+    }
+}
+
+// Реализация интерфейса Drawable для Rectangle
+impl Drawable for Rectangle {
+    fn draw() {
+        println("Drawing rectangle at (" + this.x.toString() + ", " + this.y.toString() + ") " + this.width.toString() + "x" + this.height.toString())
+    }
+    
+    fn getArea() -> float {
+        return this.width * this.height
+    }
+}
+
+// Реализация интерфейса Moveable для Rectangle
+impl Moveable for Rectangle {
+    fn move(dx: float, dy: float) {
+        // Простая демонстрация без изменения состояния
+        println("Moving rectangle by " + dx.toString() + ", " + dy.toString())
+    }
+    
+    fn getPosition() -> string {
+        return "(" + this.x.toString() + ", " + this.y.toString() + ")"
+    }
+}
+
+println("Interfaces implemented!")
+
+// Создаем объекты
+let circle = Circle{radius: 5.0, x: 0.0, y: 0.0}
+let rect = Rectangle{width: 10.0, height: 8.0, x: 2.0, y: 3.0}
+
+println("\n=== Testing Circle ===")
+circle.draw()
+println("Circle area: " + circle.getArea().toString())
+println("Circle position: " + circle.getPosition())
+
+println("\n=== Testing Rectangle ===")
+rect.draw()
+println("Rectangle area: " + rect.getArea().toString())
+println("Rectangle position: " + rect.getPosition())
+
+println("\n=== Interface System Complete ===")

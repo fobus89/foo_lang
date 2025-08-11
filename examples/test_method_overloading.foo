@@ -1,0 +1,102 @@
+// Демонстрация перегрузки методов в foo_lang
+// Перегрузка методов позволяет создавать несколько функций с одним именем,
+// но разными параметрами
+
+println("=== Method Overloading Demo ===")
+
+// 1. Базовые перегрузки с разными типами
+println("\n1. Базовые перегрузки:")
+
+fn add(a: int, b: int) {
+    return a + b
+}
+
+fn add(a: float, b: float) {
+    return a + b
+}
+
+fn add(a: string, b: string) {
+    return a + b
+}
+
+println("add(5, 3) = " + add(5, 3).toString())              // 8 (int)
+println("add(5.5, 2.3) = " + add(5.5, 2.3).toString())     // 7.8 (float) 
+println("add(Hello, World) = " + add("Hello", " World"))  // "Hello World" (string)
+
+// 2. Автоматическое приведение типов
+println("\n2. Автоматическое приведение типов:")
+
+fn calculate(x: float, y: float) {
+    return x * y + 1.5
+}
+
+fn calculate(x: int, y: int, z: int) {
+    return x + y + z
+}
+
+println("calculate(3.5, 2.0) = " + calculate(3.5, 2.0).toString())    // float + float
+println("calculate(3, 2) = " + calculate(3, 2).toString())            // int->float (автоприведение)
+println("calculate(1, 2, 3) = " + calculate(1, 2, 3).toString())     // int + int + int
+
+// 3. Перегрузки с разным количеством параметров  
+println("\n3. Разное количество параметров:")
+
+fn greetEmpty() {
+    return "Hello!"
+}
+
+fn greetName(name: string) {
+    return "Hello, " + name + "!"
+}
+
+fn greetFull(name: string, title: string) {
+    return "Hello, " + title + " " + name + "!"
+}
+
+println("greetEmpty() = " + greetEmpty())
+println("greetName(Alice) = " + greetName("Alice"))
+println("greetFull(Smith, Dr.) = " + greetFull("Smith", "Dr."))
+
+// 4. Математические перегрузки
+println("\n4. Математические операции:")
+
+fn multiply(a: int, b: int) {
+    return a * b
+}
+
+fn multiply(a: float, b: float) {
+    return a * b
+}
+
+println("multiply(5, 4) = " + multiply(5, 4).toString())          // 20 (int)
+println("multiply(2.5, 3.0) = " + multiply(2.5, 3.0).toString())     // 7.5 (float)
+
+// 5. Простые функции
+println("\n5. Простые операции:")
+
+fn double(value: int) {
+    return value * 2
+}
+
+fn double(value: float) {
+    return value * 2.0
+}
+
+println("double(21) = " + double(21).toString())          // 42 (int)
+println("double(3.5) = " + double(3.5).toString())       // 7.0 (float)
+
+// 6. Форматирование сообщений
+println("\n6. Форматирование сообщений:")
+
+fn format1(msg: string) {
+    return "[INFO] " + msg
+}
+
+fn format2(msg: string, level: string) {
+    return "[" + level + "] " + msg
+}
+
+println("format1(Hello) = " + format1("Hello"))
+println("format2(Error occurred, ERROR) = " + format2("Error occurred", "ERROR"))
+
+println("\n=== Method Overloading Complete ===")

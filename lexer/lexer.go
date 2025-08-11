@@ -116,6 +116,9 @@ var keywords = MapType[string]{
 	"export":  token.EXPORT,
 	"from":    token.FROM,
 	"as":      token.AS,
+	"extension": token.EXTENSION,
+	"interface": token.INTERFACE,
+	"impl":      token.IMPL,
 }
 
 type Lexer struct {

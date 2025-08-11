@@ -1,0 +1,11 @@
+// Простой тест интерфейсов в foo_lang
+
+println("=== Basic Interface Test ===")
+
+// Определяем интерфейс
+interface Drawable {
+    fn draw()
+    fn getArea() -> float
+}
+
+println("Interface Drawable defined successfully!")

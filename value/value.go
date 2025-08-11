@@ -1,6 +1,7 @@
 package value
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -307,4 +308,54 @@ func (n *Value) SetBreak(brk bool) {
 
 func (n *Value) IsBreak() bool {
 	return n.isBreak
+}
+
+// Extension methods registry
+var extensionMethods = make(map[string]map[string]interface{})
+
+// RegisterExtensionMethod регистрирует метод расширения для типа
+func RegisterExtensionMethod(typeName string, methodName string, method interface{}) {
+	if extensionMethods[typeName] == nil {
+		extensionMethods[typeName] = make(map[string]interface{})
+	}
+	extensionMethods[typeName][methodName] = method
+}
+
+// GetExtensionMethod возвращает метод расширения для типа
+func GetExtensionMethod(typeName string, methodName string) (interface{}, bool) {
+	if methods, ok := extensionMethods[typeName]; ok {
+		if method, ok := methods[methodName]; ok {
+			return method, true
+		}
+	}
+	return nil, false
+}
+
+// GetValueTypeName возвращает имя типа для значения
+func GetValueTypeName(v *Value) string {
+	if v == nil || v.data == nil {
+		return "nil"
+	}
+	
+	switch v.data.(type) {
+	case int64:
+		return "int"
+	case float64:
+		return "float"
+	case string:
+		return "string"
+	case bool:
+		return "bool"
+	case []interface{}:
+		return "array"
+	case map[string]interface{}:
+		return "object"
+	default:
+		// Проверяем на StructObject через рефлексию
+		typeName := fmt.Sprintf("%T", v.data)
+		if typeName == "*ast.StructObject" {
+			return "struct"
+		}
+		return "unknown"
+	}
 }

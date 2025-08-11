@@ -1,0 +1,235 @@
+// Демонстрация Extension Methods в foo_lang
+// Extension methods позволяют добавлять новые методы к существующим типам
+
+// Расширяем строки полезными методами
+extension string {
+    // Проверка на палиндром
+    fn isPalindrome() -> bool {
+        let len = this.length()
+        let mid = len / 2
+        
+        for let i = 0; i < mid; i++ {
+            if this.charAt(i) != this.charAt(len - i - 1) {
+                return false
+            }
+        }
+        return true
+    }
+    
+    // Переворот строки
+    fn reverse() -> string {
+        let result = ""
+        for let i = this.length() - 1; i >= 0; i-- {
+            result = result + this.charAt(i)
+        }
+        return result
+    }
+    
+    // Повторение строки n раз
+    fn repeat(n: int) -> string {
+        let result = ""
+        for let i = 0; i < n; i++ {
+            result = result + this
+        }
+        return result
+    }
+    
+    // Подсчет вхождений символа
+    fn countChar(char: string) -> int {
+        let count = 0
+        for let i = 0; i < this.length(); i++ {
+            if this.charAt(i) == char {
+                count++
+            }
+        }
+        return count
+    }
+    
+    // Обрезка строки с добавлением суффикса
+    fn truncate(maxLen: int, suffix: string = "...") -> string {
+        if this.length() <= maxLen {
+            return this
+        }
+        return this.substring(0, maxLen - suffix.length()) + suffix
+    }
+}
+
+// Расширяем числа математическими методами
+extension int {
+    // Проверка на четность
+    fn isEven() -> bool {
+        return this % 2 == 0
+    }
+    
+    // Проверка на нечетность
+    fn isOdd() -> bool {
+        return this % 2 != 0
+    }
+    
+    // Факториал
+    fn factorial() -> int {
+        if this <= 1 {
+            return 1
+        }
+        return this * (this - 1).factorial()
+    }
+    
+    // Возведение в квадрат
+    fn square() -> int {
+        return this * this
+    }
+    
+    // Возведение в куб
+    fn cube() -> int {
+        return this * this * this
+    }
+}
+
+// Расширяем числа с плавающей точкой
+extension float {
+    // Округление до n знаков после запятой
+    fn roundTo(decimals: int) -> float {
+        let factor = pow(10, decimals)
+        return round(this * factor) / factor
+    }
+    
+    // Проверка, является ли число целым
+    fn isWhole() -> bool {
+        return this == floor(this)
+    }
+}
+
+// Расширяем массивы дополнительными методами
+extension array {
+    // Сумма всех элементов
+    fn sum() -> float {
+        return this.reduce(0, fn(acc, x) => acc + x)
+    }
+    
+    // Проверка на наличие элемента
+    fn contains(item) -> bool {
+        for let i = 0; i < this.length(); i++ {
+            if this[i] == item {
+                return true
+            }
+        }
+        return false
+    }
+    
+    // Проверка на пустоту
+    fn isEmpty() -> bool {
+        return this.length() == 0
+    }
+    
+    // Первый элемент
+    fn first() {
+        if this.length() > 0 {
+            return this[0]
+        }
+        return nil
+    }
+    
+    // Последний элемент
+    fn last() {
+        if this.length() > 0 {
+            return this[this.length() - 1]
+        }
+        return nil
+    }
+    
+    // Реверс массива
+    fn reverse() -> array {
+        let result = []
+        for let i = this.length() - 1; i >= 0; i-- {
+            result = result.push(this[i])
+        }
+        return result
+    }
+}
+
+// Расширяем булевый тип
+extension bool {
+    // Преобразование в число
+    fn toInt() -> int {
+        if this {
+            return 1
+        }
+        return 0
+    }
+    
+    // Тернарный оператор как метод
+    fn ifTrue(trueValue, falseValue) {
+        if this {
+            return trueValue
+        }
+        return falseValue
+    }
+}
+
+// === ДЕМОНСТРАЦИЯ ===
+
+println("=== String Extensions ===")
+
+let word = "radar"
+println("'" + word + "' is palindrome: " + word.isPalindrome()) // true
+
+let text = "hello"
+println("'" + text + "' reversed: " + text.reverse()) // "olleh"
+println("'" + text + "' repeated 3 times: " + text.repeat(3)) // "hellohellohello"
+println("Count of 'l' in '" + text + "': " + text.countChar("l")) // 2
+
+let longText = "This is a very long text that needs to be truncated"
+println("Truncated: " + longText.truncate(20)) // "This is a very lo..."
+
+println("\n=== Number Extensions ===")
+
+let num = 5
+println(num + " is even: " + num.isEven()) // false
+println(num + " is odd: " + num.isOdd()) // true
+println(num + " factorial: " + num.factorial()) // 120
+println(num + " squared: " + num.square()) // 25
+println(num + " cubed: " + num.cube()) // 125
+
+let pi = 3.14159265
+println("Pi rounded to 2 decimals: " + pi.roundTo(2)) // 3.14
+println("Pi rounded to 4 decimals: " + pi.roundTo(4)) // 3.1416
+
+println("\n=== Array Extensions ===")
+
+let numbers = [1, 2, 3, 4, 5]
+println("Array: " + numbers)
+println("Sum: " + numbers.sum()) // 15
+println("Contains 3: " + numbers.contains(3)) // true
+println("Contains 10: " + numbers.contains(10)) // false
+println("First: " + numbers.first()) // 1
+println("Last: " + numbers.last()) // 5
+println("Reversed: " + numbers.reverse()) // [5, 4, 3, 2, 1]
+
+let empty = []
+println("Empty array isEmpty: " + empty.isEmpty()) // true
+
+println("\n=== Boolean Extensions ===")
+
+let flag = true
+println("true as int: " + flag.toInt()) // 1
+println("Ternary method: " + flag.ifTrue("YES", "NO")) // "YES"
+
+let flag2 = false
+println("false as int: " + flag2.toInt()) // 0
+println("Ternary method: " + flag2.ifTrue("YES", "NO")) // "NO"
+
+println("\n=== Complex Example ===")
+
+// Цепочки вызовов с extension методами
+let message = "hello world"
+let isPalindrome = message.reverse().reverse() == message
+println("Double reverse equals original: " + isPalindrome) // true
+
+// Комбинирование встроенных и extension методов
+let processedText = "test".toUpper().repeat(2).truncate(6, "!")
+println("Processed: " + processedText) // "TESTT!"
+
+// Extension методы с функциональным программированием
+let nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+let evenSquares = nums.filter(fn(x) => x.isEven()).map(fn(x) => x.square())
+println("Even squares: " + evenSquares) // [4, 16, 36, 64, 100]

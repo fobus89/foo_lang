@@ -1,0 +1,30 @@
+// Простой тест типизированных функций
+
+println("=== Simple Typed Functions ===")
+
+// Функция сложения двух чисел  
+fn add(a: int, b: int) -> int {
+    return a + b
+}
+
+// Функция приветствия
+fn greet(name: string) -> string {
+    return "Hello, " + name
+}
+
+// Функция умножения float чисел
+fn multiply(x: float, y: float) -> float {
+    return x * y
+}
+
+// Тестируем
+let sum = add(5, 3)
+println("add(5, 3) = " + sum.toString())
+
+let greeting = greet("World")  
+println("greet('World') = " + greeting)
+
+let product = multiply(2.5, 4.0)
+println("multiply(2.5, 4.0) = " + product.toString())
+
+println("\n=== Typed Functions Work! ===")
