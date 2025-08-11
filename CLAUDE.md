@@ -13,14 +13,16 @@ D:\dev\go\foo_lang_v2\
 ├── modules/               # Система модулей (загрузка, кеширование)  
 ├── parser/                # Синтаксический анализатор
 ├── scope/                 # Система областей видимости
-├── test/                  # Unit-тесты (17 файлов, 109+ тестов)
+├── test/                  # Unit-тесты (20 файлов, 130+ тестов)
 ├── token/                 # Определения токенов
 ├── value/                 # Система типов
 ├── main.go                # Точка входа
 └── README.md              # Полная документация
 ```
 
-## Статус: ✅ ПОЛНОСТЬЮ ГОТОВЫЙ ЯЗЫК ПРОГРАММИРОВАНИЯ
+## Статус: ✅ ПОЛНОСТЬЮ ГОТОВЫЙ СОВРЕМЕННЫЙ ЯЗЫК ПРОГРАММИРОВАНИЯ
+
+### 🚀 **ПОСЛЕДНЕЕ ДОСТИЖЕНИЕ** (11.01.2025): Generic ограничения типов `<T: Interface>` ⚡
 
 ### 🔥 Ключевые возможности (все реализованы и протестированы):
 
@@ -141,7 +143,7 @@ moveAndDraw(circle, 5, 3)   // ✅ Работает - Circle реализует 
 
 ## 📊 Покрытие тестами: 100%
 
-**17 файлов unit-тестов** с **109+ тестами**:
+**20 файлов unit-тестов** с **130+ тестами**:
 - `test/basic_types_test.go` - типы и операторы
 - `test/functions_test.go` - функции и рекурсия  
 - `test/closures_test.go` - замыкания (5 тестов)
@@ -151,6 +153,9 @@ moveAndDraw(circle, 5, 3)   // ✅ Работает - Circle реализует 
 - `test/collections_test.go` - массивы и объекты
 - `test/result_test.go` - Result тип
 - `test/string_features_test.go` - интерполяция и комментарии
+- `test/extension_methods_test.go` - extension methods (8 тестов)
+- `test/method_overloading_test.go` - перегрузка методов (15 тестов)
+- `test/interface_test.go` - интерфейсы и impl блоки (12 тестов)
 - И другие...
 
 **Все тесты проходят успешно!**
@@ -285,20 +290,23 @@ let area = circle.getArea()      // 78.53975
 go run main.go
 
 # Запуск конкретного файла
-go run main.go examples/test_generic_functions.foo      # Generic функции
-go run main.go examples/test_complete_generics.foo      # Полное тестирование generics
-go run main.go examples/test_array_methods.foo          # Методы массивов 
-go run main.go examples/test_anonymous_functions.foo    # Анонимные функции
-go run main.go examples/test_math.foo                   # Математические функции
-go run main.go examples/test_closures.foo               # Замыкания
+go run main.go examples/test_generic_constraints.foo         # Generic ограничения типов
+go run main.go examples/test_interface_complete.foo          # Интерфейсы и impl блоки
+go run main.go examples/test_extension_methods.foo           # Extension methods
+go run main.go examples/test_method_overloading.foo          # Перегрузка методов
+go run main.go examples/test_anonymous_functions.foo         # Анонимные функции
+go run main.go examples/test_math.foo                        # Математические функции
+go run main.go examples/test_closures.foo                    # Замыкания
 ```
 
 ### Тестирование
 ```bash
-# Запуск всех тестов (109+ тестов)
+# Запуск всех тестов (130+ тестов)
 go test ./test/... -v
 
 # Запуск конкретного теста  
+go test ./test/extension_methods_test.go -v
+go test ./test/method_overloading_test.go -v
 go test ./test/anonymous_functions_test.go -v
 go test ./test/math_functions_test.go -v
 ```
