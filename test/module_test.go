@@ -3,6 +3,7 @@ package test
 import (
 	"foo_lang/parser"
 	"foo_lang/scope"
+	"foo_lang/ast"
 	"testing"
 )
 
@@ -19,19 +20,20 @@ func TestBasicImportParsing(t *testing.T) {
 
 	// The import should parse successfully
 	expr := exprs[0]
-	result := expr.Eval()
 	
-	// Import statements return nil
-	if result != nil {
-		t.Errorf("expected import to return nil, got %v", result)
+	// Just check that we parsed an ImportExpr (don't actually execute it)
+	importExpr, ok := expr.(*ast.ImportExpr)
+	if !ok {
+		t.Errorf("expected ImportExpr, got %T", expr)
+		return
+	}
+	
+	// Verify the import path was parsed correctly
+	if importExpr.Path != "./math.foo" {
+		t.Errorf("expected path './math.foo', got '%s'", importExpr.Path)
 	}
 
-	// Check if import was registered (placeholder test)
-	if val, ok := scope.GlobalScope.Get("__import_./math.foo"); !ok {
-		t.Errorf("import not registered in scope")
-	} else if val.String() != "loaded" {
-		t.Errorf("expected 'loaded', got %s", val.String())
-	}
+	// Import parsing test complete - actual loading is tested in module_loading_test.go
 }
 
 func TestSelectiveImportParsing(t *testing.T) {
@@ -47,11 +49,20 @@ func TestSelectiveImportParsing(t *testing.T) {
 
 	// The selective import should parse successfully
 	expr := exprs[0]
-	result := expr.Eval()
 	
-	// Import statements return nil
-	if result != nil {
-		t.Errorf("expected import to return nil, got %v", result)
+	// Just check that we parsed an ImportExpr (don't actually execute it)
+	importExpr, ok := expr.(*ast.ImportExpr)
+	if !ok {
+		t.Errorf("expected ImportExpr, got %T", expr)
+		return
+	}
+	
+	// Verify the imported items were parsed correctly
+	if len(importExpr.ImportedItems) != 2 {
+		t.Errorf("expected 2 imported items, got %d", len(importExpr.ImportedItems))
+	}
+	if importExpr.ImportedItems[0] != "add" || importExpr.ImportedItems[1] != "subtract" {
+		t.Errorf("expected ['add', 'subtract'], got %v", importExpr.ImportedItems)
 	}
 }
 
@@ -68,11 +79,20 @@ func TestAliasImportParsing(t *testing.T) {
 
 	// The alias import should parse successfully
 	expr := exprs[0]
-	result := expr.Eval()
 	
-	// Import statements return nil
-	if result != nil {
-		t.Errorf("expected import to return nil, got %v", result)
+	// Just check that we parsed an ImportExpr (don't actually execute it)
+	importExpr, ok := expr.(*ast.ImportExpr)
+	if !ok {
+		t.Errorf("expected ImportExpr, got %T", expr)
+		return
+	}
+	
+	// Verify the alias was parsed correctly
+	if importExpr.AliasName != "Math" {
+		t.Errorf("expected alias 'Math', got '%s'", importExpr.AliasName)
+	}
+	if !importExpr.ImportedAll {
+		t.Errorf("expected ImportedAll to be true for alias import")
 	}
 }
 

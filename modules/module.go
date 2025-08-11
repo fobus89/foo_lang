@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"foo_lang/parser"
 	"foo_lang/scope"
 	"foo_lang/value"
 )
@@ -21,8 +20,16 @@ type Module struct {
 // ModuleCache stores loaded modules to prevent re-loading
 var ModuleCache = make(map[string]*Module)
 
+// ParseFunc represents a function that can parse code and return AST expressions
+type ParseFunc func(string) []Expr
+
+// Expr interface for AST expressions (to avoid circular import)
+type Expr interface {
+	Eval() *value.Value
+}
+
 // LoadModule loads a module from the given path
-func LoadModule(modulePath string) (*Module, error) {
+func LoadModule(modulePath string, parseFunc ParseFunc) (*Module, error) {
 	// Normalize the path
 	absPath, err := filepath.Abs(modulePath)
 	if err != nil {
@@ -55,7 +62,7 @@ func LoadModule(modulePath string) (*Module, error) {
 	scope.GlobalScope = module.Scope
 	
 	// Parse and execute the module
-	exprs := parser.NewParser(content).Parse()
+	exprs := parseFunc(string(content))
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -94,12 +101,12 @@ func ResolveModulePath(currentFile, importPath string) string {
 }
 
 // ImportModule imports items from a module into current scope
-func ImportModule(modulePath string, currentFile string, importedItems []string, alias string) error {
+func ImportModule(modulePath string, currentFile string, importedItems []string, alias string, parseFunc ParseFunc) error {
 	// Resolve the path
 	resolvedPath := ResolveModulePath(currentFile, modulePath)
 	
 	// Load the module
-	module, err := LoadModule(resolvedPath)
+	module, err := LoadModule(resolvedPath, parseFunc)
 	if err != nil {
 		return err
 	}

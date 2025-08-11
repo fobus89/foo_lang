@@ -1,0 +1,20 @@
+// Демонстрация селективного и алиасного импорта
+
+println("=== Селективный импорт ===")
+
+// Селективный импорт - только нужные функции
+import { greet, VERSION } from "examples/utils_module.foo"
+
+println(greet("Мир"))
+println("Версия утилит: " + VERSION)
+
+// Проверим что другие функции не импортированы
+// println(upper("test"))  // Это должно вызвать ошибку
+
+println("\n=== Алиасный импорт ===")
+
+// Импорт с алиасом
+import * as Utils from "examples/utils_module.foo"
+
+// Теперь доступно через Utils.функция
+println("Автор: " + Utils.AUTHOR)

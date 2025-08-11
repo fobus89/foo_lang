@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"foo_lang/parser"
+	"foo_lang/ast"
+	"foo_lang/modules"
 	"os"
 )
 
@@ -31,6 +33,17 @@ func main() {
 		mainFile, _ = os.ReadFile("examples/main.foo")
 	}
 
+	// Set up global parse function for module imports
+	parseFunc := func(code string) []modules.Expr {
+		exprs := parser.NewParser(code).Parse()
+		result := make([]modules.Expr, len(exprs))
+		for i, expr := range exprs {
+			result[i] = expr
+		}
+		return result
+	}
+	ast.SetGlobalParseFunc(parseFunc)
+	
 	exprs := parser.NewParser(mainFile).Parse()
 
 	for _, expr := range exprs {

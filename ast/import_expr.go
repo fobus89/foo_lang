@@ -1,6 +1,8 @@
 package ast
 
-import "foo_lang/scope"
+import (
+	"foo_lang/modules"
+)
 
 // ImportExpr represents different types of import statements:
 // import "./module.foo"
@@ -38,19 +40,20 @@ func NewAliasImportExpr(path string, alias string) *ImportExpr {
 
 func (i *ImportExpr) Eval() *Value {
 	// Import statements don't return values, they modify the current scope
-	// We need to use the modules system to load and import
+	// Use the modules system to load and import
 	
-	// For now, create a simple placeholder until we implement the full module system
-	// This will be replaced with actual module loading logic
+	// For now, use current directory as current file context
+	// TODO: Pass actual current file path from parser/interpreter
+	currentFile := "./"
 	
-	// Mark as imported in global scope (temporary solution)
-	scope.GlobalScope.Set("__import_"+i.Path, NewValue("loaded"))
+	if GlobalParseFunc == nil {
+		panic("GlobalParseFunc not set - cannot import modules")
+	}
 	
-	// TODO: Implement actual module loading using modules.ImportModule()
-	// err := modules.ImportModule(i.Path, "current_file", i.ImportedItems, i.AliasName)
-	// if err != nil {
-	//     panic(err.Error())
-	// }
+	err := modules.ImportModule(i.Path, currentFile, i.ImportedItems, i.AliasName, GlobalParseFunc)
+	if err != nil {
+		panic(err.Error())
+	}
 	
 	return nil
 }

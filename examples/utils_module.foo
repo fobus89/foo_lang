@@ -1,0 +1,13 @@
+// Модуль утилит
+
+export fn greet(name) {
+    return "Привет, " + name + "!"
+}
+
+export fn upper(text) {
+    // Простая имитация uppercase (пока нет встроенной функции)
+    return text + " (UPPER)"
+}
+
+export let VERSION = "1.0.0"
+export let AUTHOR = "Foo Lang Team"

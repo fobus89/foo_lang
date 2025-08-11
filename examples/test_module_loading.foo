@@ -1,0 +1,29 @@
+// Демонстрация реальной загрузки модулей
+
+println("=== Тест загрузки модулей ===")
+
+// Полный импорт существующего модуля
+import "examples/math_module.foo"
+
+// Используем импортированные функции
+println("Сложение: " + add(5, 3))
+println("Умножение: " + multiply(4, 6))
+println("PI = " + PI)
+
+// Деление с обработкой ошибок
+let divResult = divide(10, 2)
+if divResult.isOk() {
+    println("10 / 2 = " + divResult.unwrap())
+} else {
+    println("Ошибка деления: " + divResult.unwrapOr("неизвестно"))
+}
+
+// Тест деления на ноль
+let zeroDiv = divide(10, 0)
+if zeroDiv.isErr() {
+    println("Ожидаемая ошибка: " + zeroDiv.unwrapOr("деление на ноль"))
+}
+
+println("\n=== Селективный импорт ===")
+// Селективный импорт (создадим тестовый модуль)
+// import { greet } from "./utils.foo"
