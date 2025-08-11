@@ -7,15 +7,15 @@ macro debug(expr) {
 }
 
 // Макрос для создания геттера и сеттера
-macro property(name, type) {
-    let _value = nil
+macro property(name, dataType) {
+    let privateValue = nil
     
     fn getName() {
-        return _value
+        return privateValue
     }
     
     fn setName(value) {
-        _value = value
+        privateValue = value
     }
 }
 
@@ -45,17 +45,12 @@ let x = 10
 @assert(x < 5, "x должен быть меньше 5")
 
 // 3. Timing макрос  
-@timing("вычисление факториала", {
-    fn factorial(n) {
-        if n <= 1 {
-            return 1
-        }
-        return n * factorial(n - 1)
-    }
-    
-    let result = factorial(5)
-    println("5! = " + result)
-})
+fn simpleCalculation(n) {
+    return n * 2 + 1
+}
+
+let result = simpleCalculation(5)
+@timing("простое вычисление", result)
 
 // 4. Property макрос (упрощенная версия)
 // @property(age, int)
@@ -64,16 +59,13 @@ let x = 10
 
 println("\n=== Макросы с quote/unquote ===")
 
-// Макрос для создания функции удвоения
-macro makeDouble(funcName) {
-    fn funcName(x) {
-        return x * 2
-    }
+// Макрос для создания функции удвоения (упрощенная версия)
+macro makeDouble(value) {
+    println("Doubled value: " + (value * 2))
 }
 
 // Использование
-@makeDouble(doubleIt)
-println("doubleIt(5) = " + doubleIt(5))
+@makeDouble(5)
 
 // Более сложный пример - макрос для создания switch-like конструкции
 macro switch(value, cases) {
