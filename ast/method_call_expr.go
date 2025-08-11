@@ -18,6 +18,43 @@ func NewMethodCallExpr(object Expr, methodName string, args []Expr) *MethodCallE
 func (m *MethodCallExpr) Eval() *Value {
 	obj := m.Object.Eval()
 	
+	// Методы для TypeInfo
+	if typeInfo, ok := obj.Any().(*TypeInfo); ok {
+		switch m.MethodName {
+		case "String":
+			if len(m.Args) != 0 {
+				panic("String() expects no arguments")
+			}
+			return NewValue(typeInfo.String())
+		case "GetFieldNames":
+			if len(m.Args) != 0 {
+				panic("GetFieldNames() expects no arguments")
+			}
+			names := typeInfo.GetFieldNames()
+			values := make([]*Value, len(names))
+			for i, name := range names {
+				values[i] = NewValue(name)
+			}
+			return NewValue(values)
+		case "GetFieldType":
+			if len(m.Args) != 1 {
+				panic("GetFieldType() expects exactly 1 argument")
+			}
+			fieldName := m.Args[0].Eval().String()
+			fieldType := typeInfo.GetFieldType(fieldName)
+			if fieldType == nil {
+				return NewValue(nil)
+			}
+			return NewValue(fieldType)
+		case "HasField":
+			if len(m.Args) != 1 {
+				panic("HasField() expects exactly 1 argument")
+			}
+			fieldName := m.Args[0].Eval().String()
+			return NewValue(typeInfo.HasField(fieldName))
+		}
+	}
+	
 	// Методы для Result типа
 	if result, ok := obj.Any().(*ResultValue); ok {
 		switch m.MethodName {

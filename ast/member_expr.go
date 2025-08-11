@@ -16,6 +16,15 @@ func NewMemberExpr(object Expr, property string) *MemberExpr {
 func (m *MemberExpr) Eval() *Value {
 	obj := m.Object.Eval()
 	
+	// Проверяем, является ли объект TypeInfo
+	if typeInfo, ok := obj.Any().(*TypeInfo); ok {
+		property := typeInfo.GetProperty(m.Property)
+		if property != nil {
+			return property
+		}
+		panic("property '" + m.Property + "' does not exist on type")
+	}
+	
 	// Проверяем, что объект - это словарь
 	if objMap, ok := obj.Any().(map[string]*Value); ok {
 		if value, exists := objMap[m.Property]; exists {

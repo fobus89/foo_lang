@@ -1,0 +1,141 @@
+// Демонстрация метапрограммирования в foo_lang v2
+
+// Определяем структуру
+struct User {
+    name: string,
+    age: int,
+    email: string,
+    active: bool
+}
+
+// Макрос для генерации геттеров
+macro generateGetters(structType) {
+    // Получаем информацию о типе
+    if structType.Kind == "struct" {
+        // Для каждого поля создаем геттер
+        for let fieldName in structType.GetFieldNames() {
+            // Создаем функцию геттера
+            println("fn get" + fieldName + "(obj) {")
+            println("    return obj." + fieldName)
+            println("}")
+        }
+    }
+}
+
+// Макрос для генерации сеттеров
+macro generateSetters(structType) {
+    if structType.Kind == "struct" {
+        for let fieldName in structType.GetFieldNames() {
+            println("fn set" + fieldName + "(obj, value) {")
+            println("    obj." + fieldName + " = value")
+            println("}")
+        }
+    }
+}
+
+// Макрос для генерации конструктора
+macro generateConstructor(structType) {
+    if structType.Kind == "struct" {
+        let fields = structType.GetFieldNames()
+        let params = ""
+        let assignments = ""
+        
+        for let i = 0; i < fields.length(); i++ {
+            let field = fields[i]
+            params = params + field
+            assignments = assignments + "    obj." + field + " = " + field + "\n"
+            
+            if i < fields.length() - 1 {
+                params = params + ", "
+            }
+        }
+        
+        println("fn new" + structType.Name + "(" + params + ") {")
+        println("    let obj = {}")
+        println(assignments)
+        println("    return obj")
+        println("}")
+    }
+}
+
+// Макрос для генерации toString метода
+macro generateToString(structType) {
+    if structType.Kind == "struct" {
+        println("fn " + structType.Name + "ToString(obj) {")
+        println("    let result = \"" + structType.Name + " { \"")
+        
+        let fields = structType.GetFieldNames()
+        for let i = 0; i < fields.length(); i++ {
+            let field = fields[i]
+            println("    result = result + \"" + field + ": \" + obj." + field)
+            
+            if i < fields.length() - 1 {
+                println("    result = result + \", \"")
+            }
+        }
+        
+        println("    result = result + \" }\"")
+        println("    return result")
+        println("}")
+    }
+}
+
+// Макрос для генерации полного набора методов
+macro generateCRUD(structType) {
+    @generateConstructor(structType)
+    @generateGetters(structType)  
+    @generateSetters(structType)
+    @generateToString(structType)
+}
+
+println("=== Демонстрация метапрограммирования ===")
+
+// Получаем тип структуры User
+let userType = type(User)
+println("Тип User: " + userType.String())
+println("Поля: " + userType.GetFieldNames())
+
+// Генерируем код для структуры User
+println("\n=== Генерируем геттеры ===")
+@generateGetters(userType)
+
+println("\n=== Генерируем сеттеры ===")
+@generateSetters(userType)
+
+println("\n=== Генерируем конструктор ===")
+@generateConstructor(userType)
+
+println("\n=== Генерируем toString ===")
+@generateToString(userType)
+
+// Демонстрация typeof
+println("\n=== Демонстрация typeof ===")
+let x = 42
+let str = "hello"
+let arr = [1, 2, 3]
+let obj = {name: "test", value: 100}
+
+println("typeof(x): " + typeof(x).String())
+println("typeof(str): " + typeof(str).String())  
+println("typeof(arr): " + typeof(arr).String())
+println("typeof(obj): " + typeof(obj).String())
+
+// Макрос для инспекции типа любого значения
+macro inspectType(value) {
+    let typeInfo = typeof(value)
+    println("=== Type inspection ===")
+    println("Kind: " + typeInfo.Kind)
+    println("Name: " + typeInfo.Name)
+    
+    if typeInfo.Kind == "struct" {
+        println("Fields:")
+        for let field in typeInfo.GetFieldNames() {
+            println("  - " + field + ": " + typeInfo.GetFieldType(field).String())
+        }
+    }
+}
+
+println("\n=== Инспекция типов ===")
+@inspectType(obj)
+
+println("\nМетапрограммирование работает!")

@@ -85,7 +85,12 @@ var operatorKeys = func() []string {
 var keywords = MapType[string]{
 	"print":   token.PRINT,
 	"println": token.PRINTLN,
-	"macros":  token.MACROS,
+	"macro":   token.MACRO,
+	"quote":   token.QUOTE,
+	"unquote": token.UNQUOTE,
+	"typeof":  token.TYPEOF,
+	"struct":  token.STRUCT,
+	"type":    token.TYPE,
 	"let":     token.LET,
 	"const":   token.CONST,
 	"match":   token.MATCH,

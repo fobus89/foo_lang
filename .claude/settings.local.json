@@ -10,7 +10,12 @@
       "Bash(mkdir:*)",
       "Bash(go:*)",
       "Bash(wc:*)",
-      "Bash(del test_increment.foo test_compound.foo)"
+      "Bash(del test_increment.foo test_compound.foo)",
+      "Bash(./foo_lang.exe examples/test_macros.foo)",
+      "Bash(./foo_lang.exe examples/test_macros_simple.foo)",
+      "Bash(./foo_lang.exe examples/test_types_simple.foo)",
+      "Bash(./foo_lang.exe examples/test_types_basic.foo)",
+      "Bash(./foo_lang.exe examples/test_advanced_macros.foo)"
     ],
     "deny": []
   }

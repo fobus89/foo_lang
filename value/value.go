@@ -4,8 +4,6 @@ import (
 	"strconv"
 )
 
-var Container = map[string]*Value{}
-
 type Value struct {
 	isConst  bool
 	isReturn bool

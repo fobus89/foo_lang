@@ -133,47 +133,19 @@ func (p *Parser) Statement() ast.Expr {
 		return ast.NewVarExpr(ident, p.Expression())
 	}
 
-	//@generateOther("1+1+1")
-	if p.MatchAllNext(token.AT, token.IDENT, token.LPAREN) {
-		return p.CallMacro()
-	}
 
-	if p.MatchAllNext(token.Pound, token.IDENT, token.LPAREN) {
 
-		tok := p.Peek(-2)
-		ident := tok.Value
-
-		macros, ok := ast.Container[ident]
-		if !ok {
-			p.error("expected macro", p.Peek(0))
-		}
-
-		macro, ok := macros.Any().(*ast.FuncStatment)
-		if !ok || !macro.IsMacro() {
-			p.error("expected macro", p.Peek(0))
-		}
-
-		p.MatchAndNext(token.RPAREN)
-
-		fn := p.FunctionStatement().(*ast.FuncStatment)
-
-		arg := fmt.Sprintf("{name:%s, args:[%s]}", fn.Name(), strings.Join(fn.Params(), ","))
-
-		call := ast.NewMacrosCallExpr(ident,
-			[]ast.Expr{ast.NewLiteralString(arg)},
-		)
-
-		fmt.Println(call.Eval().String())
-
-		return fn
-	}
 
 	if p.Match(token.FN) {
 		return p.FunctionStatement()
 	}
 
-	if p.Match(token.MACROS) {
-		return p.MacrosStatement()
+	if p.Match(token.MACRO) {
+		return p.MacroDefinition()
+	}
+
+	if p.Match(token.STRUCT) {
+		return p.StructDefinition()
 	}
 
 	if p.MatchAndNext(token.RETURN) {
@@ -207,9 +179,6 @@ func (p *Parser) Statement() ast.Expr {
 		tok := p.Peek(-2)
 		ident := tok.Value
 
-		if p.MatchAllNext(token.AT, token.IDENT, token.LPAREN) {
-			return ast.NewLetExpr(ident, p.CallMacro())
-		}
 
 		if p.MatchAndNext(token.IF) {
 			return ast.NewConstExpr(ident, p.IfStatement())
@@ -256,9 +225,6 @@ func (p *Parser) Statement() ast.Expr {
 		// Single assignment case - keep existing logic
 		ident := names[0]
 
-		if p.MatchAllNext(token.AT, token.IDENT, token.LPAREN) {
-			return ast.NewLetExpr(ident, p.CallMacro())
-		}
 
 		if p.MatchAndNext(token.IF) {
 			return ast.NewLetExpr(ident, p.IfStatement())
@@ -329,63 +295,6 @@ func (p *Parser) ForStatement() ast.Expr {
 	return ast.NewForExpr(init, condition, step, body)
 }
 
-func (p *Parser) CallMacroWithParams(args []ast.Expr) string {
-	tok := p.Peek(-2)
-	ident := tok.Value
-
-	macros, ok := ast.Container[ident]
-	if !ok {
-		p.error("expected macro", p.Peek(0))
-	}
-
-	macro, ok := macros.Any().(*ast.FuncStatment)
-	if !ok || !macro.IsMacro() {
-		p.error("expected macro", p.Peek(0))
-	}
-
-	call := ast.NewMacrosCallExpr(ident, args)
-
-	return call.Eval().String()
-}
-
-func (p *Parser) CallMacro() ast.Expr {
-	tok := p.Peek(-2)
-	ident := tok.Value
-
-	macros, ok := ast.Container[ident]
-	if !ok {
-		p.error("expected macro", p.Peek(0))
-	}
-
-	macro, ok := macros.Any().(*ast.FuncStatment)
-	if !ok || !macro.IsMacro() {
-		p.error("expected macro", p.Peek(0))
-	}
-
-	start := p.pos - 3
-
-	var args []ast.Expr
-
-	for !p.MatchAndNext(token.RPAREN) {
-		args = append(args, p.Statement())
-		p.MatchAndNext(token.COMMA)
-	}
-
-	call := ast.NewMacrosCallExpr(ident, args)
-
-	outCode := call.Eval().String()
-	genTokens := lexer.NewLexer(outCode).Tokens()
-
-	end := p.pos // после ')'
-
-	before := slices.Clone(p.tokens[:start])
-	after := p.tokens[end:]
-
-	p.tokens = append(append(before, genTokens[:len(genTokens)-1]...), after...)
-	p.pos = start
-
-	return p.Statement()
-}
 
 func (p *Parser) FunctionStatement() ast.Expr {
 	if !p.MatchAllNext(token.FN, token.IDENT, token.LPAREN) {
@@ -426,43 +335,100 @@ func (p *Parser) FunctionStatement() ast.Expr {
 	return ast.NewFuncStatment(identTok.Value, args, body, false)
 }
 
-func (p *Parser) MacrosStatement() ast.Expr {
-	if !p.MatchAllNext(token.MACROS, token.IDENT, token.LPAREN) {
-		p.error("expected fn", p.Peek(0))
+func (p *Parser) MacroDefinition() ast.Expr {
+	if !p.MatchAndNext(token.MACRO) {
+		p.error("expected 'macro'", p.Peek(0))
 	}
 
-	identTok := p.Peek(-2)
+	if !p.Match(token.IDENT) {
+		p.error("expected macro name", p.Peek(0))
+	}
+	
+	name := p.Peek(0).Value
+	p.Next()
 
-	var args []map[string]ast.Expr
+	if !p.MatchAndNext(token.LPAREN) {
+		p.error("expected '(' after macro name", p.Peek(0))
+	}
 
-	for !p.MatchAndNext(token.RPAREN) {
-
-		argToken := p.Next()
-		{
-			if argToken.Token != token.IDENT {
-				p.error("expected identifier", argToken)
-			}
+	var params []string
+	for !p.Match(token.RPAREN) {
+		if !p.Match(token.IDENT) {
+			p.error("expected parameter name", p.Peek(0))
 		}
-
-		key := argToken.Value
-		{
-			if p.Match(token.EQ) {
-				args = append(args, map[string]ast.Expr{
-					key: p.Expression(),
-				})
-			} else {
-				args = append(args, map[string]ast.Expr{
-					key: nil,
-				})
-			}
+		
+		params = append(params, p.Peek(0).Value)
+		p.Next()
+		
+		if p.Match(token.COMMA) {
+			p.Next()
+		} else if !p.Match(token.RPAREN) {
+			p.error("expected ',' or ')'", p.Peek(0))
 		}
-
-		p.MatchAllNext(token.COMMA)
+	}
+	
+	if !p.MatchAndNext(token.RPAREN) {
+		p.error("expected ')'", p.Peek(0))
 	}
 
 	body := p.BlockStatement()
+	
+	return ast.NewMacroDefExpr(name, params, body)
+}
 
-	return ast.NewFuncStatment(identTok.Value, args, body, true)
+func (p *Parser) StructDefinition() ast.Expr {
+	if !p.MatchAndNext(token.STRUCT) {
+		p.error("expected 'struct'", p.Peek(0))
+	}
+
+	if !p.Match(token.IDENT) {
+		p.error("expected struct name", p.Peek(0))
+	}
+	
+	name := p.Peek(0).Value
+	p.Next()
+
+	if !p.MatchAndNext(token.LBRACE) {
+		p.error("expected '{' after struct name", p.Peek(0))
+	}
+
+	fields := make(map[string]ast.Expr)
+	for !p.Match(token.RBRACE) {
+		if !p.Match(token.IDENT) {
+			p.error("expected field name", p.Peek(0))
+		}
+		
+		fieldName := p.Peek(0).Value
+		p.Next()
+		
+		// Поддержка типизированных полей: fieldName: type
+		var fieldExpr ast.Expr
+		if p.MatchAndNext(token.COLON) {
+			if p.Match(token.IDENT) {
+				fieldExpr = ast.NewTypeExpr(p.Peek(0).Value)
+				p.Next()
+			} else {
+				fieldExpr = p.Expression()
+			}
+		} else {
+			// Поле без явного типа
+			fieldExpr = ast.NewTypeExpr("any")
+		}
+		
+		fields[fieldName] = fieldExpr
+		
+		if p.Match(token.COMMA) {
+			p.Next()
+		} else if !p.Match(token.RBRACE) {
+			p.error("expected ',' or '}'", p.Peek(0))
+		}
+	}
+	
+	if !p.MatchAndNext(token.RBRACE) {
+		p.error("expected '}'", p.Peek(0))
+	}
+
+	return ast.NewStructDefExpr(name, fields)
 }
 
 func (p *Parser) IfStatement() ast.Expr {
@@ -819,6 +785,87 @@ func (p *Parser) Primary() ast.Expr {
 	case token.IDENT:
 		p.Next()
 		return ast.NewVarExpr(tok.Value, nil)
+
+	case token.AT:
+		// Macro call: @macro_name(args)
+		p.Next() // consume @
+		if !p.Match(token.IDENT) {
+			p.error("expected macro name after '@'", p.Peek(0))
+		}
+		name := p.Peek(0).Value
+		p.Next()
+		
+		if !p.MatchAndNext(token.LPAREN) {
+			p.error("expected '(' after macro name", p.Peek(0))
+		}
+		
+		var args []ast.Expr
+		for !p.Match(token.RPAREN) {
+			args = append(args, p.Expression())
+			if p.Match(token.COMMA) {
+				p.Next()
+			} else if !p.Match(token.RPAREN) {
+				p.error("expected ',' or ')'", p.Peek(0))
+			}
+		}
+		
+		if !p.MatchAndNext(token.RPAREN) {
+			p.error("expected ')'", p.Peek(0))
+		}
+		
+		return ast.NewMacroCallExpr(name, args)
+
+	case token.QUOTE:
+		// Quote expression: quote(expr)
+		p.Next() // consume quote
+		if !p.MatchAndNext(token.LPAREN) {
+			p.error("expected '(' after 'quote'", p.Peek(0))
+		}
+		expr := p.Expression()
+		if !p.MatchAndNext(token.RPAREN) {
+			p.error("expected ')' after quoted expression", p.Peek(0))
+		}
+		return ast.NewQuoteExpr(expr)
+
+	case token.UNQUOTE:
+		// Unquote expression: unquote(expr)
+		p.Next() // consume unquote
+		if !p.MatchAndNext(token.LPAREN) {
+			p.error("expected '(' after 'unquote'", p.Peek(0))
+		}
+		expr := p.Expression()
+		if !p.MatchAndNext(token.RPAREN) {
+			p.error("expected ')' after unquoted expression", p.Peek(0))
+		}
+		return ast.NewUnquoteExpr(expr)
+
+	case token.TYPEOF:
+		// Typeof expression: typeof(expr)
+		p.Next() // consume typeof
+		if !p.MatchAndNext(token.LPAREN) {
+			p.error("expected '(' after 'typeof'", p.Peek(0))
+		}
+		expr := p.Expression()
+		if !p.MatchAndNext(token.RPAREN) {
+			p.error("expected ')' after typeof expression", p.Peek(0))
+		}
+		return ast.NewTypeofExpr(expr)
+
+	case token.TYPE:
+		// Type expression: type(TypeName)
+		p.Next() // consume type
+		if !p.MatchAndNext(token.LPAREN) {
+			p.error("expected '(' after 'type'", p.Peek(0))
+		}
+		if !p.Match(token.IDENT) {
+			p.error("expected type name", p.Peek(0))
+		}
+		typeName := p.Peek(0).Value
+		p.Next()
+		if !p.MatchAndNext(token.RPAREN) {
+			p.error("expected ')' after type name", p.Peek(0))
+		}
+		return ast.NewTypeExpr(typeName)
 	}
 
 	p.error("unexpected token", tok)

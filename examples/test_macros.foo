@@ -1,0 +1,85 @@
+// Демонстрация работы макросов в foo_lang
+
+// Простой макрос для отладки
+macro debug(expr) {
+    println("DEBUG: " + expr)
+    println("Value: " + expr)
+}
+
+// Макрос для создания геттера и сеттера
+macro property(name, type) {
+    let _value = nil
+    
+    fn getName() {
+        return _value
+    }
+    
+    fn setName(value) {
+        _value = value
+    }
+}
+
+// Макрос для измерения времени выполнения (пока упрощенный)
+macro timing(name, code) {
+    println("Starting: " + name)
+    code
+    println("Finished: " + name)
+}
+
+// Макрос для проверки условий
+macro assert(condition, message) {
+    if !condition {
+        println("ASSERTION FAILED: " + message)
+    }
+}
+
+// Использование макросов
+println("=== Тестирование макросов ===")
+
+// 1. Простой debug макрос
+let x = 10
+@debug(x * 2)
+
+// 2. Assert макрос
+@assert(x > 0, "x должен быть положительным")
+@assert(x < 5, "x должен быть меньше 5")
+
+// 3. Timing макрос  
+@timing("вычисление факториала", {
+    fn factorial(n) {
+        if n <= 1 {
+            return 1
+        }
+        return n * factorial(n - 1)
+    }
+    
+    let result = factorial(5)
+    println("5! = " + result)
+})
+
+// 4. Property макрос (упрощенная версия)
+// @property(age, int)
+// setAge(25)
+// println("Age: " + getAge())
+
+println("\n=== Макросы с quote/unquote ===")
+
+// Макрос для создания функции удвоения
+macro makeDouble(funcName) {
+    fn funcName(x) {
+        return x * 2
+    }
+}
+
+// Использование
+@makeDouble(doubleIt)
+println("doubleIt(5) = " + doubleIt(5))
+
+// Более сложный пример - макрос для создания switch-like конструкции
+macro switch(value, cases) {
+    let matched = false
+    // В реальной реализации здесь была бы манипуляция с AST
+    // для создания цепочки if-else из cases
+}
+
+println("\nМакросы успешно протестированы!")

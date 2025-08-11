@@ -1,0 +1,59 @@
+// Продвинутые макросы с типами
+
+struct User {
+    name: string,
+    age: int,
+    email: string
+}
+
+// Макрос для генерации простого геттера
+macro generateGetter(structType, fieldName) {
+    println("// Геттер для поля " + fieldName)
+    println("fn get" + fieldName + "(obj) {")
+    println("    return obj." + fieldName)  
+    println("}")
+}
+
+// Макрос для генерации сеттера
+macro generateSetter(structType, fieldName) {
+    println("// Сеттер для поля " + fieldName)
+    println("fn set" + fieldName + "(obj, value) {")
+    println("    obj." + fieldName + " = value")
+    println("}")
+}
+
+// Макрос для информации о типе
+macro showTypeInfo(structType) {
+    println("=== Информация о типе " + structType.Name + " ===")
+    println("Kind: " + structType.Kind)
+    println("Name: " + structType.Name)
+    
+    if structType.Kind == "struct" {
+        println("Fields:")
+        // TODO: реализовать итерацию по полям
+        println("  - name")
+        println("  - age") 
+        println("  - email")
+    }
+}
+
+println("=== Демонстрация продвинутых макросов ===")
+
+let userType = type(User)
+
+// Показываем информацию о типе
+@showTypeInfo(userType)
+
+println("\n=== Генерируем код ===")
+
+// Генерируем геттеры и сеттеры
+@generateGetter(userType, "name")
+@generateSetter(userType, "name")
+
+@generateGetter(userType, "age")
+@generateSetter(userType, "age")
+
+@generateGetter(userType, "email")
+@generateSetter(userType, "email")
+
+println("\nПродвинутые макросы работают!")

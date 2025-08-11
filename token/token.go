@@ -13,7 +13,12 @@ const (
 	CHAR        // 'a'
 	STRING      // "abc"
 	INTERP_STRING // "hello ${name}"
-	MACROS
+	MACRO         // macro
+	QUOTE         // quote
+	UNQUOTE       // unquote
+	TYPEOF        // typeof
+	STRUCT        // struct
+	TYPE          // type
 	PRINT
 	PRINTLN
 	LET
