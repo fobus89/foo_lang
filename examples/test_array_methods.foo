@@ -1,0 +1,46 @@
+// Тест методов массивов с реальными функциями
+println("=== ARRAY METHODS WITH FUNCTIONS TEST ===")
+println("")
+
+// Тестовый массив
+let numbers = [1, 2, 3, 4, 5]
+println("Original array: " + jsonStringify(numbers))
+
+// Тестируем map
+let doubleFunc = fn(x) {
+    return x * 2
+}
+
+let doubled = numbers.map(doubleFunc)
+println("Doubled: " + jsonStringify(doubled))
+
+// Тестируем map с анонимной функцией
+let squared = numbers.map(fn(x) => x * x)
+println("Squared: " + jsonStringify(squared))
+
+// Тестируем filter
+let evenFunc = fn(x) {
+    return x % 2 == 0
+}
+
+let evens = numbers.filter(evenFunc)
+println("Even numbers: " + jsonStringify(evens))
+
+// Тестируем filter с анонимной функцией
+let greaterThanThree = numbers.filter(fn(x) => x > 3)
+println("Greater than 3: " + jsonStringify(greaterThanThree))
+
+// Тестируем reduce
+let sumFunc = fn(acc, x) {
+    return acc + x
+}
+
+let sum = numbers.reduce(0, sumFunc)
+println("Sum: " + sum)
+
+// Тестируем reduce с анонимной функцией для произведения
+let product = numbers.reduce(1, fn(acc, x) => acc * x)
+println("Product: " + product)
+
+println("")
+println("✅ Array methods with functions work!")

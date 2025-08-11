@@ -112,24 +112,50 @@ fn add(a, b) {
 let sum = add(5, 3)
 ```
 
+#### Generic функции ✅ **тесты готовы**
+```foo
+// Generic функции с параметрами типов
+fn identity<T>(value: T) -> T {
+    return value
+}
+
+fn max<T>(a: T, b: T) -> T {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+fn pair<T, U>(first: T, second: U) -> string {
+    return "(" + first + ", " + second + ")"
+}
+
+// Использование generic функций
+let num = identity(42)           // T = int
+let str = identity("hello")      // T = string  
+let maxNum = max(10, 20)         // T = int
+let pairResult = pair(42, "hi")  // T = int, U = string
+```
+
 #### Типизированные функции ✅ **тесты готовы**
 ```foo
-// Функции с типизированными параметрами
-fn strictAdd(x: int, y: int) {
-    return x + y
+// Функции с типизированными параметрами и возвратом
+fn add(a: int, b: int) -> int {
+    return a + b
 }
 
-fn greet(name: string, age: int) {
-    return "Hello " + name + ", you are " + age + " years old!"
+fn concat(first: string, second: string) -> string {
+    return first + second
 }
 
-fn validate(flag: bool, threshold: float) {
+fn validate(flag: bool, threshold: float) -> bool {
     return flag && threshold > 0.5
 }
 
 // Поддержка всех примитивных типов: int, string, float, bool
-let result = strictAdd(10, 5)  // = 15
-let message = greet("Alice", 25)
+let result = add(10, 5)           // = 15
+let message = concat("Hello", " World")
+let isValid = validate(true, 0.8)
 ```
 
 #### Параметры по умолчанию
@@ -605,9 +631,82 @@ fn distance(x1, y1, x2, y2) {
 let dist = distance(0, 0, 3, 4)  // Результат: 5.0
 ```
 
-### Методы массивов
+#### Методы примитивных типов ✅ **тесты готовы**
+```foo
+// Методы чисел (int/float)
+let num = 42.7
+println(num.toString())    // "42.7"
+println(num.abs())         // 42.7
+println(num.round())       // 43
+println(num.floor())       // 42
+println(num.ceil())        // 43
+println(num.isInteger())   // false
+
+// Методы строк
+let str = "Hello World"
+println(str.length())           // 11
+println(str.charAt(0))          // "H"
+println(str.substring(0, 5))    // "Hello"
+println(str.toUpper())          // "HELLO WORLD"
+println(str.toLower())          // "hello world"
+
+// Методы логических значений
+let flag = true
+println(flag.toString())   // "true"
+println(flag.not())        // false
+```
+
+#### Строковые функции ✅ **тесты готовы**
+```foo
+// Встроенные функции для работы со строками
+strlen("hello")                    // 5
+charAt("world", 1)                 // "o"
+substring("test", 1, 3)            // "es"
+startsWith("hello", "he")          // true
+endsWith("world", "ld")            // true
+indexOf("hello", "l")              // 2
+
+// JSON функции
+let obj = {name: "Alice", age: 30}
+let json = jsonStringify(obj)      // '{"name":"Alice","age":30}'
+let parsed = jsonParse(json)       // восстанавливает объект
+```
+
+### Методы массивов ✅ **тесты готовы**
+
+#### Базовые методы
 - `array.length()` - получить длину массива
 - `array.push(value)` - добавить элемент в конец массива
+- `array.pop()` - удалить последний элемент
+- `array.slice(start, end)` - получить подмассив
+
+#### Generic методы с функциями
+```foo
+let numbers = [1, 2, 3, 4, 5]
+
+// map - преобразование каждого элемента
+let doubled = numbers.map(fn(x) => x * 2)           // [2, 4, 6, 8, 10]
+let squared = numbers.map(fn(x) => x * x)           // [1, 4, 9, 16, 25]
+
+// filter - фильтрация элементов
+let evens = numbers.filter(fn(x) => x % 2 == 0)     // [2, 4]
+let big = numbers.filter(fn(x) => x > 3)            // [4, 5]
+
+// reduce - свертка массива к одному значению
+let sum = numbers.reduce(0, fn(acc, x) => acc + x)  // 15
+let product = numbers.reduce(1, fn(acc, x) => acc * x) // 120
+
+// Цепочки методов
+let result = numbers
+    .filter(fn(x) => x % 2 == 1)     // [1, 3, 5] - нечетные
+    .map(fn(x) => x * x)             // [1, 9, 25] - квадраты  
+    .reduce(0, fn(acc, x) => acc + x) // 35 - сумма
+
+// Работа со строковыми массивами
+let words = ["hello", "world", "foo"]
+let lengths = words.map(fn(s) => s.length())    // [5, 5, 3]
+let upper = words.map(fn(s) => s.toUpper())     // ["HELLO", "WORLD", "FOO"]
+```
 
 ### Комментарии
 ```foo
@@ -770,11 +869,12 @@ go test ./test/... -v
 - [x] **Управляющие конструкции** (if/else, for, match) ✅ **тесты готовы**
 - [x] **for-yield конструкции** для создания массивов ✅ **тесты готовы**
 - [x] **Функции** (определение, вызов, рекурсия, параметры по умолчанию, множественные возвращаемые значения) ✅ **тесты готовы**
+- [x] **Generic функции** - параметры типов `<T, U>`, типизированные параметры `(param: Type)`, типизированный возврат `-> ReturnType` ✅ **тесты готовы**
 - [x] **Макросы** (определение и использование)
 - [x] **Объекты** (литералы {key: value}) ✅ **тесты готовы**
 - [x] **Массивы** (литералы [1, 2, 3]) ✅ **тесты готовы**
 - [x] **Доступ к свойствам объектов** (obj.property) ✅ **тесты готовы**
-- [x] **Методы массивов** (array.length(), array.push()) ✅ **тесты готовы**
+- [x] **Методы массивов** - базовые методы (length, push, pop, slice) и generic методы с функциями (map, filter, reduce) ✅ **тесты готовы**
 - [x] **Цепочные вызовы** (object.method().property) ✅ **тесты готовы**
 - [x] **Enum типы** (enum Color { RED, GREEN, BLUE }) ✅ **тесты готовы**
 - [x] **Система областей видимости** (глобальная + локальная для функций) ✅ **тесты готовы**

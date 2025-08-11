@@ -1,0 +1,99 @@
+// Полный тест generic функций и методов коллекций
+println("=== COMPLETE GENERICS TEST ===")
+println("")
+
+// ================ GENERIC ФУНКЦИИ ================
+
+// Identity function для любых типов
+fn identity<T>(value: T) -> T {
+    return value
+}
+
+// Maximum function для сравнимых типов
+fn max<T>(a: T, b: T) -> T {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+// Generic функция для создания пары значений
+fn pair<T, U>(first: T, second: U) -> string {
+    return "(" + first + ", " + second + ")"
+}
+
+println("=== Testing Generic Functions ===")
+
+// Тестируем identity с разными типами
+println("identity(42) = " + identity(42))
+println("identity('hello') = " + identity("hello"))
+println("identity(3.14) = " + identity(3.14))
+
+// Тестируем max
+println("max(10, 20) = " + max(10, 20))
+println("max(3.14, 2.71) = " + max(3.14, 2.71))
+
+// Тестируем функцию с несколькими generic типами
+println("pair(42, 'hello') = " + pair(42, "hello"))
+println("pair('foo', 123) = " + pair("foo", 123))
+
+println("")
+
+// ================ МЕТОДЫ КОЛЛЕКЦИЙ ================
+
+println("=== Testing Collection Methods ===")
+
+let numbers = [1, 2, 3, 4, 5]
+println("Original numbers: " + jsonStringify(numbers))
+
+// Map - преобразование элементов
+let doubled = numbers.map(fn(x) => x * 2)
+println("Doubled: " + jsonStringify(doubled))
+
+let squared = numbers.map(fn(n) => n * n)  
+println("Squared: " + jsonStringify(squared))
+
+// Filter - фильтрация элементов
+let evens = numbers.filter(fn(x) => x % 2 == 0)
+println("Even numbers: " + jsonStringify(evens))
+
+let bigNumbers = numbers.filter(fn(x) => x > 3)
+println("Numbers > 3: " + jsonStringify(bigNumbers))
+
+// Reduce - свертка коллекции
+let sum = numbers.reduce(0, fn(acc, x) => acc + x)
+println("Sum: " + sum)
+
+let product = numbers.reduce(1, fn(acc, x) => acc * x)
+println("Product: " + product)
+
+// Chains - цепочки вызовов
+let result = numbers
+    .filter(fn(x) => x % 2 == 1)  // только нечетные
+    .map(fn(x) => x * x)          // возводим в квадрат
+    .reduce(0, fn(acc, x) => acc + x)  // суммируем
+
+println("Sum of squares of odd numbers: " + result)
+
+println("")
+
+// ================ СТРОКОВЫЕ МАССИВЫ ================
+
+println("=== Testing String Arrays ===")
+
+let words = ["hello", "world", "foo", "bar"]
+println("Words: " + jsonStringify(words))
+
+// Map для строк
+let lengths = words.map(fn(s) => s.length())
+println("Word lengths: " + jsonStringify(lengths))
+
+let uppercased = words.map(fn(s) => s.toUpper())
+println("Uppercased: " + jsonStringify(uppercased))
+
+// Filter для строк
+let longWords = words.filter(fn(s) => s.length() > 3)
+println("Long words: " + jsonStringify(longWords))
+
+println("")
+println("✅ Complete generics system working!")

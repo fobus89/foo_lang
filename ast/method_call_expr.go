@@ -167,6 +167,82 @@ func (m *MethodCallExpr) Eval() *Value {
 				panic("slice() index out of bounds")
 			}
 			return NewValue(arr[start:end])
+		case "map":
+			if len(m.Args) != 1 {
+				panic("map() expects exactly 1 argument (function)")
+			}
+			
+			// Получаем функцию из аргумента
+			fnArg := m.Args[0].Eval()
+			
+			// Проверяем что это вызываемый объект
+			if callable, ok := fnArg.Any().(Callable); ok {
+				result := make([]any, len(arr))
+				
+				// Применяем функцию к каждому элементу
+				for i, item := range arr {
+					// Вызываем функцию с текущим элементом
+					argValue := NewValue(item)
+					mappedValue := callable.Call([]*Value{argValue})
+					result[i] = mappedValue.Any()
+				}
+				
+				return NewValue(result)
+			}
+			
+			panic("map() argument must be a function")
+		case "filter":
+			if len(m.Args) != 1 {
+				panic("filter() expects exactly 1 argument (predicate function)")
+			}
+			
+			// Получаем функцию из аргумента
+			fnArg := m.Args[0].Eval()
+			
+			// Проверяем что это вызываемый объект
+			if callable, ok := fnArg.Any().(Callable); ok {
+				var result []any
+				
+				// Фильтруем элементы через переданную функцию
+				for _, item := range arr {
+					// Вызываем функцию с текущим элементом
+					argValue := NewValue(item)
+					shouldInclude := callable.Call([]*Value{argValue})
+					
+					// Если функция вернула true, добавляем элемент
+					if shouldInclude.Bool() {
+						result = append(result, item)
+					}
+				}
+				
+				return NewValue(result)
+			}
+			
+			panic("filter() argument must be a function")
+		case "reduce":
+			if len(m.Args) != 2 {
+				panic("reduce() expects 2 arguments (initial value, reducer function)")
+			}
+			
+			initialValue := m.Args[0].Eval()
+			fnArg := m.Args[1].Eval()
+			
+			// Проверяем что второй аргумент - функция
+			if callable, ok := fnArg.Any().(Callable); ok {
+				accumulator := initialValue
+				
+				// Применяем reducer функцию к каждому элементу
+				for _, item := range arr {
+					// Вызываем функцию с аккумулятором и текущим элементом
+					accValue := accumulator
+					itemValue := NewValue(item)
+					accumulator = callable.Call([]*Value{accValue, itemValue})
+				}
+				
+				return accumulator
+			}
+			
+			panic("reduce() second argument must be a function")
 		}
 	}
 	

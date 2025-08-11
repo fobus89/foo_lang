@@ -1373,14 +1373,24 @@ func (p *Parser) AnonymousFunction() ast.Expr {
 	return ast.NewAnonymousFunc(args, body)
 }
 
-// hasTypedParameters проверяет, есть ли типизированные параметры в функции
+// hasTypedParameters проверяет, есть ли типизированные параметры или generic параметры
 func (p *Parser) hasTypedParameters() bool {
 	// Сохраняем текущую позицию парсера
 	savedPos := p.pos
 	defer func() { p.pos = savedPos }()
 	
 	// Пропускаем fn и имя функции
-	if !p.MatchAllNext(token.FN, token.IDENT, token.LPAREN) {
+	if !p.MatchAllNext(token.FN, token.IDENT) {
+		return false
+	}
+	
+	// Проверяем на generic параметры <T>
+	if p.Match(token.LT) {
+		return true // Найдены generic параметры
+	}
+	
+	// Пропускаем открывающую скобку параметров
+	if !p.MatchAndNext(token.LPAREN) {
 		return false
 	}
 	
@@ -1411,6 +1421,31 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 	funcName := p.Peek(0).Value
 	p.Next()
 	
+	// Проверяем на generic параметры <T, U, ...>
+	var typeParams []string
+	if p.Match(token.LT) {
+		p.Next() // consume '<'
+		
+		for !p.Match(token.GT) {
+			if !p.Match(token.IDENT) {
+				p.error("expected type parameter name", p.Peek(0))
+			}
+			
+			typeParams = append(typeParams, p.Peek(0).Value)
+			p.Next()
+			
+			if p.Match(token.COMMA) {
+				p.Next()
+			} else if !p.Match(token.GT) {
+				p.error("expected ',' or '>'", p.Peek(0))
+			}
+		}
+		
+		if !p.MatchAndNext(token.GT) {
+			p.error("expected '>'", p.Peek(0))
+		}
+	}
+	
 	if !p.MatchAndNext(token.LPAREN) {
 		p.error("expected '(' after function name", p.Peek(0))
 	}
@@ -1431,18 +1466,19 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 		if p.Match(token.COLON) {
 			p.Next() // consume ':'
 			
-			// Ожидаем примитивный тип как идентификатор
+			// Ожидаем тип как идентификатор (примитивный или generic)
 			if p.Match(token.IDENT) {
 				typeValue := p.Peek(0).Value
-				switch typeValue {
-				case "int", "string", "float", "bool":
+				// Проверяем примитивные типы или generic типы
+				if typeValue == "int" || typeValue == "string" || typeValue == "float" || typeValue == "bool" ||
+				   p.isGenericType(typeValue, typeParams) {
 					typeName = typeValue
 					p.Next()
-				default:
-					p.error("expected primitive type (int, string, float, bool)", p.Peek(0))
+				} else {
+					p.error("expected primitive or generic type (int, string, float, bool, T, U, ...)", p.Peek(0))
 				}
 			} else {
-				p.error("expected primitive type (int, string, float, bool)", p.Peek(0))
+				p.error("expected primitive or generic type", p.Peek(0))
 			}
 		}
 		
@@ -1469,7 +1505,33 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 		p.error("expected ')'", p.Peek(0))
 	}
 	
+	// Проверяем на return тип -> ReturnType
+	var returnType string
+	if p.Match(token.SUB) && p.Peek(1).Token == token.GT {
+		p.Next() // consume '-'
+		p.Next() // consume '>'
+		
+		if p.Match(token.IDENT) {
+			typeValue := p.Peek(0).Value
+			// Проверяем на валидный тип
+			if typeValue == "int" || typeValue == "string" || typeValue == "float" || typeValue == "bool" || 
+			   p.isTypeName(typeValue) || p.isGenericType(typeValue, typeParams) {
+				returnType = typeValue
+				p.Next()
+			} else {
+				p.error("expected valid return type", p.Peek(0))
+			}
+		} else {
+			p.error("expected return type after '->'", p.Peek(0))
+		}
+	}
+	
 	body := p.BlockStatement()
+	
+	// Если есть generic параметры, создаем GenericFuncStatement
+	if len(typeParams) > 0 {
+		return ast.NewGenericFuncStatement(funcName, typeParams, params, returnType, body)
+	}
 	
 	return ast.NewTypedFuncStatement(funcName, params, body)
 }
@@ -1491,5 +1553,15 @@ func (p *Parser) isTypeName(name string) bool {
 		return true
 	}
 	
+	return false
+}
+
+// isGenericType проверяет, является ли имя generic типом (T, U, K и т.д.)
+func (p *Parser) isGenericType(name string, typeParams []string) bool {
+	for _, param := range typeParams {
+		if name == param {
+			return true
+		}
+	}
 	return false
 }

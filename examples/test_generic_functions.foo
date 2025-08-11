@@ -1,0 +1,42 @@
+// Тест generic функций с параметрами типов
+println("=== GENERIC FUNCTIONS TEST ===")
+println("")
+
+// Простая generic функция identity
+fn identity<T>(value: T) -> T {
+    return value
+}
+
+// Generic функция для swap
+fn swap<T>(a: T, b: T) -> T {
+    // Пока возвращаем только первый элемент, 
+    // множественные возвращаемые значения будут позже
+    return b
+}
+
+// Generic функция сравнения
+fn isEqual<T>(a: T, b: T) -> bool {
+    return a == b
+}
+
+println("Testing identity function:")
+let intResult = identity(42)
+let stringResult = identity("Hello")
+let boolResult = identity(true)
+
+println("identity(42) = " + intResult)
+println("identity('Hello') = " + stringResult) 
+println("identity(true) = " + boolResult)
+
+println("")
+println("Testing isEqual function:")
+let equal1 = isEqual(5, 5)
+let equal2 = isEqual("hello", "world")
+let equal3 = isEqual(3.14, 3.14)
+
+println("isEqual(5, 5) = " + equal1)
+println("isEqual('hello', 'world') = " + equal2)
+println("isEqual(3.14, 3.14) = " + equal3)
+
+println("")
+println("✅ Generic functions work!")

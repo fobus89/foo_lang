@@ -1,0 +1,26 @@
+// Тест простой типизированной функции
+// Пока без generic синтаксиса, используем существующую типизацию
+
+println("=== SIMPLE TYPED FUNCTIONS TEST ===")
+println("")
+
+// Простая типизированная функция
+fn add(a: int, b: int) {
+    return a + b
+}
+
+// Функция со строками
+fn concat(first: string, second: string) {
+    return first + second
+}
+
+// Тестируем
+let result1 = add(5, 3)
+let result2 = concat("Hello", " World")
+
+println("add(5, 3) = " + result1)
+println("concat result = " + result2)
+
+println("")
+println("✅ Typed functions work!")
+println("Next step: Add generic syntax <T>")

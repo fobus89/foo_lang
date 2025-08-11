@@ -26,6 +26,25 @@ type TypedFuncStatement struct {
 	Body     Expr
 }
 
+// GenericFuncStatement представляет generic функцию с параметрами типов
+type GenericFuncStatement struct {
+	FuncName      string
+	TypeParams    []string      // Список параметров типов, например ["T", "U"]
+	Params        []FuncParam   // Обычные параметры функции
+	ReturnType    string        // Тип возвращаемого значения
+	Body          Expr
+}
+
+func NewGenericFuncStatement(funcName string, typeParams []string, params []FuncParam, returnType string, body Expr) *GenericFuncStatement {
+	return &GenericFuncStatement{
+		FuncName:   funcName,
+		TypeParams: typeParams,
+		Params:     params,
+		ReturnType: returnType,
+		Body:       body,
+	}
+}
+
 func NewTypedFuncStatement(funcName string, params []FuncParam, body Expr) *TypedFuncStatement {
 	return &TypedFuncStatement{
 		FuncName: funcName,
@@ -146,4 +165,56 @@ func (f *FuncStatment) Call(args []*Value) *Value {
 	}
 
 	return nil
+}
+
+// Eval для GenericFuncStatement - регистрирует generic функцию
+func (g *GenericFuncStatement) Eval() *Value {
+	// Сохраняем generic функцию в глобальной области видимости
+	scope.GlobalScope.Set(g.FuncName, NewValue(g))
+	return NewValue(g)
+}
+
+// Call для GenericFuncStatement с поддержкой типов
+func (g *GenericFuncStatement) Call(args []*Value) *Value {
+	// Создаем новую область видимости для функции
+	scope.GlobalScope.Push()
+	defer scope.GlobalScope.Pop()
+
+	// Проверяем количество аргументов
+	if len(args) != len(g.Params) {
+		panic(fmt.Sprintf("function '%s' expects %d arguments, got %d", 
+			g.FuncName, len(g.Params), len(args)))
+	}
+
+	// Устанавливаем параметры в области видимости
+	for i, param := range g.Params {
+		argValue := args[i]
+		
+		// TODO: Добавить проверку типов с учетом generic параметров
+		// Пока просто устанавливаем значение
+		scope.GlobalScope.Set(param.Name, argValue)
+	}
+
+	// Выполняем тело функции
+	if bodyStm, ok := g.Body.(*BodyExpr); ok {
+		for _, stm := range bodyStm.Statments {
+			if stm == nil {
+				continue
+			}
+
+			result := stm.Eval()
+			
+			// Проверяем на return
+			if result != nil && result.IsReturn() {
+				return result
+			}
+		}
+	}
+
+	return nil
+}
+
+// Name для интерфейса Callable
+func (g *GenericFuncStatement) Name() string {
+	return g.FuncName
 }

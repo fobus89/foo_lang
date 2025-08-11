@@ -1,0 +1,66 @@
+// ПЛАН GENERIC ФУНКЦИЙ ДЛЯ FOO_LANG
+// Демонстрация желаемого синтаксиса
+
+println("=== GENERIC FUNCTIONS PLAN ===")
+println("")
+
+// ========== 1. GENERIC ФУНКЦИИ С ПАРАМЕТРАМИ ТИПОВ ==========
+
+// Простая generic функция
+// fn identity<T>(value: T) -> T {
+//     return value
+// }
+
+// fn swap<T>(a: T, b: T) -> (T, T) {
+//     return b, a
+// }
+
+// fn max<T>(a: T, b: T) -> T {
+//     if a > b {
+//         return a
+//     }
+//     return b
+// }
+
+// ========== 2. ТИПИЗИРОВАННЫЕ ПАРАМЕТРЫ И ВОЗВРАТЫ ==========
+
+// fn add(a: int, b: int) -> int {
+//     return a + b
+// }
+
+// fn concat(a: string, b: string) -> string {
+//     return a + b  
+// }
+
+// fn isEqual<T>(a: T, b: T) -> bool {
+//     return a == b
+// }
+
+// ========== 3. GENERIC МЕТОДЫ ДЛЯ КОЛЛЕКЦИЙ ==========
+
+// Методы массивов с generic параметрами
+// let numbers = [1, 2, 3, 4, 5]
+
+// let doubled = numbers.map<int>(fn(x) => x * 2)
+// let evens = numbers.filter(fn(x) => x % 2 == 0)
+// let sum = numbers.reduce<int>(0, fn(acc, x) => acc + x)
+
+// let strings = ["hello", "world"]
+// let lengths = strings.map<int>(fn(s) => s.length())
+
+// ========== 4. ИСПОЛЬЗОВАНИЕ ==========
+
+// let result1 = identity<int>(42)
+// let result2 = identity<string>("hello")
+// let result3 = identity<bool>(true)
+
+// let x, y = swap<int>(10, 20)
+// let maxNum = max<int>(15, 25)
+// let maxStr = max<string>("apple", "banana")
+
+// let sum = add(5, 3)                    // 8
+// let text = concat("Hello", " World")   // "Hello World"
+// let equal = isEqual<int>(5, 5)         // true
+
+println("Этот план показывает желаемый синтаксис")
+println("Сейчас реализуем поддержку generic функций!")
