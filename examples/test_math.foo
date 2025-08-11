@@ -1,0 +1,48 @@
+// Демонстрация встроенных математических функций
+
+println("=== Тест математических функций ===")
+
+// Тригонометрические функции
+println("sin(π/2) = " + sin(1.5708))
+println("cos(0) = " + cos(0))
+println("tan(π/4) = " + tan(0.7854))
+
+// Корни и степени
+println("sqrt(16) = " + sqrt(16))
+println("pow(2, 3) = " + pow(2, 3))
+
+// Абсолютное значение и округление
+println("abs(-5.7) = " + abs(-5.7))
+println("floor(5.7) = " + floor(5.7))
+println("ceil(5.2) = " + ceil(5.2))
+println("round(5.6) = " + round(5.6))
+
+// Минимум и максимум
+println("min(3, 7) = " + min(3, 7))
+println("max(3, 7) = " + max(3, 7))
+
+// Логарифмы и экспонента
+println("log(2.718) = " + log(2.718))
+println("log10(100) = " + log10(100))
+println("exp(1) = " + exp(1))
+
+println("\n=== Практические примеры ===")
+
+// Вычисление расстояния между точками
+fn distance(x1, y1, x2, y2) {
+    let dx = x2 - x1
+    let dy = y2 - y1
+    return sqrt(pow(dx, 2) + pow(dy, 2))
+}
+
+let dist = distance(0, 0, 3, 4)
+println("Расстояние от (0,0) до (3,4) = " + dist)
+
+// Площадь круга
+fn circleArea(radius) {
+    let pi = 3.14159
+    return pi * pow(radius, 2)
+}
+
+let area = circleArea(5)
+println("Площадь круга радиусом 5 = " + area)

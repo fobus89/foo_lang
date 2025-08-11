@@ -26,57 +26,31 @@ func (f *FuncCallExpr) Eval() *Value {
 		panic("function '" + f.funcName + "' is not defined")
 	}
 
+	// Пробуем найти Callable объект (может быть FuncStatment или встроенная функция)
+	if callable, ok := val.Any().(Callable); ok {
+		// Вычисляем аргументы
+		evalArgs := make([]*Value, len(f.args))
+		for i, arg := range f.args {
+			evalArgs[i] = arg.Eval()
+		}
+		
+		// Вызываем функцию
+		return callable.Call(evalArgs)
+	}
+
+	// Старый код для совместимости с FuncStatment
 	fnStatment, ok := val.Any().(*FuncStatment)
 	if !ok {
 		panic("'" + f.funcName + "' is not a function")
 	}
 
-	bodyStm := fnStatment.body.(*BodyExpr)
-
-	expected := len(fnStatment.args)
-	passed := len(f.args)
-
-	if passed > expected {
-		panic(fmt.Sprintf("too many arguments: expected %d, got %d", expected, passed))
+	// Вычисляем аргументы
+	evalArgs := make([]*Value, len(f.args))
+	for i, arg := range f.args {
+		evalArgs[i] = arg.Eval()
 	}
 
-	// Создаем новую область видимости для функции с проверкой рекурсии
-	err := scope.GlobalScope.PushFunction()
-	if err != nil {
-		panic(err.Error())
-	}
-	defer scope.GlobalScope.PopFunction()
-
-	// Устанавливаем параметры функции в локальной области
-	for i, arg := range fnStatment.args {
-		for name, expr := range arg {
-			if i < len(f.args) {
-				value := f.args[i].Eval()
-				scope.GlobalScope.Set(name, value)
-			} else if expr != nil {
-				defaultValue := expr.Eval()
-				scope.GlobalScope.Set(name, defaultValue)
-			} else {
-				panic(fmt.Sprintf("missing required argument: %s", name))
-			}
-		}
-	}
-
-	// Выполняем тело функции
-	for _, stm := range bodyStm.Statments {
-		if stm == nil {
-			continue
-		}
-
-		result := stm.Eval()
-		
-		// Проверяем на return
-		if result != nil && result.IsReturn() {
-			return result
-		}
-	}
-
-	return nil
+	return fnStatment.Call(evalArgs)
 }
 
 func (f *FuncCallExpr) String() string {

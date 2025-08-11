@@ -5,6 +5,8 @@ import (
 	"foo_lang/parser"
 	"foo_lang/ast"
 	"foo_lang/modules"
+	"foo_lang/builtin"
+	"foo_lang/scope"
 	"os"
 )
 
@@ -43,6 +45,9 @@ func main() {
 		return result
 	}
 	ast.SetGlobalParseFunc(parseFunc)
+	
+	// Инициализируем встроенные математические функции
+	builtin.InitializeMathFunctions(scope.GlobalScope)
 	
 	exprs := parser.NewParser(mainFile).Parse()
 
