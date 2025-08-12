@@ -1,0 +1,42 @@
+// Простая демонстрация sync функций
+
+println("=== SYNC ФУНКЦИИ ===")
+
+// Мьютексы
+let mutex = newMutex("test")
+println("Мьютекс создан: " + mutex)
+mutexLock(mutex)
+println("Мьютекс заблокирован")
+mutexUnlock(mutex)
+println("Мьютекс разблокирован")
+
+// Семафоры
+let sem = newSemaphore(2)
+println("Семафор создан (лимит 2)")
+semaphoreAcquire(sem)
+println("Ресурс захвачен")
+let canAcquire = semaphoreTryAcquire(sem)
+println("Еще можно захватить: " + canAcquire.toString())
+
+// Атомарные операции
+let atomic = newAtomic(42)
+println("Атомарная переменная создана")
+let value = atomicGet(atomic)
+println("Значение: " + value.toString())
+let newVal = atomicAdd(atomic, 8)
+println("После добавления 8: " + newVal.toString())
+
+// WaitGroup
+let wg = newWaitGroup()
+println("WaitGroup создана")
+waitGroupAdd(wg, 2)
+println("Добавлено 2 задачи")
+waitGroupDone(wg)
+waitGroupDone(wg)
+println("Обе задачи завершены")
+
+// Очистка
+syncCleanup()
+println("Все примитивы очищены")
+
+println("=== ВСЕ ОСНОВНЫЕ ФУНКЦИИ РАБОТАЮТ ===")

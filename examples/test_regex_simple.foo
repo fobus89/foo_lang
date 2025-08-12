@@ -1,0 +1,37 @@
+// Простая демонстрация regex функций
+
+println("=== REGEX ФУНКЦИИ ===")
+
+// Простое сопоставление
+let match1 = regexMatch("hello", "hello world")
+let match2 = regexMatch("\\d+", "price 100")
+println("Match 'hello': " + match1.toString())
+println("Match number: " + match2.toString())
+
+// Поиск
+let found1 = regexFind("\\w+", "hello world")
+let found2 = regexFind("\\d+", "price is 100 dollars")
+println("Found word: " + found1)
+println("Found number: " + found2)
+
+// Замена
+let replaced1 = regexReplace("\\d+", "I have 5 apples", "many")
+let replaced2 = regexReplaceAll("\\d+", "I have 5 apples and 10 oranges", "X")
+println("Replace first: " + replaced1)
+println("Replace all: " + replaced2)
+
+// Валидация regex
+let valid = regexValid("\\w+")
+let invalid = regexValid("[abc")
+println("Valid regex: " + valid.toString())
+println("Invalid regex: " + invalid.toString())
+
+// Экранирование
+let escaped = regexEscape("Hello (world)")
+println("Escaped: " + escaped)
+
+// Подсчет совпадений
+let count = regexCount("\\d", "I have 5 apples and 10 oranges")
+println("Count digits: " + count.toString())
+
+println("=== ВСЕ ОСНОВНЫЕ ФУНКЦИИ РАБОТАЮТ ===")

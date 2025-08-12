@@ -89,6 +89,15 @@ func main() {
 	
 	// Инициализируем встроенные функции времени
 	builtin.InitializeTimeFunctions(scope.GlobalScope)
+	
+	// Инициализируем встроенные криптографические функции
+	builtin.InitializeCryptoFunctions(scope.GlobalScope)
+	
+	// Инициализируем встроенные функции регулярных выражений
+	builtin.InitializeRegexFunctions(scope.GlobalScope)
+	
+	// Инициализируем встроенные функции синхронизации
+	builtin.InitializeSyncFunctions(scope.GlobalScope)
 
 	exprs := parser.NewParser(mainFile).Parse()
 

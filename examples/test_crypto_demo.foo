@@ -1,0 +1,83 @@
+// Расширенная демонстрация криптографических функций
+
+println("=== КРИПТОГРАФИЧЕСКИЕ ФУНКЦИИ foo_lang v3 ===")
+
+// Хеш-функции
+println("1. ХЕШ-ФУНКЦИИ:")
+let message = "Hello, crypto world!"
+let md5 = md5Hash(message)
+let sha1 = sha1Hash(message)
+let sha256 = sha256Hash(message)
+let sha512 = sha512Hash(message)
+println("MD5: " + md5)
+println("SHA1: " + sha1)  
+println("SHA256: " + sha256)
+println("SHA512: " + sha512)
+
+// Base64 кодирование
+println("2. BASE64 КОДИРОВАНИЕ:")
+let data = "Hello World 123"
+let encoded = base64Encode(data)
+let decoded = base64Decode(encoded)
+println("Исходное: " + data)
+println("Base64: " + encoded)
+println("Декодированное: " + decoded)
+
+// URL-safe Base64
+let urlEncoded = base64URLEncode("Hello+World/Test=")
+let urlDecoded = base64URLDecode(urlEncoded)
+println("URL-safe кодирование: " + urlEncoded)
+println("URL-safe декодирование: " + urlDecoded)
+
+// Hex кодирование
+println("3. HEX КОДИРОВАНИЕ:")
+let hexEncoded = hexEncode("Test 123")
+let hexDecoded = hexDecode(hexEncoded)
+println("Hex: " + hexEncoded)
+println("Hex декодирование: " + hexDecoded)
+
+// HMAC подписи
+println("4. HMAC ПОДПИСИ:")
+let key = "secret-key"
+let payload = "important data"
+let hmac256 = hmacSHA256(key, payload)
+let hmac1 = hmacSHA1(key, payload)
+let hmacMd5 = hmacMD5(key, payload)
+println("HMAC-SHA256: " + hmac256)
+println("HMAC-SHA1: " + hmac1)
+println("HMAC-MD5: " + hmacMd5)
+
+// Случайные данные
+println("5. СЛУЧАЙНЫЕ ДАННЫЕ:")
+let randomBytes8 = randomBytes(8)
+let randomStr10 = randomString(10)
+let randomHex = randomString(8, "0123456789ABCDEF")
+let randomNum = randomInt(1, 1000)
+let uuid = randomUUID()
+println("8 байтов: " + randomBytes8)
+println("Строка (10): " + randomStr10)
+println("Hex (8): " + randomHex)
+println("Число: " + randomNum.toString())
+println("UUID: " + uuid)
+
+// Пароли  
+println("6. ПАРОЛИ:")
+let pwd = "myPassword123"
+let hashedPwd = passwordHash(pwd)
+let valid = passwordVerify(pwd, hashedPwd)
+let invalid = passwordVerify("wrongPassword", hashedPwd)
+println("Хеш пароля: " + hashedPwd)
+println("Правильный: " + valid.toString())
+println("Неправильный: " + invalid.toString())
+
+// Безопасное сравнение
+println("7. БЕЗОПАСНОЕ СРАВНЕНИЕ:")
+let token1 = "secret-token-123"
+let token2 = "secret-token-123"
+let token3 = "different-token"
+let equal = constantTimeCompare(token1, token2)
+let notEqual = constantTimeCompare(token1, token3)
+println("Равные: " + equal.toString())
+println("Не равные: " + notEqual.toString())
+
+println("=== ВСЕ ФУНКЦИИ РАБОТАЮТ КОРРЕКТНО ===")

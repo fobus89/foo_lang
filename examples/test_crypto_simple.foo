@@ -1,0 +1,38 @@
+// Простая демонстрация криптографических функций
+
+println("=== Криптографические функции ===")
+
+// Хеш-функции
+let message = "Hello World"
+let md5 = md5Hash(message)
+let sha256 = sha256Hash(message)
+
+println("MD5: " + md5)
+println("SHA256: " + sha256)
+
+// Base64 кодирование
+let data = "Hello World"
+let encoded = base64Encode(data)
+let decoded = base64Decode(encoded)
+
+println("Исходное: " + data)
+println("Base64: " + encoded)
+println("Декодированное: " + decoded)
+
+// Генерация случайных данных
+let randomStr = randomString(10)
+let randomNum = randomInt(1, 100)
+let uuid = randomUUID()
+
+println("Случайная строка: " + randomStr)
+println("Случайное число: " + randomNum.toString())
+println("UUID: " + uuid)
+
+// Пароли
+let password = "mypassword"
+let hash = passwordHash(password)
+let isValid = passwordVerify(password, hash)
+
+println("Пароль корректен: " + isValid.toString())
+
+println("=== Демонстрация завершена ===")

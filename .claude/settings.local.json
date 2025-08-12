@@ -24,7 +24,8 @@
       "Bash(del examplestest_json_macros.foo)",
       "Bash(del debug_*.foo)",
       "Bash(.foo_lang.exe:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(timeout 30 go test:*)"
     ],
     "deny": []
   }
