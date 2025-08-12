@@ -1,0 +1,82 @@
+// Тест syntax highlighting для Foo Language
+
+// 1. Ключевые слова
+let message: string = "Hello, Foo!"
+const PI: float = 3.14159
+fn greet(name: string) -> string {
+    return "Hello, " + name
+}
+
+// 2. Структуры и интерфейсы  
+struct User {
+    name: string,
+    age: int
+}
+
+interface Drawable {
+    fn draw()
+    fn getArea() -> float
+}
+
+impl Drawable for User {
+    fn draw() {
+        println("Drawing user: " + this.name)
+    }
+    fn getArea() -> float {
+        return 0.0
+    }
+}
+
+// 3. Generic функции
+fn process<T: Drawable>(item: T) -> T {
+    item.draw()
+    return item
+}
+
+// 4. Union и Optional типы
+let value: string | int | float = 42
+let optionalName: string? = null
+
+// 5. Async/await
+async fn fetchData() -> string {
+    await sleep(100)
+    return "data"
+}
+
+// 6. Макросы
+macro debug(value) {
+    println("DEBUG: " + value.toString())
+}
+
+@debug("test message")
+
+// 7. Операторы
+let x = 10
+x += 5
+x++
+let result = x > 15 ? "big" : "small"
+
+// 8. Строковая интерполяция
+let greeting = "Hello, ${optionalName ?: "Guest"}!"
+
+// 9. Match и enum
+enum Status { ACTIVE, INACTIVE }
+let status = Status.ACTIVE
+
+match status {
+    Status.ACTIVE => println("Active"),
+    _ => println("Other")
+}
+
+// 10. Массивы и объекты
+let numbers = [1, 2, 3, 4, 5]
+let user = {name: "Alice", age: 25}
+
+// 11. Extension methods
+extension string {
+    fn reverse() -> string {
+        return "reversed"
+    }
+}
+
+let reversed = "hello".reverse()

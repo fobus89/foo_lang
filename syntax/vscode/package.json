@@ -16,7 +16,6 @@
     "programming-language",
     "syntax-highlighting"
   ],
-  "main": "./out/extension.js",
   "contributes": {
     "languages": [
       {
@@ -50,17 +49,6 @@
         "path": "./themes/foo-light-color-theme.json"
       }
     ]
-  },
-  "activationEvents": [
-    "onLanguage:foo"
-  ],
-  "scripts": {
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
-  },
-  "devDependencies": {
-    "@types/vscode": "^1.74.0",
-    "typescript": "^4.9.4"
   },
   "repository": {
     "type": "git",

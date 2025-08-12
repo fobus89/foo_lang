@@ -32,7 +32,13 @@
       "Bash(then echo \"$file\")",
       "Bash(fi)",
       "Bash(done)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(code .)",
+      "Bash(npm install:*)",
+      "Bash(vsce package:*)",
+      "Bash(code:*)",
+      "Bash(tree-sitter generate:*)",
+      "Bash(tree-sitter parse:*)"
     ],
     "deny": []
   },
