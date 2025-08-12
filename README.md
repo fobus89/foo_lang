@@ -777,6 +777,78 @@ let config = jsonParse(loadedJson)
 println("Версия: " + config.version)
 ```
 
+#### HTTP клиент/сервер ✅ **тесты готовы**
+```foo
+// HTTP КЛИЕНТ - все методы поддерживаются
+httpSetTimeout(10)  // Таймаут 10 секунд
+
+// GET запрос
+let response = httpGet("https://api.example.com/users")
+println("Статус: " + response.status.toString())
+println("Данные: " + response.body)
+
+// POST запрос с JSON данными
+let userData = {name: "Alice", age: 25}
+let postResponse = httpPost("https://api.example.com/users", userData)
+
+// Кастомные заголовки
+let headers = {"Authorization": "Bearer token123", "Content-Type": "application/json"}
+let authResponse = httpGet("https://api.example.com/profile", headers)
+
+// PUT и DELETE запросы
+let updateResponse = httpPut("https://api.example.com/users/1", {name: "Bob"})
+let deleteResponse = httpDelete("https://api.example.com/users/1")
+
+// URL утилиты
+let encoded = urlEncode("Hello World & Special Chars")
+let decoded = urlDecode(encoded)
+
+// HTTP СЕРВЕР - полный роутинг
+httpCreateServer()
+
+// Обработчик GET запроса
+fn getUserHandler(request) {
+    let userId = request.query.id  // /users?id=123
+    return {
+        "status": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": jsonStringify({id: userId, name: "User " + userId})
+    }
+}
+
+// Обработчик POST запроса
+fn createUserHandler(request) {
+    let userData = jsonParse(request.body)
+    println("Создаем пользователя: " + userData.name)
+    
+    return {
+        "status": 201,
+        "headers": {"Content-Type": "application/json"}, 
+        "body": jsonStringify({id: 42, message: "User created"})
+    }
+}
+
+// Регистрация маршрутов
+httpRoute("GET", "/users", getUserHandler)
+httpRoute("POST", "/users", createUserHandler)
+httpRoute("GET", "/health", fn(request) => "OK")
+
+// Запуск сервера
+httpStartServer(3000)
+println("🚀 Сервер запущен на http://localhost:3000")
+
+// Асинхронные HTTP запросы
+fn asyncHttpRequest() {
+    let response = httpGet("https://httpbin.org/delay/1")
+    return "Запрос завершен со статусом " + response.status.toString()
+}
+
+let task1 = async asyncHttpRequest()
+let task2 = async asyncHttpRequest()
+let results = await Promise.all(task1, task2)
+println("Все HTTP запросы завершены параллельно!")
+```
+
 ### Методы массивов ✅ **тесты готовы**
 
 #### Базовые методы
@@ -1021,6 +1093,9 @@ println("Режим: " + Math.MathMode.PRECISE)
 - `test_generic_constraints.foo` - полный пример Generic ограничений типов с множественными интерфейсами
 - `test_generic_constraints_simple.foo` - простой пример Generic функций с interface ограничениями
 - `test_filesystem_simple.foo` - демонстрация файловой системы (чтение/запись файлов, работа с директориями)
+- `test_http_client.foo` - демонстрация HTTP клиента (GET, POST, PUT, DELETE, заголовки, async запросы)
+- `test_http_server.foo` - демонстрация HTTP сервера (роутинг, обработчики, JSON API)
+- `test_http_complete.foo` - полная демонстрация HTTP клиента и сервера вместе
 
 ## Запуск тестов
 
@@ -1082,6 +1157,7 @@ go test ./test/... -v
 - [x] **Строковые функции и JSON** - встроенные функции (strlen, charAt, substring, jsonParse, jsonStringify) ✅ **тесты готовы**
 - [x] **Методы примитивных типов** - методы для int, float, string, bool (.toString(), .abs(), .length() и другие) ✅ **тесты готовы**
 - [x] **Файловая система** - полная поддержка I/O операций (readFile, writeFile, exists, mkdir, copyFile и другие) ✅ **тесты готовы**
+- [x] **HTTP клиент/сервер** - полная поддержка HTTP (httpGet, httpPost, httpPut, httpDelete, httpStartServer, роутинг) ✅ **тесты готовы**
 - [x] **Extension methods** - расширение существующих типов новыми методами через синтаксис `extension TypeName { methods }` ✅ **тесты готовы**
 - [x] **Interface система** - полная система интерфейсов с определениями `interface Name { methods }` и реализациями `impl Interface for Type { methods }` ✅ **тесты готовы**
 - [x] **Перегрузка методов** - поддержка множественных определений методов с разными сигнатурами ✅ **тесты готовы**
