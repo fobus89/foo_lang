@@ -3,6 +3,7 @@ package value
 import (
 	"fmt"
 	"strconv"
+	"time"
 )
 
 type Value struct {
@@ -345,6 +346,8 @@ func GetValueTypeName(v *Value) string {
 		return "object"
 	case *Channel:
 		return "channel"
+	case time.Time:
+		return "time"
 	default:
 		// Проверяем на StructObject через рефлексию
 		typeName := fmt.Sprintf("%T", v.data)
@@ -353,4 +356,23 @@ func GetValueTypeName(v *Value) string {
 		}
 		return "unknown"
 	}
+}
+
+// NewTime создает новое значение времени
+func NewTime(t time.Time) *Value {
+	return &Value{data: t}
+}
+
+// IsTime проверяет, является ли значение временем
+func (n *Value) IsTime() bool {
+	_, ok := n.Any().(time.Time)
+	return ok
+}
+
+// Time возвращает значение как time.Time
+func (n *Value) Time() time.Time {
+	if t, ok := n.Any().(time.Time); ok {
+		return t
+	}
+	return time.Time{}
 }

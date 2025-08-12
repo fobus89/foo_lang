@@ -86,6 +86,9 @@ func main() {
 	
 	// Инициализируем встроенные функции каналов
 	builtin.InitializeChannelFunctions(scope.GlobalScope)
+	
+	// Инициализируем встроенные функции времени
+	builtin.InitializeTimeFunctions(scope.GlobalScope)
 
 	exprs := parser.NewParser(mainFile).Parse()
 
