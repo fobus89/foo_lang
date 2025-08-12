@@ -2,17 +2,16 @@ package test
 
 import (
 	"foo_lang/parser"
-	"foo_lang/scope"
 	"testing"
 )
 
 func TestIf(t *testing.T) {
 	// Clear scope and create new one
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `if true {1} else {2}`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 
 	for _, expr := range exprs {
 		value := expr.Eval()
@@ -26,11 +25,11 @@ func TestIf(t *testing.T) {
 
 func TestIfElse(t *testing.T) {
 	// Clear scope and create new one
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `if false {1} else {2}`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 
 	for _, expr := range exprs {
 		value := expr.Eval()
@@ -44,11 +43,11 @@ func TestIfElse(t *testing.T) {
 
 func TestIfExpression(t *testing.T) {
 	// Clear scope and create new one
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `if 1+2/2 {1} else {2}`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 
 	for _, expr := range exprs {
 		value := expr.Eval()

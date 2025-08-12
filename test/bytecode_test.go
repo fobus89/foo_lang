@@ -4,14 +4,11 @@ import (
 	"testing"
 	"foo_lang/bytecode"
 	"foo_lang/scope"
-	"foo_lang/builtin"
 )
 
 func TestBytecodeBasicOperations(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeMathFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализация тестовой среды с математическими функциями
+	InitWithMath()
 	
 	// Тест базовых операций через создание chunk вручную
 	chunk := bytecode.NewChunk()
@@ -49,10 +46,8 @@ func TestBytecodeBasicOperations(t *testing.T) {
 }
 
 func TestBytecodeControlFlow(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeMathFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализация тестовой среды с математическими функциями
+	InitWithMath()
 	
 	// Упрощенный тест управления потоком
 	chunk := bytecode.NewChunk()
@@ -80,10 +75,8 @@ func TestBytecodeControlFlow(t *testing.T) {
 }
 
 func TestBytecodeArrays(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeMathFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализация тестовой среды с математическими функциями
+	InitWithMath()
 	
 	// Упрощенный тест массивов
 	chunk := bytecode.NewChunk()
@@ -147,8 +140,8 @@ func TestBytecodeCompilerChunk(t *testing.T) {
 }
 
 func TestBytecodeVMExecution(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализация тестовой среды с математическими функциями
+	InitWithMath()
 	
 	// Простое выражение для тестирования VM
 	chunk := bytecode.NewChunk()

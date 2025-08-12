@@ -7,7 +7,7 @@ import (
 )
 
 func TestStringInterpolation(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let name = "World"
@@ -16,7 +16,7 @@ func TestStringInterpolation(t *testing.T) {
 		let info = "Name: ${name}, Age: ${age}"
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -45,7 +45,7 @@ func TestStringInterpolation(t *testing.T) {
 }
 
 func TestStringInterpolationWithExpressions(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let x = 10
@@ -54,7 +54,7 @@ func TestStringInterpolationWithExpressions(t *testing.T) {
 		let complex = "Result: ${x * 2 + y}"
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -83,7 +83,7 @@ func TestStringInterpolationWithExpressions(t *testing.T) {
 }
 
 func TestStringInterpolationWithArraysAndObjects(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let arr = [1, 2, 3]
@@ -93,7 +93,7 @@ func TestStringInterpolationWithArraysAndObjects(t *testing.T) {
 		let methodStr = "Length: ${arr.length()}"
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -133,7 +133,7 @@ func TestStringInterpolationWithArraysAndObjects(t *testing.T) {
 }
 
 func TestComments(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		// This is a single line comment
@@ -150,7 +150,7 @@ func TestComments(t *testing.T) {
 		let z = x + y
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -188,7 +188,7 @@ func TestComments(t *testing.T) {
 }
 
 func TestStringConcatenation(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let str1 = "Hello"
@@ -202,7 +202,7 @@ func TestStringConcatenation(t *testing.T) {
 		let numStr = "Number: " + num
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}

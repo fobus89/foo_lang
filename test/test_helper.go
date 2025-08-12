@@ -45,6 +45,14 @@ func InitWithMath() {
 	builtin.InitializeMathFunctions(scope.GlobalScope)
 }
 
+// InitWithTime инициализирует окружение с функциями времени
+func InitWithTime() {
+	InitTestEnvironment()
+	builtin.InitializeMathFunctions(scope.GlobalScope)
+	builtin.InitializeStringFunctions(scope.GlobalScope)
+	builtin.InitializeTimeFunctions(scope.GlobalScope)
+}
+
 // InitWithAll инициализирует окружение со всеми функциями
 func InitWithAll() {
 	InitTestEnvironment()

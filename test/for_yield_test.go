@@ -37,7 +37,7 @@ func compareNumbers(a, b any) bool {
 
 func TestForYieldBasic(t *testing.T) {
 	// Clear scope and create new one
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		const arr = for let i = 0; i < 5; i++ {
@@ -45,7 +45,7 @@ func TestForYieldBasic(t *testing.T) {
 		}
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -72,7 +72,7 @@ func TestForYieldBasic(t *testing.T) {
 
 func TestForYieldWithCondition(t *testing.T) {
 	// Clear scope and create new one
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		const arr = for let i = 0; i < 10; i++ {
@@ -82,7 +82,7 @@ func TestForYieldWithCondition(t *testing.T) {
 		}
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -107,7 +107,7 @@ func TestForYieldWithCondition(t *testing.T) {
 
 func TestForYieldEmpty(t *testing.T) {
 	// Clear scope and create new one
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		const empty = for let i = 0; i < 5; i++ {
@@ -117,7 +117,7 @@ func TestForYieldEmpty(t *testing.T) {
 		}
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -137,7 +137,7 @@ func TestForYieldEmpty(t *testing.T) {
 
 func TestForYieldWithBreak(t *testing.T) {
 	// Clear scope and create new one
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		const arr = for let i = 0; i < 10; i++ {
@@ -148,7 +148,7 @@ func TestForYieldWithBreak(t *testing.T) {
 		}
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -175,7 +175,7 @@ func TestForYieldWithBreak(t *testing.T) {
 
 func TestForYieldExpression(t *testing.T) {
 	// Clear scope and create new one
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		const squares = for let i = 1; i <= 4; i++ {
@@ -183,7 +183,7 @@ func TestForYieldExpression(t *testing.T) {
 		}
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}

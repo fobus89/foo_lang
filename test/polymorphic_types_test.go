@@ -3,7 +3,6 @@ package test
 import (
 	"bytes"
 	"foo_lang/parser"
-	"foo_lang/scope"
 	"io"
 	"os"
 	"strings"
@@ -65,8 +64,8 @@ func TestPolymorphicTypeMethods(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureOutput3(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				exprs := parser.NewParser(tt.code).Parse()
+				InitTestEnvironment()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -116,8 +115,8 @@ func TestTypeConversions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureOutput3(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				exprs := parser.NewParser(tt.code).Parse()
+				InitTestEnvironment()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -210,8 +209,8 @@ func TestPolymorphicMacros(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureOutput3(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				exprs := parser.NewParser(tt.code).Parse()
+				InitTestEnvironment()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -268,8 +267,8 @@ func TestTypeConversionErrors(t *testing.T) {
 				}
 			}()
 			
-			scope.GlobalScope = scope.NewScopeStack()
-			exprs := parser.NewParser(tt.code).Parse()
+			InitTestEnvironment()
+			exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -306,8 +305,8 @@ func TestUniversalTypeAnalysis(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureOutput3(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				exprs := parser.NewParser(tt.code).Parse()
+				InitTestEnvironment()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}

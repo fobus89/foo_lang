@@ -1,0 +1,166 @@
+// Пример кода на языке Foo для демонстрации syntax highlighting
+
+// Импорты и экспорты
+import { add, multiply } from "math.foo"
+import * as Utils from "utils.foo"
+
+// Константы и переменные
+const PI: float = 3.14159
+let count: int = 0
+let message = "Hello, Foo!"
+let user: string? = null
+
+// Структуры и интерфейсы
+struct User {
+    name: string,
+    age: int,
+    email: string
+}
+
+interface Drawable {
+    fn draw()
+    fn getArea() -> float
+}
+
+// Реализация интерфейса
+impl Drawable for User {
+    fn draw() {
+        println("Drawing user: " + this.name)
+    }
+    
+    fn getArea() -> float {
+        return 0.0
+    }
+}
+
+// Generic функции с ограничениями типов
+fn process<T: Drawable + Comparable>(item: T, factor: float = 1.0) -> T {
+    item.draw()
+    return item
+}
+
+// Enum и match
+enum Status {
+    ACTIVE,
+    INACTIVE, 
+    PENDING
+}
+
+fn handleStatus(status: Status) -> string {
+    return match status {
+        Status.ACTIVE => "User is active",
+        Status.INACTIVE => "User is inactive", 
+        Status.PENDING => "User registration pending",
+        _ => "Unknown status"
+    }
+}
+
+// Union и Optional типы
+let value: string | int | float = 42
+let optionalName: string? = "Alice"
+
+// Async/await и Promise
+async fn fetchUserData(userId: int) -> User {
+    await sleep(100)
+    return User{name: "Alice", age: 25, email: "alice@example.com"}
+}
+
+fn main() {
+    // Переменные и операторы
+    let x = 10
+    let y = 20.5
+    x += 5
+    y *= 2.0
+    
+    // Условия и тернарный оператор
+    let result = x > 15 ? "большое" : "маленькое"
+    
+    if x > 10 {
+        println("X больше 10")
+    } else {
+        println("X меньше или равно 10")
+    }
+    
+    // Циклы и массивы
+    let numbers = [1, 2, 3, 4, 5]
+    for let i = 0; i < numbers.length(); i++ {
+        println("Число: " + numbers[i].toString())
+    }
+    
+    // Строковая интерполяция
+    let greeting = "Привет, ${optionalName ?: "Гость"}!"
+    println(greeting)
+    
+    // Математические функции
+    let angle = PI / 4.0
+    let sinValue = sin(angle)
+    let cosValue = cos(angle)
+    println("sin(π/4) = " + sinValue.toString())
+    
+    // Каналы и многопоточность
+    let channel = newChannel(10, "numbers")
+    
+    async {
+        for let i = 0; i < 5; i++ {
+            send(channel, i)
+        }
+        close(channel)
+    }
+    
+    async {
+        for let value = range(channel) {
+            println("Получено: " + value.toString())
+        }
+    }
+    
+    // Криптографические функции
+    let data = "секретные данные"
+    let hash = sha256Hash(data)
+    let encoded = base64Encode(hash)
+    println("SHA256 hash: " + encoded)
+    
+    // Regex операции
+    let pattern = "\\d+"
+    let text = "Число: 42"
+    if regexMatch(pattern, text) {
+        let matches = regexFindAll(pattern, text)
+        println("Найдены числа: " + matches.toString())
+    }
+    
+    // Extension methods
+    extension string {
+        fn reverse() -> string {
+            let result = ""
+            for let i = this.length() - 1; i >= 0; i-- {
+                result += this.charAt(i)
+            }
+            return result
+        }
+    }
+    
+    let reversed = "hello".reverse()
+    println("Обращенная строка: " + reversed)
+    
+    // Макросы
+    macro debug(value) {
+        println("DEBUG: " + typeof(value).toString() + " = " + value.toString())
+    }
+    
+    @debug(x)
+    @debug(greeting)
+    
+    // Result типы для обработки ошибок
+    let fileResult = readFile("config.txt")
+    match fileResult {
+        Ok(content) => println("Файл прочитан: " + content),
+        Err(error) => println("Ошибка чтения: " + error)
+    }
+    
+    // Promise.all для параллельного выполнения
+    let task1 = async fetchUserData(1)
+    let task2 = async fetchUserData(2) 
+    let task3 = async fetchUserData(3)
+    
+    let users = await Promise.all(task1, task2, task3)
+    println("Загружено пользователей: " + users.length().toString())
+}

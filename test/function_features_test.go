@@ -7,7 +7,7 @@ import (
 )
 
 func TestFunctionDefaultParameters(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		fn greet(name, greeting = "Hello") {
@@ -25,7 +25,7 @@ func TestFunctionDefaultParameters(t *testing.T) {
 		let result5 = calculate(1, 2, 3)
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -82,7 +82,7 @@ func TestFunctionDefaultParameters(t *testing.T) {
 }
 
 func TestFunctionComplexDefaultParameters(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let defaultValue = 42
@@ -94,7 +94,7 @@ func TestFunctionComplexDefaultParameters(t *testing.T) {
 		let result = test(8)
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -111,7 +111,7 @@ func TestFunctionComplexDefaultParameters(t *testing.T) {
 }
 
 func TestFunctionMissingRequiredParameter(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		fn requiresTwo(a, b) {
@@ -121,7 +121,7 @@ func TestFunctionMissingRequiredParameter(t *testing.T) {
 		requiresTwo(5) // Should panic
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 
 	// This should panic with missing required argument
 	defer func() {
@@ -141,7 +141,7 @@ func TestFunctionMissingRequiredParameter(t *testing.T) {
 }
 
 func TestMultipleReturnValues(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		fn divmod(a, b) {
@@ -156,7 +156,7 @@ func TestMultipleReturnValues(t *testing.T) {
 		let name, age = getNameAge()
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -201,7 +201,7 @@ func TestMultipleReturnValues(t *testing.T) {
 }
 
 func TestMultipleReturnWithSingleValue(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		fn singleReturn() {
@@ -212,7 +212,7 @@ func TestMultipleReturnWithSingleValue(t *testing.T) {
 		let a, b = singleReturn()
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}

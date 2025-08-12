@@ -11,7 +11,7 @@ type Closure struct {
 	funcName     string
 	args         []map[string]Expr
 	body         Expr
-	capturedVars map[string]*value.Value  // Захваченные переменные
+	capturedVars map[string]*value.Value // Захваченные переменные
 	isMacro      bool
 }
 
@@ -20,18 +20,18 @@ type TypedClosure struct {
 	funcName     string
 	params       []FuncParam
 	body         Expr
-	returnType   string                   // Ожидаемый тип возвращаемого значения
-	capturedVars map[string]*value.Value  // Захваченные переменные
+	returnType   string                  // Ожидаемый тип возвращаемого значения
+	capturedVars map[string]*value.Value // Захваченные переменные
 }
 
 // NewClosure создает новое замыкание с захватом переменных из текущей области
 func NewClosure(funcName string, args []map[string]Expr, body Expr, isMacro bool) *Closure {
 	// Захватываем все переменные из текущей области видимости
 	capturedVars := make(map[string]*value.Value)
-	
+
 	// Анализируем тело функции для поиска свободных переменных
 	freeVars := findFreeVariables(body, args)
-	
+
 	// Захватываем значения свободных переменных
 	for varName := range freeVars {
 		if val, exists := scope.GlobalScope.Get(varName); exists {
@@ -39,7 +39,7 @@ func NewClosure(funcName string, args []map[string]Expr, body Expr, isMacro bool
 			capturedVars[varName] = value.NewValue(val.Any())
 		}
 	}
-	
+
 	return &Closure{
 		funcName:     funcName,
 		args:         args,
@@ -52,11 +52,11 @@ func NewClosure(funcName string, args []map[string]Expr, body Expr, isMacro bool
 // findFreeVariables анализирует AST и находит свободные переменные
 func findFreeVariables(expr Expr, funcArgs []map[string]Expr) map[string]bool {
 	freeVars := make(map[string]bool)
-	
+
 	// Пока что упростим: захватываем все переменные из текущей области видимости
 	// TODO: Улучшить анализ AST для более точного определения свободных переменных
 	allVars := scope.GlobalScope.GetAll()
-	
+
 	// Исключаем параметры функции из захваченных переменных
 	localVars := make(map[string]bool)
 	for _, arg := range funcArgs {
@@ -64,14 +64,14 @@ func findFreeVariables(expr Expr, funcArgs []map[string]Expr) map[string]bool {
 			localVars[name] = true
 		}
 	}
-	
+
 	// Захватываем все остальные переменные
 	for name := range allVars {
 		if !localVars[name] {
 			freeVars[name] = true
 		}
 	}
-	
+
 	return freeVars
 }
 
@@ -125,7 +125,7 @@ func (c *Closure) Call(args []*Value) *Value {
 			}
 
 			result := stm.Eval()
-			
+
 			// Проверяем на return
 			if result != nil && result.IsReturn() {
 				return result
@@ -164,10 +164,10 @@ func (c *Closure) GetCapturedVars() map[string]*value.Value {
 func NewTypedClosure(funcName string, params []FuncParam, body Expr, returnType string) *TypedClosure {
 	// Захватываем все переменные из текущей области видимости
 	capturedVars := make(map[string]*value.Value)
-	
+
 	// Пока используем простое решение - не захватываем переменные для типизированных функций
 	// В будущем можно добавить анализ свободных переменных
-	
+
 	return &TypedClosure{
 		funcName:     funcName,
 		params:       params,
@@ -182,7 +182,7 @@ func (tc *TypedClosure) Name() string {
 	return tc.funcName
 }
 
-// Call вызывает типизированное замыкание  
+// Call вызывает типизированное замыкание
 func (tc *TypedClosure) Call(args []*Value) *Value {
 	// Проверяем количество аргументов
 	requiredArgs := 0
@@ -191,31 +191,31 @@ func (tc *TypedClosure) Call(args []*Value) *Value {
 			requiredArgs++
 		}
 	}
-	
+
 	if len(args) < requiredArgs {
 		panic(fmt.Sprintf("function '%s' requires at least %d arguments, got %d", tc.funcName, requiredArgs, len(args)))
 	}
-	
+
 	if len(args) > len(tc.params) {
 		panic(fmt.Sprintf("function '%s' accepts at most %d arguments, got %d", tc.funcName, len(tc.params), len(args)))
 	}
-	
+
 	// Создаем новую область видимости
 	scope.GlobalScope.Push()
 	defer scope.GlobalScope.Pop()
-	
+
 	// Восстанавливаем захваченные переменные
 	for name, val := range tc.capturedVars {
 		scope.GlobalScope.Set(name, val)
 	}
-	
+
 	// Устанавливаем параметры функции с проверкой типов
 	for i, param := range tc.params {
 		var argValue *Value
-		
+
 		if i < len(args) {
 			argValue = args[i]
-			
+
 			// Проверяем тип параметра, если указан
 			if param.TypeName != "" {
 				if err := validateFunctionParameterType(argValue, param.TypeName); err != nil {
@@ -228,10 +228,10 @@ func (tc *TypedClosure) Call(args []*Value) *Value {
 		} else {
 			panic(fmt.Sprintf("missing required argument: %s", param.Name))
 		}
-		
+
 		scope.GlobalScope.Set(param.Name, argValue)
 	}
-	
+
 	// Выполняем тело функции
 	var result *Value
 	if bodyStm, ok := tc.body.(*BodyExpr); ok {
@@ -241,20 +241,21 @@ func (tc *TypedClosure) Call(args []*Value) *Value {
 				break
 			}
 		}
+
 		if result == nil || (result != nil && !result.IsReturn()) {
 			result = NewValue(nil)
 		}
 	} else {
 		result = tc.body.Eval()
 	}
-	
+
 	// Проверяем тип возвращаемого значения, если он указан
 	if tc.returnType != "" && result != nil {
 		if err := tc.validateReturnType(result); err != nil {
 			panic(fmt.Sprintf("function '%s' return type error: %s", tc.funcName, err.Error()))
 		}
 	}
-	
+
 	return result
 }
 
@@ -265,7 +266,7 @@ func (tc *TypedClosure) validateReturnType(returnValue *Value) error {
 	if returnValue.IsReturn() {
 		actualValue = NewValue(returnValue.Any())
 	}
-	
+
 	return validateFunctionParameterType(actualValue, tc.returnType)
 }
 

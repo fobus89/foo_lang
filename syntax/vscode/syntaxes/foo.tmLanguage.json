@@ -1,0 +1,306 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Foo",
+  "scopeName": "source.foo",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#types"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#macros"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#punctuation"
+    },
+    {
+      "include": "#variables"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.foo",
+          "begin": "//",
+          "end": "$"
+        },
+        {
+          "name": "comment.block.foo",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.foo",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.foo",
+              "match": "\\\\."
+            },
+            {
+              "name": "variable.other.interpolation.foo",
+              "begin": "\\$\\{",
+              "end": "\\}",
+              "patterns": [
+                {
+                  "include": "$self"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.foo",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.foo",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.float.foo",
+          "match": "\\b\\d+\\.\\d+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.foo",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.foo",
+          "match": "\\b(if|else|for|match|return|yield|break|async|await)\\b"
+        },
+        {
+          "name": "keyword.declaration.foo",
+          "match": "\\b(let|const|fn|struct|enum|interface|impl|extension|import|export|from|as)\\b"
+        },
+        {
+          "name": "keyword.operator.foo",
+          "match": "\\b(typeof|type|quote|unquote|macro)\\b"
+        },
+        {
+          "name": "constant.language.boolean.foo",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "name": "constant.language.null.foo",
+          "match": "\\b(null)\\b"
+        },
+        {
+          "name": "support.function.builtin.foo",
+          "match": "\\b(print|println|sleep|Promise)\\b"
+        },
+        {
+          "name": "storage.type.result.foo",
+          "match": "\\b(Result|Ok|Err)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.primitive.foo",
+          "match": "\\b(int|float|string|bool)\\b"
+        },
+        {
+          "name": "storage.type.generic.foo",
+          "match": "\\b[A-Z][a-zA-Z0-9_]*\\b"
+        },
+        {
+          "name": "storage.type.union.foo",
+          "match": "\\|"
+        },
+        {
+          "name": "storage.type.optional.foo",
+          "match": "\\?"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.foo",
+          "match": "\\b(fn)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.foo"
+            },
+            "2": {
+              "name": "entity.name.function.foo"
+            }
+          }
+        },
+        {
+          "name": "entity.name.function.call.foo",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+          "captures": {
+            "1": {
+              "name": "entity.name.function.foo"
+            }
+          }
+        },
+        {
+          "name": "entity.name.function.generic.foo",
+          "begin": "\\b([a-zA-Z_][a-zA-Z0-9_]*)<",
+          "end": ">",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.function.foo"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#types"
+            },
+            {
+              "name": "punctuation.separator.foo",
+              "match": ","
+            }
+          ]
+        }
+      ]
+    },
+    "macros": {
+      "patterns": [
+        {
+          "name": "entity.name.function.macro.foo",
+          "match": "\\b(macro)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.foo"
+            },
+            "2": {
+              "name": "entity.name.function.macro.foo"
+            }
+          }
+        },
+        {
+          "name": "entity.name.function.macro.call.foo",
+          "match": "@([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "entity.name.function.macro.foo"
+            }
+          }
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment.foo",
+          "match": "(\\+=|\\-=|\\*=|\\/=|%=|=)"
+        },
+        {
+          "name": "keyword.operator.comparison.foo",
+          "match": "(==|!=|<=|>=|<|>)"
+        },
+        {
+          "name": "keyword.operator.logical.foo",
+          "match": "(&&|\\|\\||!)"
+        },
+        {
+          "name": "keyword.operator.arithmetic.foo",
+          "match": "(\\+|\\-|\\*|\\/|%|\\+\\+|\\-\\-)"
+        },
+        {
+          "name": "keyword.operator.arrow.foo",
+          "match": "(=>|->|<-)"
+        },
+        {
+          "name": "keyword.operator.ternary.foo",
+          "match": "\\?"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.definition.parameters.begin.foo",
+          "match": "\\("
+        },
+        {
+          "name": "punctuation.definition.parameters.end.foo",
+          "match": "\\)"
+        },
+        {
+          "name": "punctuation.definition.array.begin.foo",
+          "match": "\\["
+        },
+        {
+          "name": "punctuation.definition.array.end.foo",
+          "match": "\\]"
+        },
+        {
+          "name": "punctuation.definition.block.begin.foo",
+          "match": "\\{"
+        },
+        {
+          "name": "punctuation.definition.block.end.foo",
+          "match": "\\}"
+        },
+        {
+          "name": "punctuation.separator.comma.foo",
+          "match": ","
+        },
+        {
+          "name": "punctuation.separator.colon.foo",
+          "match": ":"
+        },
+        {
+          "name": "punctuation.separator.semicolon.foo",
+          "match": ";"
+        },
+        {
+          "name": "punctuation.accessor.foo",
+          "match": "\\."
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "variable.other.constant.foo",
+          "match": "\\b[A-Z][A-Z0-9_]*\\b"
+        },
+        {
+          "name": "variable.other.foo",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}

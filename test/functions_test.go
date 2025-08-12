@@ -213,7 +213,7 @@ func TestFunctionScope(t *testing.T) {
 
 // TODO: Default parameters are not yet implemented
 // func TestFunctionWithDefaultParameters(t *testing.T) {
-//	scope.GlobalScope = scope.NewScopeStack()
+//	InitTestEnvironment()
 //
 //	const code = `
 //		fn greet(name, greeting = "Hello") {

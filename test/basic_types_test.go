@@ -7,8 +7,6 @@ import (
 )
 
 func TestBasicTypes(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-
 	tests := []struct {
 		name     string
 		code     string
@@ -23,9 +21,9 @@ func TestBasicTypes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			scope.GlobalScope = scope.NewScopeStack()
+			InitTestEnvironment()
 			
-			exprs := parser.NewParser(tt.code).Parse()
+			exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -61,9 +59,9 @@ func TestArithmeticOperators(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			scope.GlobalScope = scope.NewScopeStack()
+			InitTestEnvironment()
 			
-			exprs := parser.NewParser(tt.code).Parse()
+			exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -98,9 +96,9 @@ func TestLogicalOperators(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			scope.GlobalScope = scope.NewScopeStack()
+			InitTestEnvironment()
 			
-			exprs := parser.NewParser(tt.code).Parse()
+			exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -134,9 +132,9 @@ func TestComparisonOperators(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			scope.GlobalScope = scope.NewScopeStack()
+			InitTestEnvironment()
 			
-			exprs := parser.NewParser(tt.code).Parse()
+			exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}

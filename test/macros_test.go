@@ -3,7 +3,6 @@ package test
 import (
 	"bytes"
 	"foo_lang/parser"
-	"foo_lang/scope"
 	"io"
 	"os"
 	"strings"
@@ -126,8 +125,8 @@ func TestMacros(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				exprs := parser.NewParser(tt.code).Parse()
+				InitTestEnvironment()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -197,8 +196,8 @@ func TestMacroErrors(t *testing.T) {
 				}
 			}()
 			
-			scope.GlobalScope = scope.NewScopeStack()
-			exprs := parser.NewParser(tt.code).Parse()
+			InitTestEnvironment()
+			exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -234,8 +233,8 @@ func TestQuoteUnquote(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				exprs := parser.NewParser(tt.code).Parse()
+				InitTestEnvironment()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}

@@ -4,14 +4,11 @@ import (
 	"testing"
 	"foo_lang/bytecode"
 	"foo_lang/scope"
-	"foo_lang/builtin"
 )
 
 func TestSimpleBytecodeBasic(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeMathFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 	
 	// Создаем chunk напрямую (без компилятора)
 	chunk := bytecode.NewChunk()

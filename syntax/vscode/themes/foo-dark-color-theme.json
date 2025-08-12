@@ -1,0 +1,194 @@
+{
+  "name": "Foo Dark",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#1e1e1e",
+    "editor.foreground": "#d4d4d4",
+    "editorLineNumber.foreground": "#858585",
+    "editorLineNumber.activeForeground": "#c6c6c6",
+    "editor.selectionBackground": "#264f78",
+    "editor.wordHighlightBackground": "#575757b8",
+    "editor.wordHighlightStrongBackground": "#004972b8",
+    "editorCursor.foreground": "#aeafad",
+    "editor.lineHighlightBackground": "#2a2d2e"
+  },
+  "tokenColors": [
+    {
+      "name": "Comment",
+      "scope": [
+        "comment.line.double-slash.foo",
+        "comment.block.foo"
+      ],
+      "settings": {
+        "foreground": "#6A9955",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "name": "String",
+      "scope": [
+        "string.quoted.double.foo",
+        "string.quoted.single.foo"
+      ],
+      "settings": {
+        "foreground": "#CE9178"
+      }
+    },
+    {
+      "name": "String Interpolation",
+      "scope": "variable.other.interpolation.foo",
+      "settings": {
+        "foreground": "#4EC9B0"
+      }
+    },
+    {
+      "name": "Number",
+      "scope": [
+        "constant.numeric.integer.foo",
+        "constant.numeric.float.foo"
+      ],
+      "settings": {
+        "foreground": "#B5CEA8"
+      }
+    },
+    {
+      "name": "Escape Characters",
+      "scope": "constant.character.escape.foo",
+      "settings": {
+        "foreground": "#D7BA7D"
+      }
+    },
+    {
+      "name": "Keywords",
+      "scope": [
+        "keyword.control.foo",
+        "keyword.declaration.foo",
+        "keyword.operator.foo"
+      ],
+      "settings": {
+        "foreground": "#569CD6",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Types",
+      "scope": [
+        "storage.type.primitive.foo",
+        "storage.type.generic.foo"
+      ],
+      "settings": {
+        "foreground": "#4EC9B0"
+      }
+    },
+    {
+      "name": "Boolean Constants",
+      "scope": "constant.language.boolean.foo",
+      "settings": {
+        "foreground": "#569CD6"
+      }
+    },
+    {
+      "name": "Null Constant",
+      "scope": "constant.language.null.foo",
+      "settings": {
+        "foreground": "#569CD6"
+      }
+    },
+    {
+      "name": "Functions",
+      "scope": [
+        "entity.name.function.foo",
+        "entity.name.function.call.foo"
+      ],
+      "settings": {
+        "foreground": "#DCDCAA"
+      }
+    },
+    {
+      "name": "Macros",
+      "scope": [
+        "entity.name.function.macro.foo",
+        "entity.name.function.macro.call.foo"
+      ],
+      "settings": {
+        "foreground": "#FF6B9D",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Builtin Functions",
+      "scope": "support.function.builtin.foo",
+      "settings": {
+        "foreground": "#4FC1FF"
+      }
+    },
+    {
+      "name": "Result Types",
+      "scope": "storage.type.result.foo",
+      "settings": {
+        "foreground": "#FF8C42"
+      }
+    },
+    {
+      "name": "Operators",
+      "scope": [
+        "keyword.operator.assignment.foo",
+        "keyword.operator.comparison.foo",
+        "keyword.operator.logical.foo",
+        "keyword.operator.arithmetic.foo",
+        "keyword.operator.arrow.foo",
+        "keyword.operator.ternary.foo"
+      ],
+      "settings": {
+        "foreground": "#D4D4D4"
+      }
+    },
+    {
+      "name": "Union Type Operator",
+      "scope": "storage.type.union.foo",
+      "settings": {
+        "foreground": "#FF6B9D"
+      }
+    },
+    {
+      "name": "Optional Type Operator",
+      "scope": "storage.type.optional.foo",
+      "settings": {
+        "foreground": "#FF6B9D"
+      }
+    },
+    {
+      "name": "Punctuation",
+      "scope": [
+        "punctuation.definition.parameters.begin.foo",
+        "punctuation.definition.parameters.end.foo",
+        "punctuation.definition.array.begin.foo",
+        "punctuation.definition.array.end.foo",
+        "punctuation.definition.block.begin.foo",
+        "punctuation.definition.block.end.foo",
+        "punctuation.separator.comma.foo",
+        "punctuation.separator.colon.foo",
+        "punctuation.separator.semicolon.foo",
+        "punctuation.accessor.foo"
+      ],
+      "settings": {
+        "foreground": "#D4D4D4"
+      }
+    },
+    {
+      "name": "Constants",
+      "scope": "variable.other.constant.foo",
+      "settings": {
+        "foreground": "#4FC1FF",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Variables",
+      "scope": "variable.other.foo",
+      "settings": {
+        "foreground": "#9CDCFE"
+      }
+    }
+  ]
+}

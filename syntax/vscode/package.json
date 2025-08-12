@@ -1,0 +1,71 @@
+{
+  "name": "foo-lang",
+  "displayName": "Foo Language Support",
+  "description": "Syntax highlighting and language support for Foo programming language",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Syntax Highlighting"
+  ],
+  "keywords": [
+    "foo",
+    "foo-lang",
+    "programming-language",
+    "syntax-highlighting"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "foo",
+        "aliases": [
+          "Foo",
+          "foo"
+        ],
+        "extensions": [
+          ".foo"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "foo",
+        "scopeName": "source.foo",
+        "path": "./syntaxes/foo.tmLanguage.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "Foo Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/foo-dark-color-theme.json"
+      },
+      {
+        "label": "Foo Light",
+        "uiTheme": "vs",
+        "path": "./themes/foo-light-color-theme.json"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onLanguage:foo"
+  ],
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "typescript": "^4.9.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/foo-lang"
+  },
+  "author": "Foo Lang Team",
+  "license": "MIT"
+}

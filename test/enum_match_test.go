@@ -7,7 +7,7 @@ import (
 )
 
 func TestEnumDefinition(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		enum Color { RED, GREEN, BLUE }
@@ -16,7 +16,7 @@ func TestEnumDefinition(t *testing.T) {
 		let blue = Color.BLUE
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -54,14 +54,14 @@ func TestEnumDefinition(t *testing.T) {
 }
 
 func TestEnumAccess(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		enum Status { PENDING, RUNNING, COMPLETED, FAILED }
 		let currentStatus = Status.RUNNING
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -78,7 +78,7 @@ func TestEnumAccess(t *testing.T) {
 }
 
 func TestMatchExpression(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let x = 2
@@ -90,7 +90,7 @@ func TestMatchExpression(t *testing.T) {
 		}
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -107,7 +107,7 @@ func TestMatchExpression(t *testing.T) {
 }
 
 func TestMatchWithDefault(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let x = 99
@@ -118,7 +118,7 @@ func TestMatchWithDefault(t *testing.T) {
 		}
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -135,7 +135,7 @@ func TestMatchWithDefault(t *testing.T) {
 }
 
 func TestMatchWithBlocks(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let score = 80
@@ -155,7 +155,7 @@ func TestMatchWithBlocks(t *testing.T) {
 		}
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -172,7 +172,7 @@ func TestMatchWithBlocks(t *testing.T) {
 }
 
 func TestMatchWithEnums(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		enum Direction { NORTH, SOUTH, EAST, WEST }
@@ -186,7 +186,7 @@ func TestMatchWithEnums(t *testing.T) {
 		}
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -203,7 +203,7 @@ func TestMatchWithEnums(t *testing.T) {
 }
 
 func TestConditionalExpression(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let age = 20
@@ -212,7 +212,7 @@ func TestConditionalExpression(t *testing.T) {
 		let parity = number % 2 == 0 ? "even" : "odd"
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -241,7 +241,7 @@ func TestConditionalExpression(t *testing.T) {
 }
 
 func TestChainedMethodCalls(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let data = { 
@@ -252,7 +252,7 @@ func TestChainedMethodCalls(t *testing.T) {
 		let newLength = newArray.length()
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}

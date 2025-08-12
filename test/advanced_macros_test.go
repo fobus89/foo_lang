@@ -63,9 +63,9 @@ func TestStructDefinition(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			scope.GlobalScope = scope.NewScopeStack()
+			InitTestEnvironment()
 
-			exprs := parser.NewParser(tt.code).Parse()
+			exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -124,8 +124,8 @@ func TestTypeofExpression(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureOutput2(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				exprs := parser.NewParser(tt.code).Parse()
+				InitTestEnvironment()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -183,8 +183,8 @@ func TestTypeExpression(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureOutput2(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				exprs := parser.NewParser(tt.code).Parse()
+				InitTestEnvironment()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -268,8 +268,8 @@ func TestAdvancedMacrosWithTypes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureOutput2(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				exprs := parser.NewParser(tt.code).Parse()
+				InitTestEnvironment()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -333,8 +333,8 @@ func TestMacroCodeGeneration(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureOutput2(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				exprs := parser.NewParser(tt.code).Parse()
+				InitTestEnvironment()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}

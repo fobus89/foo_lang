@@ -3,9 +3,7 @@ package test
 import (
 	"bytes"
 	"fmt"
-	"foo_lang/builtin"
 	"foo_lang/parser"
-	"foo_lang/scope"
 	"foo_lang/value"
 	"io"
 	"os"
@@ -15,10 +13,7 @@ import (
 
 func TestTimeBasicOperations(t *testing.T) {
 	// Инициализируем scope с функциями времени
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeMathFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
-	builtin.InitializeTimeFunctions(scope.GlobalScope)
+	InitWithTime()
 
 	tests := []struct {
 		name string
@@ -82,11 +77,7 @@ func TestTimeBasicOperations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureTimeOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				// Регистрируем все встроенные функции
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeTimeFunctions(scope.GlobalScope)
+				InitWithTime()
 				
 				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
@@ -157,10 +148,7 @@ func TestTimeArithmetic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureTimeOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeTimeFunctions(scope.GlobalScope)
+				InitWithTime()
 				
 				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
@@ -221,10 +209,7 @@ func TestTimeComparison(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureTimeOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeTimeFunctions(scope.GlobalScope)
+				InitWithTime()
 				
 				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
@@ -280,10 +265,7 @@ func TestTimeFormatting(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureTimeOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeTimeFunctions(scope.GlobalScope)
+				InitWithTime()
 				
 				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
@@ -380,10 +362,7 @@ func TestTimeErrorHandling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureTimeOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeTimeFunctions(scope.GlobalScope)
+				InitWithTime()
 				
 				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {

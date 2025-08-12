@@ -54,8 +54,7 @@ func TestBasicClosure(t *testing.T) {
 }
 
 func TestClosureModification(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-	
+	// Устанавливаем global parse function
 	parseFunc := func(code string) []modules.Expr {
 		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
@@ -111,8 +110,7 @@ func TestClosureModification(t *testing.T) {
 }
 
 func TestNestedClosures(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-	
+	// Устанавливаем global parse function
 	parseFunc := func(code string) []modules.Expr {
 		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
@@ -162,8 +160,7 @@ func TestNestedClosures(t *testing.T) {
 }
 
 func TestClosureWithParameters(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-	
+	// Устанавливаем global parse function
 	parseFunc := func(code string) []modules.Expr {
 		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
@@ -211,8 +208,7 @@ func TestClosureWithParameters(t *testing.T) {
 }
 
 func TestClosureWithMathFunctions(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-	
+	// Устанавливаем global parse function
 	parseFunc := func(code string) []modules.Expr {
 		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))

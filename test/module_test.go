@@ -8,11 +8,11 @@ import (
 )
 
 func TestBasicImportParsing(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `import "./math.foo"`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	if len(exprs) != 1 {
 		t.Errorf("expected 1 expression, got %d", len(exprs))
 		return
@@ -37,11 +37,11 @@ func TestBasicImportParsing(t *testing.T) {
 }
 
 func TestSelectiveImportParsing(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `import { add, subtract } from "./math.foo"`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	if len(exprs) != 1 {
 		t.Errorf("expected 1 expression, got %d", len(exprs))
 		return
@@ -67,11 +67,11 @@ func TestSelectiveImportParsing(t *testing.T) {
 }
 
 func TestAliasImportParsing(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `import * as Math from "./math.foo"`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	if len(exprs) != 1 {
 		t.Errorf("expected 1 expression, got %d", len(exprs))
 		return
@@ -97,7 +97,7 @@ func TestAliasImportParsing(t *testing.T) {
 }
 
 func TestBasicExportParsing(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		export fn add(a, b) {
@@ -105,7 +105,7 @@ func TestBasicExportParsing(t *testing.T) {
 		}
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	if len(exprs) != 1 {
 		t.Errorf("expected 1 expression, got %d", len(exprs))
 		return
@@ -132,11 +132,11 @@ func TestBasicExportParsing(t *testing.T) {
 }
 
 func TestExportVariable(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `export let PI = 3.14159`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	if len(exprs) != 1 {
 		t.Errorf("expected 1 expression, got %d", len(exprs))
 		return
@@ -165,11 +165,11 @@ func TestExportVariable(t *testing.T) {
 }
 
 func TestExportConstant(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `export const MAX_SIZE = 100`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	if len(exprs) != 1 {
 		t.Errorf("expected 1 expression, got %d", len(exprs))
 		return
@@ -198,11 +198,11 @@ func TestExportConstant(t *testing.T) {
 }
 
 func TestExportEnum(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `export enum Status { PENDING, RUNNING, COMPLETED }`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	if len(exprs) != 1 {
 		t.Errorf("expected 1 expression, got %d", len(exprs))
 		return

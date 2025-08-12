@@ -9,11 +9,11 @@ import (
 )
 
 func TestResultOk(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `let result = Ok(42)`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -45,11 +45,11 @@ func TestResultOk(t *testing.T) {
 }
 
 func TestResultErr(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `let result = Err("error message")`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -81,7 +81,7 @@ func TestResultErr(t *testing.T) {
 }
 
 func TestResultMethods(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let okResult = Ok(100)
@@ -94,7 +94,7 @@ func TestResultMethods(t *testing.T) {
 		let unwrapOrTest2 = errResult.unwrapOr(-1)
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -128,14 +128,14 @@ func TestResultMethods(t *testing.T) {
 }
 
 func TestResultUnwrapPanic(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let errResult = Err("something went wrong")
 		errResult.unwrap()
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	
 	// This should panic
 	defer func() {
@@ -155,7 +155,7 @@ func TestResultUnwrapPanic(t *testing.T) {
 }
 
 func TestResultInFunction(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		fn safeDivide(a, b) {
@@ -172,7 +172,7 @@ func TestResultInFunction(t *testing.T) {
 		let value2 = result2.unwrapOr(-1)
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -201,7 +201,7 @@ func TestResultInFunction(t *testing.T) {
 }
 
 func TestResultChaining(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		fn parseInt(str) {
@@ -231,7 +231,7 @@ func TestResultChaining(t *testing.T) {
 		let final2 = result2.unwrapOr("no result")
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}

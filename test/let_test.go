@@ -8,14 +8,14 @@ import (
 
 func TestLet(t *testing.T) {
 	// Clear scope and create new one
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let x = 1
 		let y = 2
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 
 	for _, expr := range exprs {
 		expr.Eval()
@@ -40,7 +40,7 @@ func TestLet(t *testing.T) {
 
 func TestLetExpression(t *testing.T) {
 	// Clear scope and create new one
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 
 	const code = `
 		let x = 1
@@ -48,7 +48,7 @@ func TestLetExpression(t *testing.T) {
 		let z = x + y
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 
 	for _, expr := range exprs {
 		expr.Eval()
