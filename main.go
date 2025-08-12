@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"foo_lang/parser"
 	"foo_lang/ast"
-	"foo_lang/modules"
 	"foo_lang/builtin"
+	"foo_lang/modules"
+	"foo_lang/parser"
 	"foo_lang/scope"
 	"os"
 )
@@ -24,7 +24,7 @@ func main() {
 
 	var mainFile []byte
 	var err error
-	
+
 	if len(os.Args) > 1 {
 		mainFile, err = os.ReadFile(os.Args[1])
 		if err != nil {
@@ -45,16 +45,16 @@ func main() {
 		return result
 	}
 	ast.SetGlobalParseFunc(parseFunc)
-	
+
 	// Инициализируем встроенные математические функции
 	builtin.InitializeMathFunctions(scope.GlobalScope)
-	
+
 	// Инициализируем встроенные строковые функции
 	builtin.InitializeStringFunctions(scope.GlobalScope)
-	
+
 	// Инициализируем встроенные функции файловой системы
 	builtin.InitializeFilesystemFunctions(scope.GlobalScope)
-	
+
 	exprs := parser.NewParser(mainFile).Parse()
 
 	for _, expr := range exprs {
