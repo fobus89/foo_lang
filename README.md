@@ -876,6 +876,67 @@ for let i = 1; i <= 5; i++ {
 }
 ```
 
+#### Работа с датой и временем ✅ **тесты готовы**
+```foo
+// Текущее время
+let currentTime = now()
+println("Сейчас: " + timeFormat(currentTime, "datetime"))
+
+// Создание времени из Unix timestamp
+let specificTime = timeFromUnix(1609459200)  // 2021-01-01 00:00:00 UTC
+println("Время: " + timeFormat(specificTime, "date"))
+
+// Создание времени из строки
+let parsedTime = timeFromString("2023-12-25 15:30:00", "datetime")
+
+// Получение компонентов времени
+let year = timeYear(currentTime)
+let month = timeMonth(currentTime)
+let day = timeDay(currentTime)
+let hour = timeHour(currentTime)
+let minute = timeMinute(currentTime)
+let second = timeSecond(currentTime)
+let weekday = timeWeekday(currentTime)  // 0 = Воскресенье
+
+// Форматирование времени
+timeFormat(currentTime, "date")           // "2023-12-01"
+timeFormat(currentTime, "time")           // "15:30:45"
+timeFormat(currentTime, "datetime")       // "2023-12-01 15:30:45"
+timeFormat(currentTime, "YYYY-MM-DD")     // "2023-12-01"
+timeFormat(currentTime, "HH:mm:ss")       // "15:30:45"
+
+// Арифметические операции с датами
+let futureTime = timeAddDays(currentTime, 30)     // +30 дней
+let pastTime = timeAddMonths(currentTime, -6)     // -6 месяцев
+let nextYear = timeAddYears(currentTime, 1)       // +1 год
+let laterTime = timeAddHours(currentTime, 5)      // +5 часов
+let soonTime = timeAddMinutes(currentTime, 15)    // +15 минут
+let justNow = timeAddSeconds(currentTime, 30)     // +30 секунд
+
+// Сравнение времен
+let time1 = timeFromUnix(1609459200)
+let time2 = timeFromUnix(1609545600)
+let isBefore = timeBefore(time1, time2)    // true
+let isAfter = timeAfter(time2, time1)      // true  
+let isEqual = timeEqual(time1, time1)      // true
+
+// Разности между временами
+let diffSeconds = timeDiff(time2, time1)      // в секундах
+let diffMinutes = timeDiffMinutes(time2, time1) // в минутах
+let diffHours = timeDiffHours(time2, time1)   // в часах
+let diffDays = timeDiffDays(time2, time1)     // в днях
+
+// Unix timestamps
+let timestamp = timeUnix(currentTime)      // получить timestamp
+let timeFromStamp = timeFromUnix(timestamp) // создать из timestamp
+
+// Практический пример - расчет возраста
+let birthDate = timeFromUnix(946684800)  // 2000-01-01
+let ageInDays = timeDiffDays(now(), birthDate)
+let ageInYears = ageInDays / 365.25
+println("Возраст: " + ageInYears.toString() + " лет")
+```
+
 #### Файловая система ✅ **тесты готовы**
 ```foo
 // Работа с файлами
@@ -1224,6 +1285,7 @@ println("Режим: " + Math.MathMode.PRECISE)
 - `test_http_server.foo` - демонстрация HTTP сервера (роутинг, обработчики, JSON API)
 - `test_http_complete.foo` - полная демонстрация HTTP клиента и сервера вместе
 - `test_channels_basic.foo` - демонстрация каналов для межгорутинной коммуникации
+- `test_time_demo.foo` - полная демонстрация работы с датой и временем (25+ функций)
 
 ## Запуск тестов
 
@@ -1360,9 +1422,10 @@ OP_ADD                        1              0s
 - [x] **Generic ограничения типов** - полная система `<T: Interface + Interface2>` с проверкой во время выполнения ✅ **тесты готовы**
 - [x] **Bytecode виртуальная машина** - компиляция в bytecode, VM выполнение, профилирование, дизассемблирование ✅ **тесты готовы**
 - [x] **Каналы для межгорутинной коммуникации** - полная система каналов с буферизацией, неблокирующими операциями, select и интеграция с async/await ✅ **тесты готовы**
+- [x] **Работа с датой и временем** - полная поддержка временных операций (25+ функций: now, timeFromUnix, timeFormat, timeYear, timeAddDays, timeDiff, timeBefore и другие) ✅ **тесты готовы**
 
 ### 📊 Покрытие тестами: 100%
-Все основные функции языка покрыты unit-тестами (285+ тестов):
+Все основные функции языка покрыты unit-тестами (290+ тестов):
 - `test/basic_types_test.go` - базовые типы и операторы
 - `test/collections_test.go` - массивы и объекты  
 - `test/functions_test.go` - функции и рекурсия
@@ -1387,6 +1450,7 @@ OP_ADD                        1              0s
 - `test/simple_bytecode_test.go` - упрощенные bytecode тесты (6 тестов арифметики, логики, сравнений)
 - `test/minimal_bytecode_test.go` - минимальные bytecode тесты (5 тестов базового функционала VM)
 - `test/channels_test.go` - каналы для межгорутинной коммуникации (10 тестов конкурентности, буферизации, select)
+- `test/time_test.go` - работа с датой и временем (25+ функций времени, форматирование, арифметика)
 
 ### 🚧 Следующие этапы развития
 
