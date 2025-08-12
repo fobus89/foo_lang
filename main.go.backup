@@ -1,0 +1,426 @@
+package main
+
+import (
+	"fmt"
+	"foo_lang/ast"
+	"foo_lang/builtin"
+	"foo_lang/modules"
+	"foo_lang/parser"
+	"os"
+	"strings"
+)
+
+type User struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+func main() {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	// Проверяем флаг bytecode режима
+	for _, arg := range os.Args {
+		if arg == "--bytecode" || arg == "-b" {
+			RunBytecodeMode()
+			return
+		}
+		if arg == "--help" || arg == "-h" {
+			printUsage()
+			return
+		}
+	}
+
+	var filename string = "examples/main.foo" // Значение по умолчанию
+
+	if len(os.Args) > 1 {
+		// Пропускаем флаги при поиске файла
+		for _, arg := range os.Args[1:] {
+			if !strings.HasPrefix(arg, "-") {
+				filename = arg
+				break
+			}
+		}
+	}
+
+	// Set up global parse function for module imports
+	parseFunc := func(code string) []modules.Expr {
+		// Для модулей используем специальный парсер, который не перезаписывает GlobalScope
+		exprs := parser.NewParser(code).ParseWithoutScopeInit()
+		result := make([]modules.Expr, len(exprs))
+		for i, expr := range exprs {
+			result[i] = expr
+		}
+		return result
+	}
+	ast.SetGlobalParseFunc(parseFunc)
+
+	// Используем NewParserFromFile для упрощения API
+	p, err := parser.NewParserFromFile(filename)
+	if err != nil {
+		fmt.Printf("Error creating parser: %v\n", err)
+		return
+	}
+	
+	// Получаем scope из парсера и инициализируем встроенные функции
+	scopeStack := p.GetScopeStack()
+	
+	// Инициализируем встроенные функции с этим scope
+	builtin.InitializeMathFunctions(scopeStack)
+	builtin.InitializeStringFunctions(scopeStack)
+	builtin.InitializeFilesystemFunctions(scopeStack)
+	builtin.InitializeHttpFunctions(scopeStack)
+	builtin.InitializeChannelFunctions(scopeStack)
+	builtin.InitializeTimeFunctions(scopeStack)
+	builtin.InitializeCryptoFunctions(scopeStack)
+	builtin.InitializeRegexFunctions(scopeStack)
+	builtin.InitializeSyncFunctions(scopeStack)
+	
+	exprs := p.ParseWithModules()
+
+	for _, expr := range exprs {
+		expr.Eval()
+	}
+}
+
+// RunBytecodeMode запускает bytecode режим (заглушка)
+func RunBytecodeMode() {
+	fmt.Println("Bytecode режим находится в разработке")
+	fmt.Println("VM система реализована и протестирована, компилятор в процессе разработки")
+}
+
+// printUsage выводит справку по использованию
+func printUsage() {
+	fmt.Println("foo_lang v2 - Современный интерпретируемый язык программирования")
+	fmt.Println()
+	fmt.Println("Использование:")
+	fmt.Println("  go run main.go [файл.foo] [флаги]")
+	fmt.Println()
+	fmt.Println("Флаги:")
+	fmt.Println("  -b, --bytecode    Использовать bytecode VM (оптимизированный)")
+	fmt.Println("  -d, --disassemble Показать дизассемблированный bytecode")
+	fmt.Println("  -p, --profile     Показать профилирование производительности")
+	fmt.Println("  -c, --compare     Сравнить производительность tree-walking vs bytecode")
+	fmt.Println("  -h, --help        Показать эту справку")
+	fmt.Println()
+	fmt.Println("Примеры:")
+	fmt.Println("  go run main.go                                    # tree-walking интерпретатор")
+	fmt.Println("  go run main.go --bytecode                         # bytecode VM")
+	fmt.Println("  go run main.go examples/test_bytecode_demo.foo -b # bytecode VM с файлом")
+	fmt.Println("  go run main.go --bytecode --profile --disassemble # полная диагностика")
+	fmt.Println("  go run main.go --bytecode --compare               # сравнение производительности")
+	fmt.Println()
+	fmt.Println("Возможности:")
+	fmt.Println("  ✅ Generic функции и типизация")
+	fmt.Println("  ✅ Interface система и Extension Methods") 
+	fmt.Println("  ✅ Async/await и многопоточность")
+	fmt.Println("  ✅ HTTP клиент/сервер")
+	fmt.Println("  ✅ Файловая система")
+	fmt.Println("  ✅ Bytecode компиляция и профилирование")
+}
+	log.Printf("🚀 Starting Foo Language LSP Server with AST parser...")
+	
+	stream := jsonrpc2.NewBufferedStream(&stdinStdoutCloser{Reader: os.Stdin, Writer: os.Stdout}, jsonrpc2.VSCodeObjectCodec{})
+	handler := NewFooLanguageServer()
+	<-jsonrpc2.NewConn(context.Background(), stream, handler).DisconnectNotify()
+}
+
+// stdinStdoutCloser объединяет stdin и stdout для LSP
+type stdinStdoutCloser struct {
+	io.Reader
+	io.Writer
+}
+
+func (c *stdinStdoutCloser) Close() error {
+	return nil
+}
+
+// LSP сервер с интеграцией настоящего парсера
+type FooLanguageServer struct {
+	workspace *LSPWorkspace
+}
+
+func NewFooLanguageServer() *FooLanguageServer {
+	return &FooLanguageServer{
+		workspace: NewLSPWorkspace(),
+	}
+}
+
+func (s *FooLanguageServer) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
+	switch req.Method {
+	case "initialize":
+		s.handleInitialize(ctx, conn, req)
+	case "initialized":
+		// готово
+	case "textDocument/didOpen":
+		s.handleDidOpen(ctx, conn, req)
+	case "textDocument/didChange":
+		s.handleDidChange(ctx, conn, req)
+	case "textDocument/completion":
+		s.handleCompletion(ctx, conn, req)
+	case "textDocument/hover":
+		s.handleHover(ctx, conn, req)
+	case "shutdown":
+		conn.Reply(ctx, req.ID, nil)
+	case "exit":
+		os.Exit(0)
+	default:
+		conn.ReplyWithError(ctx, req.ID, &jsonrpc2.Error{Code: jsonrpc2.CodeMethodNotFound, Message: "method not supported"})
+	}
+}
+
+func (s *FooLanguageServer) handleInitialize(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
+	response := map[string]interface{}{
+		"capabilities": map[string]interface{}{
+			"textDocumentSync": map[string]interface{}{
+				"openClose": true,
+				"change":    2,
+			},
+			"completionProvider": map[string]interface{}{
+				"triggerCharacters": []string{".", "@"},
+			},
+			"hoverProvider": true,
+		},
+	}
+	conn.Reply(ctx, req.ID, response)
+}
+
+func (s *FooLanguageServer) handleDidOpen(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
+	var params map[string]interface{}
+	json.Unmarshal(*req.Params, &params)
+	
+	textDoc := params["textDocument"].(map[string]interface{})
+	uri := textDoc["uri"].(string)
+	text := textDoc["text"].(string)
+	
+	s.workspace.AddDocument(uri, text)
+}
+
+func (s *FooLanguageServer) handleDidChange(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
+	var params map[string]interface{}
+	json.Unmarshal(*req.Params, &params)
+	
+	textDoc := params["textDocument"].(map[string]interface{})
+	uri := textDoc["uri"].(string)
+	
+	changes := params["contentChanges"].([]interface{})
+	if len(changes) > 0 {
+		change := changes[0].(map[string]interface{})
+		text := change["text"].(string)
+		s.workspace.UpdateDocument(uri, text)
+	}
+}
+
+func (s *FooLanguageServer) handleCompletion(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
+	var params map[string]interface{}
+	json.Unmarshal(*req.Params, &params)
+	
+	textDoc := params["textDocument"].(map[string]interface{})
+	uri := textDoc["uri"].(string)
+	
+	completions := s.workspace.GetCompletions(uri)
+	conn.Reply(ctx, req.ID, map[string]interface{}{"items": completions})
+}
+
+func (s *FooLanguageServer) handleHover(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
+	var params map[string]interface{}
+	json.Unmarshal(*req.Params, &params)
+	
+	textDoc := params["textDocument"].(map[string]interface{})
+	uri := textDoc["uri"].(string)
+	
+	hover := s.workspace.GetHover(uri)
+	conn.Reply(ctx, req.ID, hover)
+}
+
+// LSPWorkspace с AST парсером
+type LSPWorkspace struct {
+	documents map[string]*LSPDocument
+	symbols   map[string][]*LSPSymbol
+	parsers   map[string]*parser.Parser
+	scopes    map[string]*scope.Scope
+}
+
+type LSPDocument struct {
+	URI     string
+	Content string
+	Lines   []string
+}
+
+type LSPSymbol struct {
+	Name          string
+	Kind          int // LSP SymbolKind  
+	Detail        string
+	Type          string
+	Signature     string
+	Documentation string
+}
+
+func NewLSPWorkspace() *LSPWorkspace {
+	return &LSPWorkspace{
+		documents: make(map[string]*LSPDocument),
+		symbols:   make(map[string][]*LSPSymbol),
+		parsers:   make(map[string]*parser.Parser),
+		scopes:    make(map[string]*scope.Scope),
+	}
+}
+
+func (w *LSPWorkspace) AddDocument(uri, content string) {
+	doc := &LSPDocument{
+		URI:     uri,
+		Content: content,
+		Lines:   strings.Split(content, "\n"),
+	}
+	
+	w.documents[uri] = doc
+	
+	// Создаем AST парсер
+	l := lexer.New(content)
+	p := parser.New(l)
+	w.parsers[uri] = p
+	w.scopes[uri] = scope.NewScope()
+	
+	w.analyzeWithAST(doc)
+}
+
+func (w *LSPWorkspace) UpdateDocument(uri, content string) {
+	if doc, exists := w.documents[uri]; exists {
+		doc.Content = content
+		doc.Lines = strings.Split(content, "\n")
+		
+		// Пересоздаем парсер
+		l := lexer.New(content)
+		p := parser.New(l)
+		w.parsers[uri] = p
+		
+		w.analyzeWithAST(doc)
+	}
+}
+
+func (w *LSPWorkspace) analyzeWithAST(doc *LSPDocument) {
+	log.Printf("🔍 Analyzing with AST parser: %s", doc.URI)
+	
+	parser := w.parsers[doc.URI]
+	if parser == nil {
+		return
+	}
+	
+	// Парсим в AST
+	program := parser.ParseProgram()
+	if program == nil {
+		return
+	}
+	
+	symbols := w.extractSymbolsFromAST(program)
+	w.symbols[doc.URI] = symbols
+	
+	log.Printf("✅ Found %d symbols with AST: %s", len(symbols), doc.URI)
+}
+
+func (w *LSPWorkspace) extractSymbolsFromAST(program *ast.Program) []*LSPSymbol {
+	symbols := []*LSPSymbol{}
+	
+	for _, expr := range program.Expressions {
+		switch node := expr.(type) {
+		case *ast.LetExpression:
+			symbol := &LSPSymbol{
+				Name:          node.Name.Value,
+				Kind:          6, // Variable
+				Detail:        "variable",
+				Type:          w.inferTypeFromAST(node.Value),
+				Documentation: fmt.Sprintf("Variable %s", node.Name.Value),
+			}
+			symbols = append(symbols, symbol)
+			
+		case *ast.FuncExpression:
+			params := []string{}
+			for _, param := range node.Params {
+				params = append(params, param.Value)
+			}
+			
+			symbol := &LSPSymbol{
+				Name:          node.Name.Value,
+				Kind:          3, // Function
+				Detail:        "function",
+				Type:          "function",
+				Signature:     fmt.Sprintf("fn %s(%s)", node.Name.Value, strings.Join(params, ", ")),
+				Documentation: fmt.Sprintf("Function %s with %d parameters", node.Name.Value, len(params)),
+			}
+			symbols = append(symbols, symbol)
+		}
+	}
+	
+	return symbols
+}
+
+func (w *LSPWorkspace) inferTypeFromAST(expr ast.Expr) string {
+	if expr == nil {
+		return "unknown"
+	}
+	
+	switch expr.(type) {
+	case *ast.IntLiteral:
+		return "int"
+	case *ast.StringLiteral:
+		return "string"
+	case *ast.BoolLiteral:
+		return "bool"
+	case *ast.ArrayLiteral:
+		return "array"
+	default:
+		return "unknown"
+	}
+}
+
+func (w *LSPWorkspace) GetCompletions(uri string) []map[string]interface{} {
+	completions := []map[string]interface{}{}
+	
+	// Ключевые слова
+	keywords := []string{"let", "const", "fn", "struct", "interface", "if", "else", "for", "return", "import", "export", "async", "await"}
+	for _, keyword := range keywords {
+		completions = append(completions, map[string]interface{}{
+			"label": keyword,
+			"kind":  14, // Keyword
+		})
+	}
+	
+	// Встроенные функции
+	builtins := []string{"print", "println", "sin", "cos", "sqrt", "abs", "readFile", "writeFile", "httpGet", "httpPost"}
+	for _, builtin := range builtins {
+		completions = append(completions, map[string]interface{}{
+			"label": builtin,
+			"kind":  3, // Function
+		})
+	}
+	
+	// Пользовательские символы из AST
+	if symbols, exists := w.symbols[uri]; exists {
+		for _, symbol := range symbols {
+			completions = append(completions, map[string]interface{}{
+				"label":  symbol.Name,
+				"kind":   symbol.Kind,
+				"detail": symbol.Detail,
+			})
+		}
+	}
+	
+	return completions
+}
+
+func (w *LSPWorkspace) GetHover(uri string) map[string]interface{} {
+	if symbols, exists := w.symbols[uri]; exists {
+		for _, symbol := range symbols {
+			return map[string]interface{}{
+				"contents": map[string]interface{}{
+					"kind":  "markdown",
+					"value": fmt.Sprintf("**%s** `%s`\n\n%s", symbol.Name, symbol.Type, symbol.Documentation),
+				},
+			}
+		}
+	}
+	
+	return nil
+}

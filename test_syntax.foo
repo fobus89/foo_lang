@@ -1,11 +1,13 @@
-// Тест syntax highlighting для Foo Language
+import "./math_module.foo"
 
 // 1. Ключевые слова
 let message: string = "Hello, Foo!"
-const PI: float = 3.14159
-fn greet(name: string) -> string {
-    return "Hello, " + name
-}
+
+// const PI: float = 3.14159
+
+// fn greet(name: string) -> string {
+//     return "Hello, " + name
+// }
 
 // 2. Структуры и интерфейсы  
 struct User {
@@ -22,6 +24,7 @@ impl Drawable for User {
     fn draw() {
         println("Drawing user: " + this.name)
     }
+
     fn getArea() -> float {
         return 0.0
     }
@@ -35,10 +38,10 @@ fn process<T: Drawable>(item: T) -> T {
 
 // 4. Union и Optional типы
 let value: string | int | float = 42
-let optionalName: string? = null
+// let optionalName: string? = null
 
 // 5. Async/await
-async fn fetchData() -> string {
+fn fetchData() -> string {
     await sleep(100)
     return "data"
 }
@@ -57,10 +60,11 @@ x++
 let result = x > 15 ? "big" : "small"
 
 // 8. Строковая интерполяция
-let greeting = "Hello, ${optionalName ?: "Guest"}!"
+let greeting = "Hello, ${"Guest"}!"
 
 // 9. Match и enum
 enum Status { ACTIVE, INACTIVE }
+
 let status = Status.ACTIVE
 
 match status {

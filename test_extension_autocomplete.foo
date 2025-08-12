@@ -1,0 +1,59 @@
+// Тестовый файл для проверки extension methods автокомплита
+
+// Определяем extension методы для строк
+extension string {
+    fn reverse() -> string {
+        // реализация переворота строки
+        return "reversed"
+    }
+    
+    fn capitalize() -> string {
+        return "Capitalized"
+    }
+    
+    fn repeat(count: int) -> string {
+        return "repeated"
+    }
+}
+
+// Определяем extension методы для чисел
+extension int {
+    fn square() -> int {
+        return this * this
+    }
+    
+    fn isEven() -> bool {
+        return this % 2 == 0
+    }
+}
+
+// Определяем структуру
+struct User {
+    name: string,
+    age: int
+}
+
+// Extension методы для структуры
+extension User {
+    fn getDisplayName() -> string {
+        return "User: " + this.name
+    }
+    
+    fn isAdult() -> bool {
+        return this.age >= 18
+    }
+}
+
+// Тестируем переменные
+let message: string = "Hello World"
+let number: int = 42
+let user = User{name: "Alice", age: 25}
+
+// Места для тестирования автокомплита:
+// message.   <- здесь должны появиться: reverse, capitalize, repeat + встроенные методы строк
+// number.    <- здесь должны появиться: square, isEven + встроенные методы чисел
+// user.      <- здесь должны появиться: getDisplayName, isAdult + встроенные методы
+
+message.
+number.
+user.

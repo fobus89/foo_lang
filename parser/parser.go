@@ -52,7 +52,7 @@ func NewParserFromFile(filePath string) (*Parser, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot read file %s: %v", filePath, err)
 	}
-	
+
 	tokens := lexer.NewLexer(content).Tokens()
 	return &Parser{
 		tokens:      tokens,
@@ -134,7 +134,7 @@ func (p *Parser) MatchAnyNext(tokens ...token.Token) bool {
 
 func (p *Parser) Parse() []ast.Expr {
 	var exprs []ast.Expr
-	
+
 	// Устанавливаем глобальный scope для использования в AST узлах
 	scope.GlobalScope = p.scopeStack
 
@@ -161,10 +161,10 @@ func (p *Parser) ParseWithoutScopeInit() []ast.Expr {
 // ParseWithModules парсит код с правильной поддержкой импортов модулей
 func (p *Parser) ParseWithModules() []ast.Expr {
 	var exprs []ast.Expr
-	
+
 	// Устанавливаем глобальный scope для использования в AST узлах
 	scope.GlobalScope = p.scopeStack
-	
+
 	// Устанавливаем контекст текущего файла для корректной работы импортов
 	if p.currentFile != "" {
 		ast.SetCurrentFileContext(p.currentFile)
@@ -203,9 +203,6 @@ func (p *Parser) Statement() ast.Expr {
 		return ast.NewVarExpr(ident, p.Expression())
 	}
 
-
-
-
 	if p.Match(token.FN) {
 		// Проверяем, есть ли типизированные параметры (например, fn func_name(param: int))
 		if p.hasTypedParameters() {
@@ -226,12 +223,12 @@ func (p *Parser) Statement() ast.Expr {
 		// Parse multiple return values: return a, b, c
 		var returnValues []ast.Expr
 		returnValues = append(returnValues, p.Expression())
-		
+
 		// Check for additional return values
 		for p.MatchAndNext(token.COMMA) {
 			returnValues = append(returnValues, p.Expression())
 		}
-		
+
 		if len(returnValues) == 1 {
 			// Single return value
 			return ast.NewReturnExpr(returnValues[0])
@@ -253,7 +250,6 @@ func (p *Parser) Statement() ast.Expr {
 		tok := p.Peek(-2)
 		ident := tok.Value
 
-
 		if p.MatchAndNext(token.IF) {
 			return ast.NewConstExpr(ident, p.IfStatement())
 		}
@@ -272,19 +268,19 @@ func (p *Parser) Statement() ast.Expr {
 	// Check for multiple variable assignment: let a, b, c = expr
 	if p.MatchAndNext(token.LET) {
 		var names []string
-		
+
 		// Parse first identifier
 		if !p.Match(token.IDENT) {
 			p.error("expected identifier after let", p.Peek(0))
 		}
 		names = append(names, p.Next().Value)
-		
+
 		// Check for type annotation: let name: type = value
 		var varType string
 		if p.MatchAndNext(token.COLON) {
 			varType = p.parseTypeAnnotation()
 		}
-		
+
 		// Check for additional identifiers (multiple assignment)
 		for p.MatchAndNext(token.COMMA) {
 			if !p.Match(token.IDENT) {
@@ -292,19 +288,18 @@ func (p *Parser) Statement() ast.Expr {
 			}
 			names = append(names, p.Next().Value)
 		}
-		
+
 		if !p.MatchAndNext(token.EQ) {
 			p.error("expected '=' after variable names", p.Peek(0))
 		}
-		
+
 		// Multiple assignment case
 		if len(names) > 1 {
 			return ast.NewMultiAssignExpr(names, p.Expression())
 		}
-		
+
 		// Single assignment case - keep existing logic
 		ident := names[0]
-
 
 		// Выбираем тип выражения для создания LetExpr или TypedLetExpr
 		var createLetExpr func(string, ast.Expr) ast.Expr
@@ -405,7 +400,6 @@ func (p *Parser) ForStatement() ast.Expr {
 	return ast.NewForExpr(init, condition, step, body)
 }
 
-
 func (p *Parser) FunctionStatement() ast.Expr {
 	if !p.MatchAllNext(token.FN, token.IDENT, token.LPAREN) {
 		p.error("expected fn", p.Peek(0))
@@ -453,7 +447,7 @@ func (p *Parser) MacroDefinition() ast.Expr {
 	if !p.Match(token.IDENT) {
 		p.error("expected macro name", p.Peek(0))
 	}
-	
+
 	name := p.Peek(0).Value
 	p.Next()
 
@@ -466,22 +460,22 @@ func (p *Parser) MacroDefinition() ast.Expr {
 		if !p.Match(token.IDENT) {
 			p.error("expected parameter name", p.Peek(0))
 		}
-		
+
 		paramName := p.Peek(0).Value
 		p.Next()
-		
+
 		var typeName string
 		// Проверяем на типизированный параметр: paramName: Type
 		if p.Match(token.COLON) {
 			p.Next() // consume ':'
-			
+
 			// Ожидаем тип параметра
 			currentToken := p.Peek(0)
 			if p.Match(token.TYPE) {
 				typeName = "Type"
 				p.Next()
 			} else if p.Match(token.FNTYPE) {
-				typeName = "FnType" 
+				typeName = "FnType"
 				p.Next()
 			} else if p.Match(token.STRUCTTYPE) {
 				typeName = "StructType"
@@ -493,16 +487,16 @@ func (p *Parser) MacroDefinition() ast.Expr {
 				p.error("expected type annotation (Type, FnType, StructType, EnumType)", currentToken)
 			}
 		}
-		
+
 		params = append(params, ast.MacroParam{Name: paramName, TypeName: typeName})
-		
+
 		if p.Match(token.COMMA) {
 			p.Next()
 		} else if !p.Match(token.RPAREN) {
 			p.error("expected ',' or ')'", p.Peek(0))
 		}
 	}
-	
+
 	if !p.MatchAndNext(token.RPAREN) {
 		p.error("expected ')'", p.Peek(0))
 	}
@@ -524,29 +518,29 @@ func (p *Parser) MacroDefinition() ast.Expr {
 	// Если есть Expr блок
 	if p.Match(token.EXPR) {
 		p.Next() // consume 'Expr'
-		
+
 		if !p.MatchAndNext(token.LBRACE) {
 			p.error("expected '{' after 'Expr'", p.Peek(0))
 		}
-		
+
 		// Парсим содержимое Expr блока
 		var exprStatements []ast.Expr
 		for !p.Match(token.RBRACE) {
 			stmt := p.Statement()
 			exprStatements = append(exprStatements, stmt)
 		}
-		
+
 		if !p.MatchAndNext(token.RBRACE) {
 			p.error("expected '}' after Expr block", p.Peek(0))
 		}
-		
+
 		codeGenBody = ast.NewExprBlockExpr(exprStatements)
 	}
 
 	if !p.MatchAndNext(token.RBRACE) {
 		p.error("expected '}' after macro body", p.Peek(0))
 	}
-	
+
 	return ast.NewMacroDefExpr(name, params, macroTimeStatements, codeGenBody)
 }
 
@@ -558,7 +552,7 @@ func (p *Parser) StructDefinition() ast.Expr {
 	if !p.Match(token.IDENT) {
 		p.error("expected struct name", p.Peek(0))
 	}
-	
+
 	name := p.Peek(0).Value
 	p.Next()
 
@@ -571,10 +565,10 @@ func (p *Parser) StructDefinition() ast.Expr {
 		if !p.Match(token.IDENT) {
 			p.error("expected field name", p.Peek(0))
 		}
-		
+
 		fieldName := p.Peek(0).Value
 		p.Next()
-		
+
 		// Поддержка типизированных полей: fieldName: type
 		var fieldExpr ast.Expr
 		if p.MatchAndNext(token.COLON) {
@@ -588,16 +582,16 @@ func (p *Parser) StructDefinition() ast.Expr {
 			// Поле без явного типа
 			fieldExpr = ast.NewTypeExpr("any")
 		}
-		
+
 		fields[fieldName] = fieldExpr
-		
+
 		if p.Match(token.COMMA) {
 			p.Next()
 		} else if !p.Match(token.RBRACE) {
 			p.error("expected ',' or '}'", p.Peek(0))
 		}
 	}
-	
+
 	if !p.MatchAndNext(token.RBRACE) {
 		p.error("expected '}'", p.Peek(0))
 	}
@@ -826,7 +820,7 @@ func (p *Parser) Unary() ast.Expr {
 
 func (p *Parser) Postfix() ast.Expr {
 	expr := p.Primary()
-	
+
 	for {
 		if p.MatchAndNext(token.DOT) {
 			// Точечная нотация: obj.property или obj.method()
@@ -834,7 +828,7 @@ func (p *Parser) Postfix() ast.Expr {
 			if propTok.Token != token.IDENT {
 				p.error("expected property name after '.'", propTok)
 			}
-			
+
 			// Проверяем, это вызов метода или доступ к свойству
 			if p.MatchAndNext(token.LPAREN) {
 				// Это вызов метода: obj.method(args)
@@ -873,7 +867,7 @@ func (p *Parser) Postfix() ast.Expr {
 			// И только если следующий токен выглядит как поле структуры
 			if varExpr, ok := expr.(*ast.VarExpr); ok && p.isStructInstantiation() {
 				fields := make(map[string]ast.Expr)
-				
+
 				// Пустой объект {}
 				if p.MatchAndNext(token.RBRACE) {
 					expr = ast.NewStructInstanceExpr(varExpr.Name, fields)
@@ -883,7 +877,7 @@ func (p *Parser) Postfix() ast.Expr {
 						// Ожидаем идентификатор как ключ поля
 						keyTok := p.Next()
 						var key string
-						
+
 						if keyTok.Token == token.IDENT {
 							key = keyTok.Value
 						} else if keyTok.Token == token.STRING {
@@ -905,12 +899,12 @@ func (p *Parser) Postfix() ast.Expr {
 						if p.MatchAndNext(token.RBRACE) {
 							break
 						}
-						
+
 						if !p.MatchAndNext(token.COMMA) {
 							p.error("expected ',' or '}'", p.Peek(0))
 						}
 					}
-					
+
 					expr = ast.NewStructInstanceExpr(varExpr.Name, fields)
 				}
 			} else {
@@ -923,7 +917,7 @@ func (p *Parser) Postfix() ast.Expr {
 			break
 		}
 	}
-	
+
 	return expr
 }
 
@@ -963,7 +957,7 @@ func (p *Parser) Primary() ast.Expr {
 		p.Next()
 		b, _ := strconv.ParseBool(tok.Value)
 		return ast.NewBoolExpr(b)
-	
+
 	case token.NULL:
 		p.Next()
 		return ast.NewNullExpr()
@@ -1011,23 +1005,23 @@ func (p *Parser) Primary() ast.Expr {
 			return p.AnonymousFunction()
 		}
 		break
-		
+
 	case token.IDENT:
 		p.Next()
 		return ast.NewVarExpr(tok.Value, nil)
-		
+
 	case token.ASYNC:
 		// async expression: async expr
 		p.Next() // consume async
 		expr := p.Unary()
 		return &ast.AsyncExpr{Expr: expr}
-		
+
 	case token.AWAIT:
 		// await expression: await expr
 		p.Next() // consume await
 		expr := p.Unary()
 		return &ast.AwaitExpr{Expr: expr}
-		
+
 	case token.SLEEP:
 		// sleep function: sleep(milliseconds)
 		p.Next() // consume sleep
@@ -1039,7 +1033,7 @@ func (p *Parser) Primary() ast.Expr {
 			p.error("expected ')' after sleep duration", p.Peek(0))
 		}
 		return &ast.SleepExpr{Duration: duration}
-		
+
 	case token.PROMISE:
 		// Promise.all or Promise.any
 		p.Next() // consume Promise
@@ -1050,11 +1044,11 @@ func (p *Parser) Primary() ast.Expr {
 			p.error("expected 'all' or 'any' after Promise.", p.Peek(0))
 		}
 		method := p.Next().Value
-		
+
 		if !p.MatchAndNext(token.LPAREN) {
 			p.error("expected '(' after Promise."+method, p.Peek(0))
 		}
-		
+
 		var args []ast.Expr
 		for !p.Match(token.RPAREN) {
 			args = append(args, p.Expression())
@@ -1064,11 +1058,11 @@ func (p *Parser) Primary() ast.Expr {
 				p.error("expected ',' or ')'", p.Peek(0))
 			}
 		}
-		
+
 		if !p.MatchAndNext(token.RPAREN) {
 			p.error("expected ')'", p.Peek(0))
 		}
-		
+
 		switch method {
 		case "all":
 			return &ast.PromiseAllExpr{Args: args}
@@ -1087,11 +1081,11 @@ func (p *Parser) Primary() ast.Expr {
 		}
 		name := p.Peek(0).Value
 		p.Next()
-		
+
 		if !p.MatchAndNext(token.LPAREN) {
 			p.error("expected '(' after macro name", p.Peek(0))
 		}
-		
+
 		var args []ast.Expr
 		for !p.Match(token.RPAREN) {
 			// В макросах пытаемся сначала интерпретировать IDENT как TypeName
@@ -1107,18 +1101,18 @@ func (p *Parser) Primary() ast.Expr {
 			} else {
 				args = append(args, p.Expression())
 			}
-			
+
 			if p.Match(token.COMMA) {
 				p.Next()
 			} else if !p.Match(token.RPAREN) {
 				p.error("expected ',' or ')'", p.Peek(0))
 			}
 		}
-		
+
 		if !p.MatchAndNext(token.RPAREN) {
 			p.error("expected ')'", p.Peek(0))
 		}
-		
+
 		return ast.NewMacroCallExpr(name, args)
 
 	case token.QUOTE:
@@ -1195,7 +1189,7 @@ func (p *Parser) ObjectLiteral() ast.Expr {
 		// Ожидаем идентификатор или строку как ключ
 		keyTok := p.Next()
 		var key string
-		
+
 		if keyTok.Token == token.IDENT {
 			key = keyTok.Value
 		} else if keyTok.Token == token.STRING {
@@ -1217,7 +1211,7 @@ func (p *Parser) ObjectLiteral() ast.Expr {
 		if p.MatchAndNext(token.RBRACE) {
 			break
 		}
-		
+
 		if !p.MatchAndNext(token.COMMA) {
 			p.error("expected ',' or '}'", p.Peek(0))
 		}
@@ -1288,35 +1282,35 @@ func (p *Parser) EnumStatement() ast.Expr {
 	if !p.Match(token.IDENT) {
 		p.error("expected enum name", p.Peek(0))
 	}
-	
+
 	enumName := p.Next().Value
-	
+
 	if !p.MatchAndNext(token.LBRACE) {
 		p.error("expected '{'", p.Peek(0))
 	}
-	
+
 	var values []string
-	
+
 	for !p.MatchAndNext(token.RBRACE) {
 		if !p.Match(token.IDENT) {
 			p.error("expected enum value", p.Peek(0))
 		}
-		
+
 		values = append(values, p.Next().Value)
-		
+
 		if p.MatchAndNext(token.RBRACE) {
 			break
 		}
-		
+
 		if !p.MatchAndNext(token.COMMA) {
 			p.error("expected ',' or '}'", p.Peek(0))
 		}
-		
+
 		if p.MatchAndNext(token.RBRACE) {
 			break
 		}
 	}
-	
+
 	return ast.NewEnumExpr(enumName, values)
 }
 
@@ -1324,29 +1318,29 @@ func (p *Parser) ArrayLiteral() ast.Expr {
 	if !p.MatchAndNext(token.LBRACK) {
 		p.error("expected '['", p.Peek(0))
 	}
-	
+
 	var elements []ast.Expr
-	
+
 	if p.MatchAndNext(token.RBRACK) {
 		return ast.NewArrayExpr(elements)
 	}
-	
+
 	for {
 		elements = append(elements, p.Expression())
-		
+
 		if p.MatchAndNext(token.RBRACK) {
 			break
 		}
-		
+
 		if !p.MatchAndNext(token.COMMA) {
 			p.error("expected ',' or ']'", p.Peek(0))
 		}
-		
+
 		if p.MatchAndNext(token.RBRACK) {
 			break
 		}
 	}
-	
+
 	return ast.NewArrayExpr(elements)
 }
 
@@ -1427,7 +1421,7 @@ func (p *Parser) InterpolatedString() ast.Expr {
 
 // ImportStatement parses import statements:
 // import "./module.foo"
-// import { func1, var1 } from "./module.foo"  
+// import { func1, var1 } from "./module.foo"
 // import * as ModuleName from "./module.foo"
 func (p *Parser) ImportStatement() ast.Expr {
 	// import "./path"
@@ -1440,34 +1434,34 @@ func (p *Parser) ImportStatement() ast.Expr {
 	// import { item1, item2 } from "./path"
 	if p.MatchAndNext(token.LBRACE) {
 		var items []string
-		
+
 		for !p.Match(token.RBRACE) {
 			if !p.Match(token.IDENT) {
 				p.error("expected identifier in import list", p.Peek(0))
 			}
 			items = append(items, p.Peek(0).Value)
 			p.Next()
-			
+
 			if !p.MatchAndNext(token.COMMA) {
 				break
 			}
 		}
-		
+
 		if !p.MatchAndNext(token.RBRACE) {
 			p.error("expected '}' after import list", p.Peek(0))
 		}
-		
+
 		if !p.MatchAndNext(token.FROM) {
 			p.error("expected 'from' after import list", p.Peek(0))
 		}
-		
+
 		if !p.Match(token.STRING) {
 			p.error("expected module path string", p.Peek(0))
 		}
-		
+
 		path := p.Peek(0).Value
 		p.Next()
-		
+
 		return ast.NewSelectiveImportExpr(path, items)
 	}
 
@@ -1476,21 +1470,21 @@ func (p *Parser) ImportStatement() ast.Expr {
 		if !p.Match(token.IDENT) {
 			p.error("expected identifier after 'as'", p.Peek(0))
 		}
-		
+
 		alias := p.Peek(0).Value
 		p.Next()
-		
+
 		if !p.MatchAndNext(token.FROM) {
 			p.error("expected 'from' after alias", p.Peek(0))
 		}
-		
+
 		if !p.Match(token.STRING) {
 			p.error("expected module path string", p.Peek(0))
 		}
-		
+
 		path := p.Peek(0).Value
 		p.Next()
-		
+
 		return ast.NewAliasImportExpr(path, alias)
 	}
 
@@ -1505,7 +1499,7 @@ func (p *Parser) ImportStatement() ast.Expr {
 func (p *Parser) ExportStatement() ast.Expr {
 	var declaration ast.Expr
 	var name string
-	
+
 	// export fn name() { }
 	if p.Match(token.FN) {
 		declaration = p.FunctionStatement()
@@ -1524,7 +1518,7 @@ func (p *Parser) ExportStatement() ast.Expr {
 	} else if p.MatchAll(token.CONST, token.IDENT, token.EQ) {
 		// export const variable = value
 		p.NextN(2) // Skip CONST and IDENT
-		name = p.Peek(-1).Value 
+		name = p.Peek(-1).Value
 		p.Next() // Skip EQ
 		declaration = ast.NewConstExpr(name, p.Expression())
 	} else if p.MatchAndNext(token.ENUM) {
@@ -1538,7 +1532,7 @@ func (p *Parser) ExportStatement() ast.Expr {
 		p.error("invalid export declaration", p.Peek(0))
 		return nil
 	}
-	
+
 	return ast.NewExportExpr(declaration, name)
 }
 
@@ -1599,30 +1593,30 @@ func (p *Parser) AnonymousFunction() ast.Expr {
 
 func (p *Parser) ExtensionStatement() ast.Expr {
 	// extension TypeName { methods }
-	
+
 	if !p.Match(token.IDENT) {
 		p.error("expected type name after 'extension'", p.Peek(0))
 	}
-	
+
 	typeName := p.Next().Value
-	
+
 	if !p.MatchAndNext(token.LBRACE) {
 		p.error("expected '{' after type name", p.Peek(0))
 	}
-	
+
 	var methods []*ast.ExtensionMethodInfo
-	
+
 	// Парсим методы внутри блока extension
 	for !p.Match(token.RBRACE) {
 		if p.Match(token.FN) {
 			p.Next() // consume 'fn'
-			
+
 			// Парсим имя метода
 			if !p.Match(token.IDENT) {
 				p.error("expected method name", p.Peek(0))
 			}
 			methodName := p.Next().Value
-			
+
 			// Проверяем на generic параметры <T>
 			var genericParams []string
 			if p.MatchAndNext(token.LT) {
@@ -1637,24 +1631,24 @@ func (p *Parser) ExtensionStatement() ast.Expr {
 					p.error("expected '>' after generic parameters", p.Peek(0))
 				}
 			}
-			
+
 			if !p.MatchAndNext(token.LPAREN) {
 				p.error("expected '(' after method name", p.Peek(0))
 			}
-			
+
 			// Парсим параметры метода (без this, он добавится автоматически)
 			var params []string
 			var defaults []ast.Expr
 			var paramTypes []string
-			
+
 			for !p.Match(token.RPAREN) {
 				if !p.Match(token.IDENT) {
 					p.error("expected parameter name", p.Peek(0))
 				}
-				
+
 				paramName := p.Next().Value
 				params = append(params, paramName)
-				
+
 				// Проверяем на типизацию параметра
 				if p.MatchAndNext(token.COLON) {
 					if p.MatchAnyNext(token.INT_TYPE, token.STRING_TYPE, token.FLOAT_TYPE, token.BOOL_TYPE) {
@@ -1667,21 +1661,21 @@ func (p *Parser) ExtensionStatement() ast.Expr {
 				} else {
 					paramTypes = append(paramTypes, "")
 				}
-				
+
 				// Проверяем на параметр по умолчанию
 				if p.MatchAndNext(token.EQ) {
 					defaults = append(defaults, p.Expression())
 				} else {
 					defaults = append(defaults, nil)
 				}
-				
+
 				p.MatchAndNext(token.COMMA)
 			}
-			
+
 			if !p.MatchAndNext(token.RPAREN) {
 				p.error("expected ')'", p.Peek(0))
 			}
-			
+
 			// Проверяем на типизированный возврат
 			var returnType string
 			if p.MatchAndNext(token.SUB) {
@@ -1696,37 +1690,37 @@ func (p *Parser) ExtensionStatement() ast.Expr {
 					p.error("expected return type", p.Peek(0))
 				}
 			}
-			
+
 			// Парсим тело метода
 			if !p.Match(token.LBRACE) {
 				p.error("expected '{' for method body", p.Peek(0))
 			}
 			body := p.BlockStatement()
-			
+
 			// Создаем метод
 			method := &ast.ExtensionMethodInfo{
-				Name: methodName,
-				Params: params,
-				Defaults: defaults,
-				Body: body,
+				Name:          methodName,
+				Params:        params,
+				Defaults:      defaults,
+				Body:          body,
 				GenericParams: genericParams,
-				ParamTypes: paramTypes,
-				ReturnType: returnType,
+				ParamTypes:    paramTypes,
+				ReturnType:    returnType,
 			}
-			
+
 			methods = append(methods, method)
 		} else {
 			p.error("expected method definition inside extension", p.Peek(0))
 		}
 	}
-	
+
 	if !p.MatchAndNext(token.RBRACE) {
 		p.error("expected '}' to close extension", p.Peek(0))
 	}
-	
+
 	return &ast.ExtensionExpr{
 		TypeName: typeName,
-		Methods: methods,
+		Methods:  methods,
 	}
 }
 
@@ -1735,22 +1729,22 @@ func (p *Parser) hasTypedParameters() bool {
 	// Сохраняем текущую позицию парсера
 	savedPos := p.pos
 	defer func() { p.pos = savedPos }()
-	
+
 	// Пропускаем fn и имя функции
 	if !p.MatchAllNext(token.FN, token.IDENT) {
 		return false
 	}
-	
+
 	// Проверяем на generic параметры <T>
 	if p.Match(token.LT) {
 		return true // Найдены generic параметры
 	}
-	
+
 	// Пропускаем открывающую скобку параметров
 	if !p.MatchAndNext(token.LPAREN) {
 		return false
 	}
-	
+
 	// Ищем параметры с двоеточиями (param: type)
 	for !p.Match(token.RPAREN) && p.pos < len(p.tokens) {
 		if p.Match(token.IDENT) {
@@ -1761,17 +1755,17 @@ func (p *Parser) hasTypedParameters() bool {
 		}
 		p.Next()
 	}
-	
+
 	// Пропускаем закрывающую скобку параметров
 	if p.Match(token.RPAREN) {
 		p.Next()
 	}
-	
+
 	// Проверяем наличие типа возврата -> Type
-	if p.Match(token.SUB) && p.pos + 1 < len(p.tokens) && p.tokens[p.pos + 1].Token == token.GT {
+	if p.Match(token.SUB) && p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].Token == token.GT {
 		return true // Найден тип возврата
 	}
-	
+
 	return false
 }
 
@@ -1780,40 +1774,40 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 	if !p.MatchAndNext(token.FN) {
 		p.error("expected 'fn'", p.Peek(0))
 	}
-	
+
 	if !p.Match(token.IDENT) {
 		p.error("expected function name", p.Peek(0))
 	}
-	
+
 	funcName := p.Peek(0).Value
 	p.Next()
-	
+
 	// Проверяем на generic параметры <T, U, T: Interface, ...>
 	var typeParams []ast.TypeConstraint
 	if p.Match(token.LT) {
 		p.Next() // consume '<'
-		
+
 		for !p.Match(token.GT) {
 			if !p.Match(token.IDENT) {
 				p.error("expected type parameter name", p.Peek(0))
 			}
-			
+
 			typeName := p.Peek(0).Value
 			p.Next()
-			
+
 			var constraints []string
 			// Проверяем на ограничения: T: Interface1 + Interface2
 			if p.Match(token.COLON) {
 				p.Next() // consume ':'
-				
+
 				for {
 					if !p.Match(token.IDENT) {
 						p.error("expected constraint interface name", p.Peek(0))
 					}
-					
+
 					constraints = append(constraints, p.Peek(0).Value)
 					p.Next()
-					
+
 					// Проверяем на дополнительные ограничения через +
 					if p.Match(token.ADD) {
 						p.Next() // consume '+'
@@ -1823,85 +1817,85 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 					}
 				}
 			}
-			
+
 			typeParams = append(typeParams, ast.NewConstrainedTypeParam(typeName, constraints))
-			
+
 			if p.Match(token.COMMA) {
 				p.Next()
 			} else if !p.Match(token.GT) {
 				p.error("expected ',' or '>'", p.Peek(0))
 			}
 		}
-		
+
 		if !p.MatchAndNext(token.GT) {
 			p.error("expected '>'", p.Peek(0))
 		}
 	}
-	
+
 	if !p.MatchAndNext(token.LPAREN) {
 		p.error("expected '(' after function name", p.Peek(0))
 	}
-	
+
 	var params []ast.FuncParam
 	for !p.Match(token.RPAREN) {
 		if !p.Match(token.IDENT) {
 			p.error("expected parameter name", p.Peek(0))
 		}
-		
+
 		paramName := p.Peek(0).Value
 		p.Next()
-		
+
 		var typeName string
 		var defaultValue ast.Expr
-		
+
 		// Проверяем на типизированный параметр: paramName: type
 		if p.Match(token.COLON) {
 			p.Next() // consume ':'
-			
+
 			// Используем parseTypeAnnotation для поддержки Union типов
 			typeName = p.parseTypeAnnotation()
 		}
-		
+
 		// Проверяем на значение по умолчанию: param = default
 		if p.Match(token.EQ) {
 			p.Next()
 			defaultValue = p.Expression()
 		}
-		
+
 		params = append(params, ast.FuncParam{
 			Name:     paramName,
 			TypeName: typeName,
 			Default:  defaultValue,
 		})
-		
+
 		if p.Match(token.COMMA) {
 			p.Next()
 		} else if !p.Match(token.RPAREN) {
 			p.error("expected ',' or ')'", p.Peek(0))
 		}
 	}
-	
+
 	if !p.MatchAndNext(token.RPAREN) {
 		p.error("expected ')'", p.Peek(0))
 	}
-	
+
 	// Проверяем на return тип -> ReturnType
 	var returnType string
 	if p.Peek(0).Token == token.SUB && p.Peek(1).Token == token.GT {
 		p.Next() // consume '-'
 		p.Next() // consume '>'
-		
+
 		// Используем parseTypeAnnotation для поддержки Union типов в возврате
 		returnType = p.parseTypeAnnotation()
 	}
-	
+
 	body := p.BlockStatement()
-	
+
 	// Если есть generic параметры, создаем GenericFuncStatement
 	if len(typeParams) > 0 {
 		return ast.NewGenericFuncStatement(funcName, typeParams, params, returnType, body)
 	}
-	
+
 	return ast.NewTypedFuncStatement(funcName, params, body, returnType)
 }
 
@@ -1912,7 +1906,7 @@ func (p *Parser) isTypeName(name string) bool {
 	case "int", "string", "float", "bool":
 		return true
 	}
-	
+
 	// Проверяем, есть ли такой тип в scope (структуры, енумы)
 	// Ищем либо TypeInfo, либо определение типа
 	if _, exists := scope.GlobalScope.Get(name + "__TypeInfo"); exists {
@@ -1921,7 +1915,7 @@ func (p *Parser) isTypeName(name string) bool {
 	if _, exists := scope.GlobalScope.Get(name); exists {
 		return true
 	}
-	
+
 	return false
 }
 
@@ -1942,28 +1936,28 @@ func (p *Parser) InterfaceStatement() ast.Expr {
 	if !p.Match(token.IDENT) {
 		p.error("expected interface name", p.Peek(0))
 	}
-	
+
 	interfaceName := p.Peek(0).Value
 	p.Next()
-	
+
 	// Ожидаем открывающую скобку
 	if !p.MatchAndNext(token.LBRACE) {
 		p.error("expected '{' after interface name", p.Peek(0))
 	}
-	
+
 	var methods []ast.InterfaceMethod
-	
+
 	// Парсим методы интерфейса
 	for !p.Match(token.RBRACE) {
 		method := p.parseInterfaceMethod()
 		methods = append(methods, method)
 	}
-	
+
 	// Ожидаем закрывающую скобку
 	if !p.MatchAndNext(token.RBRACE) {
 		p.error("expected '}' after interface methods", p.Peek(0))
 	}
-	
+
 	return ast.NewInterfaceDefinition(interfaceName, methods)
 }
 
@@ -1973,37 +1967,37 @@ func (p *Parser) parseInterfaceMethod() ast.InterfaceMethod {
 	if !p.MatchAndNext(token.FN) {
 		p.error("expected 'fn' for interface method", p.Peek(0))
 	}
-	
+
 	// Имя метода
 	if !p.Match(token.IDENT) {
 		p.error("expected method name", p.Peek(0))
 	}
-	
+
 	methodName := p.Peek(0).Value
 	p.Next()
-	
+
 	// Параметры
 	if !p.MatchAndNext(token.LPAREN) {
 		p.error("expected '(' after method name", p.Peek(0))
 	}
-	
+
 	var params []ast.FuncParam
-	
+
 	// Парсим параметры
 	if !p.Match(token.RPAREN) {
 		params = p.parseInterfaceParams()
 	}
-	
+
 	if !p.MatchAndNext(token.RPAREN) {
 		p.error("expected ')' after method parameters", p.Peek(0))
 	}
-	
+
 	// Возвращаемый тип (опционально)
 	var returnType string
 	if p.Peek(0).Token == token.SUB && p.Peek(1).Token == token.GT {
 		p.Next() // consume '-'
 		p.Next() // consume '>'
-		
+
 		if p.Match(token.IDENT) {
 			returnType = p.Peek(0).Value
 			p.Next()
@@ -2011,7 +2005,7 @@ func (p *Parser) parseInterfaceMethod() ast.InterfaceMethod {
 			p.error("expected return type after '->'", p.Peek(0))
 		}
 	}
-	
+
 	return ast.InterfaceMethod{
 		Name:       methodName,
 		Params:     params,
@@ -2026,38 +2020,38 @@ func (p *Parser) ImplStatement() ast.Expr {
 	if !p.Match(token.IDENT) {
 		p.error("expected interface name after 'impl'", p.Peek(0))
 	}
-	
+
 	interfaceName := p.Peek(0).Value
 	p.Next()
-	
+
 	// Ожидаем 'for'
 	if !p.Match(token.FOR) {
 		p.error("expected 'for' after interface name", p.Peek(0))
 	}
 	p.Next()
-	
+
 	// Ожидаем имя типа
 	if !p.Match(token.IDENT) {
 		p.error("expected type name after 'for'", p.Peek(0))
 	}
-	
+
 	typeName := p.Peek(0).Value
 	p.Next()
-	
+
 	// Ожидаем открывающую скобку
 	if !p.MatchAndNext(token.LBRACE) {
 		p.error("expected '{' after type name", p.Peek(0))
 	}
-	
+
 	var methods []*ast.TypedFuncStatement
-	
+
 	// Парсим реализации методов
 	for !p.Match(token.RBRACE) {
 		// Ожидаем fn
 		if !p.Match(token.FN) {
 			p.error("expected 'fn' for method implementation", p.Peek(0))
 		}
-		
+
 		// Парсим типизированную функцию
 		method := p.TypedFunctionStatement()
 		if typedFunc, ok := method.(*ast.TypedFuncStatement); ok {
@@ -2066,34 +2060,34 @@ func (p *Parser) ImplStatement() ast.Expr {
 			p.error("expected typed function in impl block", p.Peek(0))
 		}
 	}
-	
+
 	// Ожидаем закрывающую скобку
 	if !p.MatchAndNext(token.RBRACE) {
 		p.error("expected '}' after impl methods", p.Peek(0))
 	}
-	
+
 	return ast.NewImplBlock(interfaceName, typeName, methods)
 }
 
 // parseInterfaceParams парсит параметры методов интерфейса
 func (p *Parser) parseInterfaceParams() []ast.FuncParam {
 	var params []ast.FuncParam
-	
+
 	for !p.Match(token.RPAREN) {
 		if !p.Match(token.IDENT) {
 			p.error("expected parameter name", p.Peek(0))
 		}
-		
+
 		paramName := p.Peek(0).Value
 		p.Next()
-		
+
 		var typeName string
 		var defaultValue ast.Expr
-		
+
 		// Проверяем на тип параметра: param: type
 		if p.Match(token.COLON) {
 			p.Next()
-			
+
 			if p.Match(token.IDENT) {
 				typeValue := p.Peek(0).Value
 				if p.isTypeName(typeValue) {
@@ -2106,20 +2100,20 @@ func (p *Parser) parseInterfaceParams() []ast.FuncParam {
 				p.error("expected type name", p.Peek(0))
 			}
 		}
-		
+
 		params = append(params, ast.FuncParam{
 			Name:     paramName,
 			TypeName: typeName,
 			Default:  defaultValue,
 		})
-		
+
 		if p.Match(token.COMMA) {
 			p.Next()
 		} else if !p.Match(token.RPAREN) {
 			p.error("expected ',' or ')'", p.Peek(0))
 		}
 	}
-	
+
 	return params
 }
 
@@ -2129,19 +2123,19 @@ func (p *Parser) isStructInstantiation() bool {
 	if p.Peek(0).Token == token.RBRACE {
 		return true
 	}
-	
+
 	// Если следующий токен IDENT и после него ':' или '=', это поле структуры
 	if p.Peek(0).Token == token.IDENT {
 		nextTok := p.Peek(1).Token
 		return nextTok == token.COLON || nextTok == token.EQ
 	}
-	
+
 	// Если следующий токен STRING и после него ':' или '=', это поле структуры
 	if p.Peek(0).Token == token.STRING {
 		nextTok := p.Peek(1).Token
 		return nextTok == token.COLON || nextTok == token.EQ
 	}
-	
+
 	// Во всех остальных случаях это не создание структуры
 	return false
 }
@@ -2153,26 +2147,26 @@ func (p *Parser) TypeAliasStatement() ast.Expr {
 	if !p.Match(token.IDENT) {
 		p.error("expected type name after 'type'", p.Peek(0))
 	}
-	
+
 	aliasName := p.Next().Value
-	
+
 	// Ожидаем знак равенства
 	if !p.MatchAndNext(token.EQ) {
 		p.error("expected '=' after type alias name", p.Peek(0))
 	}
-	
+
 	// Ожидаем базовый тип
 	if !p.Match(token.IDENT) {
 		p.error("expected base type name after '='", p.Peek(0))
 	}
-	
+
 	baseType := p.Next().Value
-	
+
 	// Проверяем валидность базового типа (отложим проверку до runtime)
 	if !p.isPotentialValidBaseType(baseType) {
-		p.error("unknown base type: " + baseType, p.Peek(0))
+		p.error("unknown base type: "+baseType, p.Peek(0))
 	}
-	
+
 	return ast.NewTypeAliasExpr(aliasName, baseType)
 }
 
@@ -2184,7 +2178,7 @@ func (p *Parser) isValidTypeAtParseTime(typeName string) bool {
 	case "int", "string", "float", "bool", "array", "object":
 		return true
 	}
-	
+
 	// Все остальные типы считаем потенциально валидными (псевдонимы, пользовательские типы)
 	return true
 }
@@ -2196,7 +2190,7 @@ func (p *Parser) isValidBaseType(typeName string) bool {
 	case "int", "string", "float", "bool", "array", "object":
 		return true
 	}
-	
+
 	// Проверяем пользовательские типы в scope
 	if _, exists := scope.GlobalScope.Get(typeName + "__TypeInfo"); exists {
 		return true
@@ -2204,7 +2198,7 @@ func (p *Parser) isValidBaseType(typeName string) bool {
 	if _, exists := scope.GlobalScope.Get(typeName); exists {
 		return true
 	}
-	
+
 	return false
 }
 
@@ -2223,7 +2217,7 @@ func (p *Parser) isPotentialValidBaseType(typeName string) bool {
 	case "int", "string", "float", "bool", "array", "object":
 		return true
 	}
-	
+
 	// Все остальные типы (включая другие псевдонимы) считаем потенциально валидными
 	// Валидация произойдет во время выполнения
 	return true
@@ -2234,17 +2228,17 @@ func (p *Parser) parseTypeAnnotation() string {
 	// Проверяем Tuple синтаксис (type1, type2, ...)
 	if p.Match(token.LPAREN) {
 		p.Next() // consume '('
-		
+
 		var tupleTypes []string
-		
+
 		// Парсим типы в скобках
 		for !p.Match(token.RPAREN) {
 			if !p.Match(token.IDENT) {
 				p.error("expected type name in tuple", p.Peek(0))
 			}
-			
+
 			tupleTypes = append(tupleTypes, p.Next().Value)
-			
+
 			// Проверяем запятую или закрывающую скобку
 			if p.Match(token.COMMA) {
 				p.Next() // consume ','
@@ -2252,31 +2246,31 @@ func (p *Parser) parseTypeAnnotation() string {
 				p.error("expected ',' or ')' in tuple type", p.Peek(0))
 			}
 		}
-		
+
 		if !p.MatchAndNext(token.RPAREN) {
 			p.error("expected ')' after tuple types", p.Peek(0))
 		}
-		
+
 		// Возвращаем Tuple тип в специальном формате
 		return "(" + strings.Join(tupleTypes, ",") + ")"
 	}
-	
+
 	if !p.Match(token.IDENT) {
 		p.error("expected type name", p.Peek(0))
 	}
-	
+
 	// Парсим базовый тип
 	baseType := p.Next().Value
-	
+
 	// Проверяем Optional синтаксис (?)
 	if p.Match(token.QUESTION) {
 		p.Next() // consume '?'
 		// Optional тип эквивалентен Union типу с null
 		return baseType + "|null"
 	}
-	
+
 	types := []string{baseType}
-	
+
 	// Проверяем наличие Union синтаксиса (|)
 	for p.Match(token.PIPE) {
 		p.Next() // consume '|'
@@ -2285,12 +2279,12 @@ func (p *Parser) parseTypeAnnotation() string {
 		}
 		types = append(types, p.Next().Value)
 	}
-	
+
 	// Если только один тип - возвращаем как есть
 	if len(types) == 1 {
 		return types[0]
 	}
-	
+
 	// Если несколько типов - возвращаем Union тип
 	return strings.Join(types, "|")
 }

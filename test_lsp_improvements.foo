@@ -1,0 +1,53 @@
+// Демонстрация улучшенного LSP с context-aware автокомплитом
+
+// 1. Extension методы для строк
+extension string {
+    fn reverse() -> string {
+        return "reversed string"
+    }
+    
+    fn wordCount() -> int {
+        return 5  // упрощенная реализация
+    }
+    
+    fn isEmail() -> bool {
+        return true  // упрощенная реализация
+    }
+}
+
+// 2. Extension методы для чисел  
+extension int {
+    fn factorial() -> int {
+        return 120  // упрощенная реализация
+    }
+    
+    fn isPrime() -> bool {
+        return true  // упрощенная реализация
+    }
+    
+    fn doubled() -> int {
+        return this * 2
+    }
+}
+
+// 3. Создаем переменные разных типов
+let message: string = "Hello, World!"
+let count: int = 42
+
+// 4. ТЕСТИРОВАНИЕ АВТОКОМПЛИТА:
+
+// После точки для строки должно предлагаться:
+// - extension методы: reverse, wordCount, isEmail
+// - встроенные методы: length, charAt, substring, toUpper, toLower, toString
+message.
+
+// После точки для числа должно предлагаться:  
+// - extension методы: factorial, isPrime, doubled
+// - встроенные методы: toString, abs
+count.
+
+// Вызываем методы чтобы LSP их увидел
+let reversed = message.reverse()
+let length = message.length()
+let factorial = count.factorial()
+let doubled = count.doubled()

@@ -64,10 +64,10 @@ func main() {
 		fmt.Printf("Error creating parser: %v\n", err)
 		return
 	}
-	
+
 	// Получаем scope из парсера и инициализируем встроенные функции
 	scopeStack := p.GetScopeStack()
-	
+
 	// Инициализируем встроенные функции с этим scope
 	builtin.InitializeMathFunctions(scopeStack)
 	builtin.InitializeStringFunctions(scopeStack)
@@ -78,7 +78,7 @@ func main() {
 	builtin.InitializeCryptoFunctions(scopeStack)
 	builtin.InitializeRegexFunctions(scopeStack)
 	builtin.InitializeSyncFunctions(scopeStack)
-	
+
 	exprs := p.ParseWithModules()
 
 	for _, expr := range exprs {
@@ -115,7 +115,7 @@ func printUsage() {
 	fmt.Println()
 	fmt.Println("Возможности:")
 	fmt.Println("  ✅ Generic функции и типизация")
-	fmt.Println("  ✅ Interface система и Extension Methods") 
+	fmt.Println("  ✅ Interface система и Extension Methods")
 	fmt.Println("  ✅ Async/await и многопоточность")
 	fmt.Println("  ✅ HTTP клиент/сервер")
 	fmt.Println("  ✅ Файловая система")

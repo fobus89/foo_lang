@@ -1,8 +1,9 @@
 {
   "name": "foo-lang",
   "displayName": "Foo Language Support",
-  "description": "Syntax highlighting and language support for Foo programming language",
-  "version": "1.0.0",
+  "description": "Full language support for Foo programming language with LSP",
+  "version": "1.1.5",
+  "publisher": "foolang",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -10,11 +11,17 @@
     "Programming Languages",
     "Syntax Highlighting"
   ],
+  "activationEvents": [
+    "onLanguage:foo"
+  ],
+  "main": "./out/extension.js",
   "keywords": [
     "foo",
     "foo-lang",
     "programming-language",
-    "syntax-highlighting"
+    "syntax-highlighting",
+    "lsp",
+    "language-server"
   ],
   "contributes": {
     "languages": [
@@ -48,7 +55,48 @@
         "uiTheme": "vs",
         "path": "./themes/foo-light-color-theme.json"
       }
-    ]
+    ],
+    "commands": [
+      {
+        "command": "foo.restart",
+        "title": "Restart Foo Language Server",
+        "category": "Foo"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Foo Language",
+      "properties": {
+        "foo.maxCompletionItems": {
+          "type": "number",
+          "default": 100,
+          "description": "Maximum number of completion items to show"
+        },
+        "foo.enableDiagnostics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable real-time diagnostics"
+        },
+        "foo.enableHover": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable hover information"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^4.9.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0"
   },
   "repository": {
     "type": "git",

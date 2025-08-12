@@ -1,4 +1,4 @@
-module foo_lang
+module foo_lang_lsp
 
 go 1.24.1
 

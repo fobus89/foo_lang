@@ -1,0 +1,50 @@
+// Простой тест для extension methods без рекурсии
+
+extension string {
+    fn reverse() -> string {
+        return "reversed"
+    }
+    
+    fn wordCount() -> int {
+        return 5
+    }
+}
+
+extension int {
+    fn doubled() -> int {
+        return this * 2
+    }
+    
+    fn isEven() -> bool {
+        return this % 2 == 0
+    }
+}
+
+// Переменные для тестирования
+let message: string = "Hello"
+let number: int = 42
+
+// Вызовы методов
+let rev = message.reverse()
+let count = message.wordCount()
+let length = message.length()
+
+let doubled = number.doubled()
+let even = number.isEven()
+let str = number.toString()
+
+// Вывод результатов
+println("Message: " + message)
+println("Reversed: " + rev)
+println("Word count: " + count.toString())
+println("Length: " + length.toString())
+
+println("Number: " + number.toString())
+println("Doubled: " + doubled.toString())
+println("Is even: " + even.toString())
+
+// МЕСТА ДЛЯ ТЕСТИРОВАНИЯ АВТОКОМПЛИТА:
+// Раскомментируйте строки ниже в VS Code для тестирования
+
+// message.   <- должны появиться: reverse, wordCount, length, charAt, substring, toUpper, toLower, toString
+// number.    <- должны появиться: doubled, isEven, toString, abs

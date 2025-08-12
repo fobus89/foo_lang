@@ -38,7 +38,15 @@
       "Bash(vsce package:*)",
       "Bash(code:*)",
       "Bash(tree-sitter generate:*)",
-      "Bash(tree-sitter parse:*)"
+      "Bash(tree-sitter parse:*)",
+      "Bash(npm run compile:*)",
+      "Bash(.foo-lsp.exe)",
+      "Bash(./foo-lsp.exe)",
+      "Bash(echo $USERPROFILE)",
+      "Bash(npx vsce:*)",
+      "Bash(cat:*)",
+      "Bash(cp:*)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   },

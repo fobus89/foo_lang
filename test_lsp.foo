@@ -1,0 +1,74 @@
+// Тестовый файл для проверки LSP функциональности
+
+// 1. Переменные и константы
+let userName: string = "Alice"
+const MAX_USERS: int = 100
+
+// 2. Функции
+fn calculateTotal(price: float, quantity: int) -> float {
+    return price * quantity
+}
+
+fn greetUser(name: string) -> string {
+    return "Hello, " + name + "!"
+}
+
+// 3. Структуры и интерфейсы
+struct Product {
+    name: string,
+    price: float,
+    inStock: bool
+}
+
+interface Calculable {
+    fn calculate() -> float
+    fn getTotal() -> float
+}
+
+impl Calculable for Product {
+    fn calculate() -> float {
+        return this.price
+    }
+    
+    fn getTotal() -> float {
+        return this.price * 1.2  // налог 20%
+    }
+}
+
+// 4. Generic функции
+fn process<T: Calculable>(item: T) -> float {
+    return item.calculate()
+}
+
+// 5. Async функции
+async fn fetchUserData(userId: int) -> string {
+    await sleep(100)
+    return "user_" + userId.toString()
+}
+
+// 6. Использование встроенных функций
+let result = sin(3.14159)
+let fileContent = readFile("config.txt")
+let hash = sha256Hash("password123")
+
+// 7. Каналы и concurrency
+let channel = newChannel(10, "data_channel")
+send(channel, "message")
+
+// 8. HTTP операции
+let response = httpGet("https://api.example.com/users")
+
+// 9. Regex операции  
+let isValid = regexMatch("\\d+", "123")
+let replaced = regexReplace("foo", "bar", "foo world")
+
+// 10. Макросы
+macro debug(value) {
+    println("DEBUG: " + value.toString())
+}
+
+@debug("test message")
+
+// 11. Тестируем автокомплит
+let user = Product{name: "Laptop", price: 999.99, inStock: true}
+user.  // здесь должно быть автодополнение методов
