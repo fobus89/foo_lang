@@ -1,0 +1,35 @@
+// Простой тест Optional типов
+
+println("=== Простой тест Optional типов ===")
+
+// Optional тип с значением
+let name: string? = "Alice"
+println("name assigned: " + name)
+
+// Optional тип с null
+let age: int? = null  
+println("age is null: " + typeof(age))
+
+// Переназначение на null
+let score: float? = 95.5
+println("score before: " + score.toString())
+
+score = null
+println("score after null assignment: " + typeof(score))
+
+// Проверим синтаксис Optional в разных типах
+let optionalInt: int? = 42
+let optionalFloat: float? = 3.14
+let optionalString: string? = "test"
+let optionalBool: bool? = true
+
+println("optionalInt: " + optionalInt.toString())
+println("optionalFloat: " + optionalFloat.toString()) 
+println("optionalString: " + optionalString)
+println("optionalBool: " + optionalBool.toString())
+
+// Тест валидации Optional типов
+let validOptional: string? = null  // OK
+let anotherValid: string? = "hello"  // OK
+
+println("=== Optional типы базово работают! ===")

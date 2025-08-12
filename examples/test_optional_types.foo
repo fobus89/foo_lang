@@ -1,0 +1,42 @@
+// Тестирование Optional типов: string?, int?, etc.
+
+println("=== Тест Optional типов ===")
+
+// Optional тип с значением
+let name: string? = "Alice"
+println("name: " + (name != null ? name : "null"))
+
+// Optional тип с null
+let age: int? = null  
+println("age: " + (age != null ? age.toString() : "null"))
+
+// Обычная переменная с Optional значением
+let email: string? = "alice@example.com"
+println("email: " + (email != null ? email : "null"))
+
+// Переназначение Optional переменной
+let score: float? = 95.5
+println("score before: " + (score != null ? score.toString() : "null"))
+
+score = null
+println("score after: " + (score != null ? score.toString() : "null"))
+
+// Optional тип в функции
+fn greetUser(name: string?) -> string {
+    if name != null {
+        return "Hello, " + name + "!"
+    } else {
+        return "Hello, Anonymous!"
+    }
+}
+
+let greeting1 = greetUser("Bob")
+println("greetUser('Bob'): " + greeting1)
+
+let greeting2 = greetUser(null)
+println("greetUser(null): " + greeting2)
+
+// Тест ошибки - неподходящий тип для Optional
+// let wrongOptional: int? = "string"  // Должна быть ошибка
+
+println("=== Optional типы работают! ===")

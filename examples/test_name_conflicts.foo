@@ -1,0 +1,25 @@
+// Тестирование конфликтов имен при импорте модулей
+
+println("=== Тест конфликтов имен ===")
+
+// Импортируем первый модуль
+import "./math_module.foo"
+
+println("После импорта math_module:")
+let result1 = add(5, 3)
+println("add(5, 3) = " + result1.toString())
+println("PI = " + PI.toString())
+
+// Импортируем второй модуль с конфликтующими именами
+import "./conflict_module.foo"
+
+println("\nПосле импорта conflict_module:")
+let result2 = add(5, 3) 
+println("add(5, 3) = " + result2.toString())
+println("PI = " + PI.toString())
+
+// Проверим multiply тоже
+let result3 = multiply(4, 3)
+println("multiply(4, 3) = " + result3.toString())
+
+println("\n=== Вывод: последний импорт перезаписывает функции ===")

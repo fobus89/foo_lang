@@ -6,14 +6,16 @@ import (
 	"foo_lang/lexer"
 	"foo_lang/scope"
 	"foo_lang/token"
+	"os"
 	"slices"
 	"strconv"
 	"strings"
 )
 
 type Parser struct {
-	tokens []token.TokenType
-	pos    int
+	tokens     []token.TokenType
+	pos        int
+	currentFile string // Путь к текущему файлу для обработки импортов
 }
 
 func (p *Parser) error(msg string, tok token.TokenType) {
@@ -25,6 +27,29 @@ func NewParser[T []rune | string | []byte](input T) *Parser {
 	return &Parser{
 		tokens: tokens,
 	}
+}
+
+// NewParserWithFile создает парсер с контекстом файла для правильной обработки импортов
+func NewParserWithFile[T []rune | string | []byte](input T, filePath string) *Parser {
+	tokens := lexer.NewLexer(input).Tokens()
+	return &Parser{
+		tokens:      tokens,
+		currentFile: filePath,
+	}
+}
+
+// NewParserFromFile создает парсер, читая файл автоматически по пути
+func NewParserFromFile(filePath string) (*Parser, error) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read file %s: %v", filePath, err)
+	}
+	
+	tokens := lexer.NewLexer(content).Tokens()
+	return &Parser{
+		tokens:      tokens,
+		currentFile: filePath,
+	}, nil
 }
 
 func (p *Parser) Peek(offset int) token.TokenType {
@@ -100,6 +125,23 @@ func (p *Parser) MatchAnyNext(tokens ...token.Token) bool {
 
 func (p *Parser) Parse() []ast.Expr {
 	var exprs []ast.Expr
+
+	for !p.Match(token.EOF) {
+		expr := p.Statement()
+		exprs = append(exprs, expr)
+	}
+
+	return exprs
+}
+
+// ParseWithModules парсит код с правильной поддержкой импортов модулей
+func (p *Parser) ParseWithModules() []ast.Expr {
+	var exprs []ast.Expr
+	
+	// Устанавливаем контекст текущего файла для корректной работы импортов
+	if p.currentFile != "" {
+		ast.SetCurrentFileContext(p.currentFile)
+	}
 
 	for !p.Match(token.EOF) {
 		expr := p.Statement()
@@ -213,14 +255,7 @@ func (p *Parser) Statement() ast.Expr {
 		// Check for type annotation: let name: type = value
 		var varType string
 		if p.MatchAndNext(token.COLON) {
-			if !p.Match(token.IDENT) {
-				p.error("expected type name after ':'", p.Peek(0))
-			}
-			varType = p.Next().Value
-			// Проверяем валидность типа
-			if varType != "int" && varType != "string" && varType != "float" && varType != "bool" {
-				p.error("unknown type: " + varType, p.Peek(0))
-			}
+			varType = p.parseTypeAnnotation()
 		}
 		
 		// Check for additional identifiers (multiple assignment)
@@ -310,6 +345,12 @@ func (p *Parser) Statement() ast.Expr {
 
 	if p.MatchAndNext(token.IMPL) {
 		return p.ImplStatement()
+	}
+
+	// type alias: type UserId = int (проверяем синтаксис алиаса)
+	if p.Match(token.TYPE) && p.Peek(1).Token == token.IDENT && p.Peek(2).Token == token.EQ {
+		p.Next() // consume TYPE
+		return p.TypeAliasStatement()
 	}
 
 	return p.Expression()
@@ -895,6 +936,10 @@ func (p *Parser) Primary() ast.Expr {
 		p.Next()
 		b, _ := strconv.ParseBool(tok.Value)
 		return ast.NewBoolExpr(b)
+	
+	case token.NULL:
+		p.Next()
+		return ast.NewNullExpr()
 
 	case token.LPAREN:
 		p.Next()
@@ -1786,20 +1831,8 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 		if p.Match(token.COLON) {
 			p.Next() // consume ':'
 			
-			// Ожидаем тип как идентификатор (примитивный или generic)
-			if p.Match(token.IDENT) {
-				typeValue := p.Peek(0).Value
-				// Проверяем примитивные типы или generic типы
-				if typeValue == "int" || typeValue == "string" || typeValue == "float" || typeValue == "bool" ||
-				   p.isGenericType(typeValue, typeParams) {
-					typeName = typeValue
-					p.Next()
-				} else {
-					p.error("expected primitive or generic type (int, string, float, bool, T, U, ...)", p.Peek(0))
-				}
-			} else {
-				p.error("expected primitive or generic type", p.Peek(0))
-			}
+			// Используем parseTypeAnnotation для поддержки Union типов
+			typeName = p.parseTypeAnnotation()
 		}
 		
 		// Проверяем на значение по умолчанию: param = default
@@ -1831,19 +1864,8 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 		p.Next() // consume '-'
 		p.Next() // consume '>'
 		
-		if p.Match(token.IDENT) {
-			typeValue := p.Peek(0).Value
-			// Проверяем на валидный тип
-			if typeValue == "int" || typeValue == "string" || typeValue == "float" || typeValue == "bool" || 
-			   p.isTypeName(typeValue) || p.isGenericType(typeValue, typeParams) {
-				returnType = typeValue
-				p.Next()
-			} else {
-				p.error("expected valid return type", p.Peek(0))
-			}
-		} else {
-			p.error("expected return type after '->'", p.Peek(0))
-		}
+		// Используем parseTypeAnnotation для поддержки Union типов в возврате
+		returnType = p.parseTypeAnnotation()
 	}
 	
 	body := p.BlockStatement()
@@ -2095,4 +2117,153 @@ func (p *Parser) isStructInstantiation() bool {
 	
 	// Во всех остальных случаях это не создание структуры
 	return false
+}
+
+// TypeAliasStatement парсит определение псевдонима типа
+// type UserId = int
+func (p *Parser) TypeAliasStatement() ast.Expr {
+	// Ожидаем имя нового типа
+	if !p.Match(token.IDENT) {
+		p.error("expected type name after 'type'", p.Peek(0))
+	}
+	
+	aliasName := p.Next().Value
+	
+	// Ожидаем знак равенства
+	if !p.MatchAndNext(token.EQ) {
+		p.error("expected '=' after type alias name", p.Peek(0))
+	}
+	
+	// Ожидаем базовый тип
+	if !p.Match(token.IDENT) {
+		p.error("expected base type name after '='", p.Peek(0))
+	}
+	
+	baseType := p.Next().Value
+	
+	// Проверяем валидность базового типа (отложим проверку до runtime)
+	if !p.isPotentialValidBaseType(baseType) {
+		p.error("unknown base type: " + baseType, p.Peek(0))
+	}
+	
+	return ast.NewTypeAliasExpr(aliasName, baseType)
+}
+
+// isValidTypeAtParseTime проверяет типы только на этапе парсинга (примитивные)
+func (p *Parser) isValidTypeAtParseTime(typeName string) bool {
+	// На этапе парсинга проверяем только примитивные типы
+	// Псевдонимы и пользовательские типы будут проверены во время выполнения
+	switch typeName {
+	case "int", "string", "float", "bool", "array", "object":
+		return true
+	}
+	
+	// Все остальные типы считаем потенциально валидными (псевдонимы, пользовательские типы)
+	return true
+}
+
+// isValidBaseType проверяет, является ли тип валидным для псевдонима
+func (p *Parser) isValidBaseType(typeName string) bool {
+	// Примитивные типы
+	switch typeName {
+	case "int", "string", "float", "bool", "array", "object":
+		return true
+	}
+	
+	// Проверяем пользовательские типы в scope
+	if _, exists := scope.GlobalScope.Get(typeName + "__TypeInfo"); exists {
+		return true
+	}
+	if _, exists := scope.GlobalScope.Get(typeName); exists {
+		return true
+	}
+	
+	return false
+}
+
+// isPotentialTypeAlias проверяет, может ли быть типом псевдоним
+func (p *Parser) isPotentialTypeAlias(typeName string) bool {
+	// На этапе парсинга мы не можем знать все псевдонимы
+	// Поэтому считаем все неизвестные идентификаторы потенциальными псевдонимами
+	// Валидация произойдет во время выполнения
+	return true
+}
+
+// isPotentialValidBaseType проверяет потенциальную валидность базового типа для псевдонима
+func (p *Parser) isPotentialValidBaseType(typeName string) bool {
+	// Примитивные типы
+	switch typeName {
+	case "int", "string", "float", "bool", "array", "object":
+		return true
+	}
+	
+	// Все остальные типы (включая другие псевдонимы) считаем потенциально валидными
+	// Валидация произойдет во время выполнения
+	return true
+}
+
+// parseTypeAnnotation парсит типовую аннотацию, включая Union, Optional и Tuple типы
+func (p *Parser) parseTypeAnnotation() string {
+	// Проверяем Tuple синтаксис (type1, type2, ...)
+	if p.Match(token.LPAREN) {
+		p.Next() // consume '('
+		
+		var tupleTypes []string
+		
+		// Парсим типы в скобках
+		for !p.Match(token.RPAREN) {
+			if !p.Match(token.IDENT) {
+				p.error("expected type name in tuple", p.Peek(0))
+			}
+			
+			tupleTypes = append(tupleTypes, p.Next().Value)
+			
+			// Проверяем запятую или закрывающую скобку
+			if p.Match(token.COMMA) {
+				p.Next() // consume ','
+			} else if !p.Match(token.RPAREN) {
+				p.error("expected ',' or ')' in tuple type", p.Peek(0))
+			}
+		}
+		
+		if !p.MatchAndNext(token.RPAREN) {
+			p.error("expected ')' after tuple types", p.Peek(0))
+		}
+		
+		// Возвращаем Tuple тип в специальном формате
+		return "(" + strings.Join(tupleTypes, ",") + ")"
+	}
+	
+	if !p.Match(token.IDENT) {
+		p.error("expected type name", p.Peek(0))
+	}
+	
+	// Парсим базовый тип
+	baseType := p.Next().Value
+	
+	// Проверяем Optional синтаксис (?)
+	if p.Match(token.QUESTION) {
+		p.Next() // consume '?'
+		// Optional тип эквивалентен Union типу с null
+		return baseType + "|null"
+	}
+	
+	types := []string{baseType}
+	
+	// Проверяем наличие Union синтаксиса (|)
+	for p.Match(token.PIPE) {
+		p.Next() // consume '|'
+		if !p.Match(token.IDENT) {
+			p.error("expected type name after '|'", p.Peek(0))
+		}
+		types = append(types, p.Next().Value)
+	}
+	
+	// Если только один тип - возвращаем как есть
+	if len(types) == 1 {
+		return types[0]
+	}
+	
+	// Если несколько типов - возвращаем Union тип
+	return strings.Join(types, "|")
 }

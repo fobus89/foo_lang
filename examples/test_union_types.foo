@@ -1,0 +1,40 @@
+// Тестирование Union типов: string | number | null
+
+println("=== Тест Union типов ===")
+
+// Union тип: string | int
+let mixedValue: string | int = "Hello"
+println("mixedValue (string): " + mixedValue)
+
+// Переназначение на другой допустимый тип
+let mixedValue2: string | int = 42
+println("mixedValue2 (int): " + mixedValue2.toString())
+
+// Union тип с null (используем специальное значение)
+let nullableString: string | int = "test"
+println("nullableString (string): " + nullableString)
+
+// Пока пропустим null, так как он не реализован как литерал
+
+// Более сложный Union тип
+let complexValue: string | int | float = 3.14
+println("complexValue (float): " + complexValue.toString())
+
+let complexValue2: string | int | float = "complex"
+println("complexValue2 (string): " + complexValue2)
+
+// Union тип в функции
+fn processValue(value: string | int) -> string {
+    return "Processed: " + value.toString()
+}
+
+let result1 = processValue("test")
+println("processValue('test'): " + result1)
+
+let result2 = processValue(123)
+println("processValue(123): " + result2)
+
+// Тест ошибки типа
+let wrongType: string | int = 3.14  // float не подходит под string | int
+
+println("=== Union типы работают корректно! ===")

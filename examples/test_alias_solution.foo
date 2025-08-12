@@ -1,0 +1,22 @@
+// Решение конфликтов через алиасы
+
+println("=== Решение конфликтов через алиасы ===")
+
+// Импорт с алиасами - избегаем конфликтов
+import * as MathModule from "./math_module.foo"
+import * as ConflictModule from "./conflict_module.foo"
+
+println("Использование через алиасы:")
+
+// Доступ через алиас объекта (проверим работает ли это)
+println("Попытка вызова через алиас...")
+println("Тип MathModule: " + typeof(MathModule))
+println("Тип ConflictModule: " + typeof(ConflictModule))
+
+// Проверим доступ к функциям через алиасы
+println("Доступ к add через MathModule: " + typeof(MathModule.add))
+println("Доступ к add через ConflictModule: " + typeof(ConflictModule.add))
+println("Доступ к PI через MathModule: " + typeof(MathModule.PI))
+println("Доступ к PI через ConflictModule: " + typeof(ConflictModule.PI))
+
+println("\n=== Алиасы позволяют избежать конфликтов ===")

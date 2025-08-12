@@ -1,0 +1,16 @@
+// Простой тест type aliases
+
+println("=== Simple Type Alias Test ===")
+
+// Определяем псевдоним
+type UserId = int
+
+println("Type alias created!")
+
+// Используем псевдоним 
+let id: UserId = 123
+
+println("Variable with alias type created!")
+println("id = " + id.toString())
+
+println("✅ Type alias test completed!")

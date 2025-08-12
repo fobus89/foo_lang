@@ -95,6 +95,23 @@ func (ch *Channel) ReceiveBlocking() (*Value, error) {
 	return value, nil
 }
 
+// TrySend пытается отправить значение в канал (неблокирующая операция)
+func (ch *Channel) TrySend(value *Value) bool {
+	ch.mu.RLock()
+	defer ch.mu.RUnlock()
+	
+	if ch.closed {
+		return false
+	}
+	
+	select {
+	case ch.buffer <- value:
+		return true
+	default:
+		return false
+	}
+}
+
 // TryReceive пытается получить значение из канала (неблокирующая операция)
 func (ch *Channel) TryReceive() (*Value, bool) {
 	ch.mu.RLock()

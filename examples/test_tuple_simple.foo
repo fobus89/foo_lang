@@ -1,0 +1,22 @@
+// Простой тест Tuple типов
+
+println("=== Простой тест Tuple типов ===")
+
+// Базовые Tuple типы
+let point: (float, float) = [3.5, 7.2]
+println("point: [" + point[0].toString() + ", " + point[1].toString() + "]")
+
+let person: (string, int, bool) = ["Alice", 25, true]
+println("person: " + person[0] + ", age " + person[1].toString() + ", active: " + person[2].toString())
+
+// Разные типы в Tuple
+let mixed: (int, string, float) = [42, "hello", 99.9]
+println("mixed[0] (int): " + mixed[0].toString())
+println("mixed[1] (string): " + mixed[1])
+println("mixed[2] (float): " + mixed[2].toString())
+
+// Тест с типами массивов
+let coordinates: (float, float, float) = [1.1, 2.2, 3.3]
+println("3D coordinates: " + coordinates[0].toString() + ", " + coordinates[1].toString() + ", " + coordinates[2].toString())
+
+println("=== Базовые Tuple типы работают! ===")

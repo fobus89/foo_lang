@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"foo_lang/scope"
 	"foo_lang/value"
+	"time"
 )
 
 // InitializeChannelFunctions инициализирует встроенные функции для работы с каналами
@@ -151,6 +152,164 @@ func InitializeChannelFunctions(globalScope *scope.ScopeStack) {
 		return value.NewString(chVal.String())
 	}
 	globalScope.Set("channelInfo", value.NewValue(channelInfoFunc))
+	
+	// trySend - неблокирующая отправка в канал
+	trySendFunc := func(args []*value.Value) *value.Value {
+		if len(args) != 2 {
+			return value.NewString("Error: trySend() requires 2 arguments (channel, value)")
+		}
+		
+		chVal, ok := args[0].Any().(*value.Channel)
+		if !ok {
+			return value.NewString("Error: first argument must be a channel")
+		}
+		
+		success := chVal.TrySend(args[1])
+		return value.NewBool(success)
+	}
+	globalScope.Set("trySend", value.NewValue(trySendFunc))
+	
+	// channelSelect - select для множественного выбора каналов
+	channelSelectFunc := func(args []*value.Value) *value.Value {
+		if len(args) < 1 {
+			return value.NewString("Error: channelSelect() requires at least 1 argument (array of channels)")
+		}
+		
+		channels, ok := args[0].Any().([]interface{})
+		if !ok {
+			return value.NewString("Error: first argument must be array of channels")
+		}
+		
+		// Создаем select операцию
+		sel := value.NewSelect()
+		for _, ch := range channels {
+			if channel, ok := ch.(*value.Value); ok {
+				if chVal, ok := channel.Any().(*value.Channel); ok {
+					sel.AddReceiveCase(chVal)
+				}
+			}
+		}
+		
+		// Выполняем select
+		index, result, err := sel.Execute()
+		if err != nil {
+			return value.NewString(fmt.Sprintf("Error: %v", err))
+		}
+		
+		// Возвращаем объект с результатом
+		resultObj := map[string]interface{}{
+			"index": int64(index),
+			"value": result.Any(),
+		}
+		return value.NewValue(resultObj)
+	}
+	globalScope.Set("channelSelect", value.NewValue(channelSelectFunc))
+	
+	// channelTimeout - операции с настраиваемым таймаутом
+	channelTimeoutFunc := func(args []*value.Value) *value.Value {
+		if len(args) != 3 {
+			return value.NewString("Error: channelTimeout() requires 3 arguments (channel, operation, timeoutMs)")
+		}
+		
+		chVal, ok := args[0].Any().(*value.Channel)
+		if !ok {
+			return value.NewString("Error: first argument must be a channel")
+		}
+		
+		operation, ok := args[1].Any().(string)
+		if !ok {
+			return value.NewString("Error: second argument must be operation string ('send' or 'receive')")
+		}
+		
+		timeoutMs, ok := args[2].Any().(int64)
+		if !ok {
+			return value.NewString("Error: third argument must be timeout in milliseconds")
+		}
+		
+		switch operation {
+		case "receive":
+			// Создаем канал для результата
+			resultChan := make(chan *value.Value, 1)
+			errorChan := make(chan error, 1)
+			
+			// Запускаем получение в горутине
+			go func() {
+				val, err := chVal.ReceiveBlocking()
+				if err != nil {
+					errorChan <- err
+				} else {
+					resultChan <- val
+				}
+			}()
+			
+			// Ждем результат или таймаут
+			select {
+			case result := <-resultChan:
+				return result
+			case err := <-errorChan:
+				return value.NewString(fmt.Sprintf("Error: %v", err))
+			case <-time.After(time.Duration(timeoutMs) * time.Millisecond):
+				return value.NewString("timeout")
+			}
+		default:
+			return value.NewString("Error: unsupported operation. Use 'receive'")
+		}
+	}
+	globalScope.Set("channelTimeout", value.NewValue(channelTimeoutFunc))
+	
+	// channelRange - итерация по каналу до закрытия
+	channelRangeFunc := func(args []*value.Value) *value.Value {
+		if len(args) != 1 {
+			return value.NewString("Error: channelRange() requires 1 argument (channel)")
+		}
+		
+		chVal, ok := args[0].Any().(*value.Channel)
+		if !ok {
+			return value.NewString("Error: argument must be a channel")
+		}
+		
+		var results []interface{}
+		for {
+			val, ok := chVal.TryReceive()
+			if !ok {
+				// Канал пуст, проверяем закрыт ли он
+				if chVal.IsClosed() {
+					break
+				}
+				// Канал не закрыт, ждем немного
+				time.Sleep(10 * time.Millisecond)
+				continue
+			}
+			results = append(results, val.Any())
+		}
+		
+		return value.NewValue(results)
+	}
+	globalScope.Set("channelRange", value.NewValue(channelRangeFunc))
+	
+	// channelDrain - очистка канала
+	channelDrainFunc := func(args []*value.Value) *value.Value {
+		if len(args) != 1 {
+			return value.NewString("Error: channelDrain() requires 1 argument (channel)")
+		}
+		
+		chVal, ok := args[0].Any().(*value.Channel)
+		if !ok {
+			return value.NewString("Error: argument must be a channel")
+		}
+		
+		var drained []interface{}
+		for {
+			val, ok := chVal.TryReceive()
+			if !ok {
+				break // Канал пуст
+			}
+			drained = append(drained, val.Any())
+		}
+		
+		return value.NewValue(drained)
+	}
+	globalScope.Set("channelDrain", value.NewValue(channelDrainFunc))
 }
 
 // Worker представляет worker для обработки задач из канала

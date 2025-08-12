@@ -42,9 +42,11 @@ func (i *ImportExpr) Eval() *Value {
 	// Import statements don't return values, they modify the current scope
 	// Use the modules system to load and import
 	
-	// For now, use current directory as current file context
-	// TODO: Pass actual current file path from parser/interpreter
-	currentFile := "./"
+	// Используем контекст текущего файла, установленный парсером
+	currentFile := GetCurrentFileContext()
+	if currentFile == "" {
+		currentFile = "./" // Fallback для обратной совместимости
+	}
 	
 	if GlobalParseFunc == nil {
 		panic("GlobalParseFunc not set - cannot import modules")

@@ -269,30 +269,8 @@ func (tc *TypedClosure) validateReturnType(returnValue *Value) error {
 	return validateFunctionParameterType(actualValue, tc.returnType)
 }
 
-// validateFunctionParameterType проверяет соответствие типа аргумента ожидаемому примитивному типу
+// validateFunctionParameterType проверяет соответствие типа аргумента ожидаемому типу (включая Union типы)
 func validateFunctionParameterType(argValue *Value, expectedTypeName string) error {
-	switch expectedTypeName {
-	case "int":
-		if !argValue.IsInt64() {
-			return fmt.Errorf("expected int, got %T", argValue.Any())
-		}
-		return nil
-	case "string":
-		if !argValue.IsString() {
-			return fmt.Errorf("expected string, got %T", argValue.Any())
-		}
-		return nil
-	case "float":
-		if !argValue.IsFloat64() && !argValue.IsInt64() { // int может быть приведен к float
-			return fmt.Errorf("expected float, got %T", argValue.Any())
-		}
-		return nil
-	case "bool":
-		if !argValue.IsBool() {
-			return fmt.Errorf("expected bool, got %T", argValue.Any())
-		}
-		return nil
-	default:
-		return fmt.Errorf("unknown type constraint: %s", expectedTypeName)
-	}
+	// Используем универсальную функцию валидации, которая поддерживает Union типы
+	return validateVariableType(argValue, expectedTypeName)
 }

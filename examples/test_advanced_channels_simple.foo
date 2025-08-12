@@ -1,0 +1,39 @@
+// Простая демонстрация новых продвинутых функций каналов
+
+println("=== Тест продвинутых функций каналов ===")
+
+// 1. trySend - неблокирующая отправка
+println("1. TrySend test:")
+let ch1 = newChannel(2)
+let success1 = trySend(ch1, "msg1")
+let success2 = trySend(ch1, "msg2") 
+let success3 = trySend(ch1, "msg3")  // false - канал полный
+
+println("TrySend: " + success1.toString() + ", " + success2.toString() + ", " + success3.toString())
+println("Длина: " + len(ch1).toString())
+
+// 2. channelDrain - очистка канала
+println("\n2. ChannelDrain test:")
+let drained = channelDrain(ch1)
+println("Извлечено: " + drained.length().toString())
+println("Длина после: " + len(ch1).toString())
+
+// 3. channelTimeout - операции с таймаутом
+println("\n3. ChannelTimeout test:")
+let ch2 = newChannel(1)
+send(ch2, "timeout_msg")
+let result = channelTimeout(ch2, "receive", 100)
+println("Timeout receive: " + result)
+
+// 4. channelRange test
+println("\n4. ChannelRange test:")
+let ch3 = newChannel(3)
+send(ch3, "range1")
+send(ch3, "range2")
+send(ch3, "range3")
+close(ch3)
+
+let rangeResults = channelRange(ch3)
+println("Range получено: " + rangeResults.length().toString())
+
+println("\n✅ Все новые функции каналов работают!")

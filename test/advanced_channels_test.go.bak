@@ -1,0 +1,254 @@
+package test
+
+import (
+	"testing"
+	
+	"foo_lang/ast"
+	"foo_lang/builtin"
+	"foo_lang/lexer"
+	"foo_lang/parser"
+	"foo_lang/scope"
+)
+
+func TestTrySend(t *testing.T) {
+	globalScope := scope.NewScopeStack()
+	builtin.InitializeChannelFunctions(globalScope)
+	
+	// Тест неблокирующей отправки в буферизованный канал
+	input := `
+		let ch = newChannel(2)
+		let result1 = trySend(ch, "test1")  // Должно работать
+		let result2 = trySend(ch, "test2")  // Должно работать
+		let result3 = trySend(ch, "test3")  // Должно вернуть false (канал полный)
+		
+		println("TrySend result1: " + result1.toString())
+		println("TrySend result2: " + result2.toString())
+		println("TrySend result3: " + result3.toString())
+		
+		// Проверим что в канале есть данные
+		let len1 = len(ch)
+		println("Channel length: " + len1.toString())
+	`
+	
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	
+	if len(p.Errors()) != 0 {
+		for _, err := range p.Errors() {
+			t.Errorf("Parser error: %s", err)
+		}
+		return
+	}
+	
+	result := ast.Eval(program, globalScope)
+	if result.Type() == "ERROR" {
+		t.Errorf("Evaluation error: %s", result.Inspect())
+	}
+}
+
+func TestChannelDrain(t *testing.T) {
+	globalScope := scope.NewScopeStack()
+	builtin.InitializeChannelFunctions(globalScope)
+	
+	// Тест очистки канала
+	input := `
+		let ch = newChannel(3)
+		send(ch, "message1")
+		send(ch, "message2")
+		send(ch, "message3")
+		
+		println("Before drain - length: " + len(ch).toString())
+		
+		let drained = channelDrain(ch)
+		println("Drained messages: " + drained.length().toString())
+		println("After drain - length: " + len(ch).toString())
+	`
+	
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	
+	if len(p.Errors()) != 0 {
+		for _, err := range p.Errors() {
+			t.Errorf("Parser error: %s", err)
+		}
+		return
+	}
+	
+	result := ast.Eval(program, globalScope)
+	if result.Type() == "ERROR" {
+		t.Errorf("Evaluation error: %s", result.Inspect())
+	}
+}
+
+func TestAdvancedChannelSelect(t *testing.T) {
+	globalScope := scope.NewScopeStack()
+	builtin.InitializeChannelFunctions(globalScope)
+	
+	// Тест select операций между каналами
+	input := `
+		let ch1 = newChannel(1)
+		let ch2 = newChannel(1)
+		let ch3 = newChannel(1)
+		
+		// Отправим данные в разные каналы
+		send(ch1, "from ch1")
+		send(ch2, "from ch2")
+		
+		// Создаем массив каналов для select
+		let channels = [ch1, ch2, ch3]
+		let result = channelSelect(channels)
+		
+		println("Select result index: " + result.index.toString())
+		println("Select result value: " + result.value.toString())
+	`
+	
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	
+	if len(p.Errors()) != 0 {
+		for _, err := range p.Errors() {
+			t.Errorf("Parser error: %s", err)
+		}
+		return
+	}
+	
+	result := ast.Eval(program, globalScope)
+	if result.Type() == "ERROR" {
+		t.Errorf("Evaluation error: %s", result.Inspect())
+	}
+}
+
+func TestChannelTimeout(t *testing.T) {
+	globalScope := scope.NewScopeStack()
+	builtin.InitializeChannelFunctions(globalScope)
+	
+	// Тест операций с таймаутом
+	input := `
+		let ch = newChannel(0)
+		
+		// Попробуем получить из пустого канала с коротким таймаутом
+		let result = channelTimeout(ch, "receive", 100)
+		println("Timeout result: " + result.toString())
+		
+		// Отправим данные и попробуем получить
+		send(ch, "test message")
+		let result2 = channelTimeout(ch, "receive", 1000)
+		println("Successful receive: " + result2.toString())
+	`
+	
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	
+	if len(p.Errors()) != 0 {
+		for _, err := range p.Errors() {
+			t.Errorf("Parser error: %s", err)
+		}
+		return
+	}
+	
+	result := ast.Eval(program, globalScope)
+	if result.Type() == "ERROR" {
+		t.Errorf("Evaluation error: %s", result.Inspect())
+	}
+}
+
+func TestChannelRange(t *testing.T) {
+	globalScope := scope.NewScopeStack()
+	builtin.InitializeChannelFunctions(globalScope)
+	
+	// Тест итерации по каналу
+	input := `
+		let ch = newChannel(3)
+		
+		// Отправляем несколько сообщений
+		send(ch, "msg1")
+		send(ch, "msg2")
+		send(ch, "msg3")
+		
+		// Закрываем канал
+		close(ch)
+		
+		// Получаем все сообщения
+		let messages = channelRange(ch)
+		println("Received messages count: " + messages.length().toString())
+		
+		// Проверяем что канал теперь пуст
+		let finalLength = len(ch)
+		println("Final channel length: " + finalLength.toString())
+	`
+	
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	
+	if len(p.Errors()) != 0 {
+		for _, err := range p.Errors() {
+			t.Errorf("Parser error: %s", err)
+		}
+		return
+	}
+	
+	result := ast.Eval(program, globalScope)
+	if result.Type() == "ERROR" {
+		t.Errorf("Evaluation error: %s", result.Inspect())
+	}
+}
+
+func TestAdvancedChannelWorkflow(t *testing.T) {
+	globalScope := scope.NewScopeStack()
+	builtin.InitializeChannelFunctions(globalScope)
+	
+	// Комплексный тест всех новых функций
+	input := `
+		println("=== Advanced Channel Functions Test ===")
+		
+		// Создаем несколько каналов
+		let prodCh = newChannel(5)    // Канал для продуцирования
+		let consCh = newChannel(3)    // Канал для потребления
+		
+		// Заполняем первый канал
+		let success1 = trySend(prodCh, "item1")
+		let success2 = trySend(prodCh, "item2")
+		let success3 = trySend(prodCh, "item3")
+		
+		println("TrySend results: " + success1.toString() + ", " + success2.toString() + ", " + success3.toString())
+		println("Producer channel length: " + len(prodCh).toString())
+		
+		// Перемещаем часть данных в другой канал
+		let item = receive(prodCh)
+		trySend(consCh, item)
+		
+		// Используем select для выбора из нескольких каналов
+		let channels = [prodCh, consCh]
+		let selectResult = channelSelect(channels)
+		println("Select chose channel " + selectResult.index.toString() + " with value: " + selectResult.value.toString())
+		
+		// Очищаем оставшиеся данные из первого канала
+		let remaining = channelDrain(prodCh)
+		println("Drained " + remaining.length().toString() + " items from producer")
+		
+		// Проверяем финальное состояние
+		println("Final producer length: " + len(prodCh).toString())
+		println("Final consumer length: " + len(consCh).toString())
+	`
+	
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	
+	if len(p.Errors()) != 0 {
+		for _, err := range p.Errors() {
+			t.Errorf("Parser error: %s", err)
+		}
+		return
+	}
+	
+	result := ast.Eval(program, globalScope)
+	if result.Type() == "ERROR" {
+		t.Errorf("Evaluation error: %s", result.Inspect())
+	}
+}

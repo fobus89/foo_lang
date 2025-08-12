@@ -1,0 +1,7 @@
+// Только определение type alias
+
+println("=== Type Alias Definition Test ===")
+
+type UserId = int
+
+println("Type alias defined successfully!")

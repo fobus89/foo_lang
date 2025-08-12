@@ -28,5 +28,8 @@
       "Bash(timeout 30 go test:*)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "context7"
+  ]
 }

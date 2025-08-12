@@ -1,7 +1,86 @@
+import "./math_module.foo"
+
+fn calculateDistance(x1, y1, x2, y2) {
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
+}
+
+const add = fn(x, y) => x + y
+const square = fn(n) => n * n
+const double = fn(x) => x * 2
+
+println(add(1,23))
+
+macro generateStructUtils(structParam: StructType) {
+    //println("=== Struct-Only Macro ===")
+    //println("Processing struct: " + structParam.Name)
+    
+    Expr {
+        println(structParam)
+        println("// Generated utilities for " + structParam.Name)
+        println("fn create" + structParam.Name + "() {")
+        println("    return {}")
+        println("}")
+        
+        println("fn validate" + structParam.Name + "(obj) {")
+        println("    // Add validation logic")
+        println("    return true") 
+        println("}")
+        
+        println("fn serialize" + structParam.Name + "(obj) {")
+        println("    return JSON.stringify(obj)")
+        println("}")
+    } 
+}
+
+enum MathConstants {
+    PI_VALUE,
+    E_VALUE,
+    GOLDEN_RATIO
+}
+
+struct User {
+    name: string,
+    age: int,
+    email: string
+}
+
+@generateStructUtils(User)
+
+
+fn identity<T>(value: T) -> T {
+    return value
+}
+
+let numbers = [1, 2, 3, 4, 5]
+let squared = numbers.map(fn(n) => n * n).filter(fn(n)=> n%2==0)
+
+println(squared)
+
 const arr = for let i = 0; i<10; i++ {
   if i > 2 && i < 5 {
     yield i
   }
+  await sleep(100)
 }
 
+println(multiply(1,2))
 println(arr)
+println(PI)
+
+fn testParams(name=12, value=21) {
+    print("Функция вызвана с: " + name + " = " + value.toString())
+    return "Результат: " + name + " = " + value.toString()
+}
+
+println(testParams())
+
+fn simpleAsync() {
+    await sleep(100)
+    println("Async функция выполняется")
+    return "Результат из async"
+}
+
+let promise = async simpleAsync()
+let result = await promise
+println(result)
+println(identity(12))

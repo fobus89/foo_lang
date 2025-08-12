@@ -1,0 +1,21 @@
+// Тестирование конфликтов при селективном импорте
+
+println("=== Тест селективных конфликтов ===")
+
+// Селективный импорт из первого модуля
+import { add, PI } from "./math_module.foo"
+
+println("После селективного импорта из math_module:")
+let result1 = add(5, 3)
+println("add(5, 3) = " + result1.toString())
+println("PI = " + PI.toString())
+
+// Селективный импорт из второго модуля (конфликтующие имена)
+import { add } from "./conflict_module.foo"
+
+println("\nПосле селективного импорта add из conflict_module:")
+let result2 = add(5, 3)
+println("add(5, 3) = " + result2.toString())
+println("PI = " + PI.toString())  // PI должна остаться из первого модуля
+
+println("\n=== Селективный импорт тоже перезаписывает ===")

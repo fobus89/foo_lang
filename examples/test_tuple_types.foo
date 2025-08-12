@@ -1,0 +1,33 @@
+// Тестирование Tuple типов: (string, int, float)
+
+println("=== Тест Tuple типов ===")
+
+// Простой Tuple тип
+let coordinates: (float, float) = [3.14, 2.71]
+println("coordinates: [" + coordinates[0].toString() + ", " + coordinates[1].toString() + "]")
+
+// Смешанный Tuple тип  
+let userInfo: (string, int, bool) = ["Alice", 25, true]
+println("userInfo: [" + userInfo[0] + ", " + userInfo[1].toString() + ", " + userInfo[2].toString() + "]")
+
+// Более сложный Tuple
+let complex: (string, float, int, bool) = ["test", 99.9, 42, false]
+println("complex tuple length: " + complex.length().toString())
+
+// Tuple в функции
+fn processUser(user: (string, int)) -> string {
+    return user[0] + " is " + user[1].toString() + " years old"
+}
+
+let userData = ["Bob", 30]
+let userDesc: (string, int) = userData
+let description = processUser(userDesc)
+println("User description: " + description)
+
+// Тест валидации - неправильное количество элементов
+// let wrongSize: (string, int) = ["only_one"]  // Должна быть ошибка
+
+// Тест валидации - неправильные типы
+// let wrongTypes: (string, int) = ["string", "not_int"]  // Должна быть ошибка
+
+println("=== Tuple типы работают! ===")

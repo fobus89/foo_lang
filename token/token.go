@@ -42,6 +42,7 @@ const (
 	ERR
 	TRUE
 	FALSE
+	NULL
 	RETURN
 	YIELD
 	BREAK
@@ -94,6 +95,7 @@ const (
 	AND_ASSIGN     // &=
 	OR_ASSIGN      // |=
 	XOR_ASSIGN     // ^=
+	PIPE           // | (для Union типов)
 	SHL_ASSIGN     // <<=
 	SHR_ASSIGN     // >>=
 	AND_NOT_ASSIGN // &^=

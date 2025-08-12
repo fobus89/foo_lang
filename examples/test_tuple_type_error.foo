@@ -1,0 +1,11 @@
+// Тест ошибки типов в Tuple
+
+println("=== Тест ошибки типов в Tuple ===")
+
+let validTuple: (string, int) = ["hello", 42]
+println("validTuple работает")
+
+// Тест ошибки - неправильные типы
+let wrongTypes: (string, int) = ["string", "not_int"]
+
+println("=== Этот код не должен выполниться ===")

@@ -1,0 +1,25 @@
+// Простой тест Union типов для переменных
+
+println("=== Простой тест Union типов ===")
+
+// Union тип: string | int
+let value1: string | int = "Hello"
+println("value1: " + value1 + " (type: " + typeof(value1) + ")")
+
+let value2: string | int = 42
+println("value2: " + value2.toString() + " (type: " + typeof(value2) + ")")
+
+// Сложный Union тип: string | int | float  
+let value3: string | int | float = 3.14
+println("value3: " + value3.toString() + " (type: " + typeof(value3) + ")")
+
+let value4: string | int | float = "test"
+println("value4: " + value4 + " (type: " + typeof(value4) + ")")
+
+let value5: string | int | float = 100
+println("value5: " + value5.toString() + " (type: " + typeof(value5) + ")")
+
+// Тест валидации типов - этот код должен вызвать ошибку:
+let wrongValue: int | float = "should fail"  // строка не подходит под int | float
+
+println("=== Union типы работают! ===")

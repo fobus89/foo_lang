@@ -1,0 +1,40 @@
+// Тестирование системы импортов с ParseWithModules()
+
+// Импорт всего модуля
+//import "./math_module.foo"
+
+// Селективный импорт
+import { add, PI } from "./math_module.foo"
+
+// Импорт с алиасом
+import * as Math from "./math_module.foo"
+
+// Тестируем использование импортированных функций
+println("=== Тест системы импортов ===")
+
+// Использование функций из полного импорта
+let result1 = add(5, 3)
+println("add(5, 3) = " + result1.toString())
+
+// Использование константы PI
+println("PI = " + PI.toString())
+
+// Используем функции напрямую после полного импорта
+let result2 = multiply(4, 7)
+println("multiply(4, 7) = " + result2.toString())
+
+// Использование константы E
+println("E = " + E.toString())
+
+// Проверка функции subtract
+let result3 = subtract(10, 3)
+println("subtract(10, 3) = " + result3.toString())
+
+// Проверим что доступны все экспортированные функции
+println("Доступные функции из модуля:")
+println("- add: " + typeof(add))
+println("- subtract: " + typeof(subtract))  
+println("- multiply: " + typeof(multiply))
+println("- divide: " + typeof(divide))
+
+println("=== Тест завершен успешно ===")

@@ -35,34 +35,22 @@ func main() {
 		}
 	}
 
-	var mainFile []byte
-	var err error
+	var filename string = "examples/main.foo" // Значение по умолчанию
 
 	if len(os.Args) > 1 {
 		// Пропускаем флаги при поиске файла
-		filename := ""
 		for _, arg := range os.Args[1:] {
 			if !strings.HasPrefix(arg, "-") {
 				filename = arg
 				break
 			}
 		}
-		
-		if filename != "" {
-			mainFile, err = os.ReadFile(filename)
-			if err != nil {
-				fmt.Printf("Error reading file: %v\n", err)
-				return
-			}
-		} else {
-			mainFile, _ = os.ReadFile("examples/main.foo")
-		}
-	} else {
-		mainFile, _ = os.ReadFile("examples/main.foo")
 	}
 
 	// Set up global parse function for module imports
 	parseFunc := func(code string) []modules.Expr {
+		// Для модулей пока используем базовый Parser, так как у нас нет пути файла модуля
+		// TODO: Передавать путь файла модуля в parseFunc для лучшей поддержки вложенных импортов
 		exprs := parser.NewParser(code).Parse()
 		result := make([]modules.Expr, len(exprs))
 		for i, expr := range exprs {
@@ -99,7 +87,14 @@ func main() {
 	// Инициализируем встроенные функции синхронизации
 	builtin.InitializeSyncFunctions(scope.GlobalScope)
 
-	exprs := parser.NewParser(mainFile).Parse()
+	// Используем NewParserFromFile для упрощения API
+	p, err := parser.NewParserFromFile(filename)
+	if err != nil {
+		fmt.Printf("Error creating parser: %v\n", err)
+		return
+	}
+	
+	exprs := p.ParseWithModules()
 
 	for _, expr := range exprs {
 		expr.Eval()

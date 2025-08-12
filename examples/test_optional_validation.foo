@@ -1,0 +1,25 @@
+// Тест валидации Optional типов
+
+println("=== Тест валидации Optional типов ===")
+
+// Правильные присваивания
+let validString: string? = "hello"
+println("validString: " + validString)
+
+let validNull: string? = null
+println("validNull type: " + typeof(validNull))
+
+// Переназначения
+validString = null
+println("validString after null: " + typeof(validString))
+
+let validInt: int? = 42
+println("validInt: " + validInt.toString())
+
+validInt = null  
+println("validInt after null: " + typeof(validInt))
+
+// Тест ошибки типа - должна быть ошибка
+let invalidOptional: int? = "string should fail"
+
+println("=== Этот код не должен выполниться ===")

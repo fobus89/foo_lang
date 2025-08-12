@@ -1,0 +1,68 @@
+// Работающий пример Type Aliases в foo_lang v2
+
+println("=== ✅ Type Aliases - Полностью рабочий пример ===")
+
+// 1. Создание псевдонимов
+type UserId = int
+type UserName = string  
+type Score = float
+type IsActive = bool
+type UserList = array
+type UserData = object
+
+println("✅ Все псевдонимы созданы успешно!")
+
+// 2. Использование в переменных
+let userId: UserId = 12345
+let userName: UserName = "Alice"
+let userScore: Score = 85.5
+let userActive: IsActive = true
+let users: UserList = ["Alice", "Bob", "Charlie"]
+let profile: UserData = {
+    name: "Alice",
+    age: 30,
+    email: "alice@example.com"
+}
+
+println("✅ Все переменные с псевдонимами созданы!")
+
+// 3. Вывод значений
+println("\n📋 Значения:")
+println("userId: " + userId.toString())
+println("userName: " + userName)
+println("userScore: " + userScore.toString())
+println("userActive: " + userActive.toString())
+println("users length: " + users.length().toString())
+println("profile name: " + profile.name)
+
+// 4. Цепочка псевдонимов
+type PrimaryKey = UserId
+type EntityId = PrimaryKey
+
+let entityId: EntityId = 999
+println("✅ Цепочка псевдонимов работает!")
+println("entityId: " + entityId.toString())
+
+// 5. Псевдонимы в функциях (без перегрузки)
+fn processUser(id: UserId, name: UserName) {
+    println("Processing user: " + name + " (ID: " + id.toString() + ")")
+}
+
+processUser(userId, userName)
+
+// 6. Функция с return type alias
+fn createScore(value: float) -> Score {
+    return value
+}
+
+let newScore = createScore(95.5)
+println("New score: " + newScore.toString())
+
+println("\n🎉 Type Aliases полностью работают в foo_lang v2!")
+println("✅ Поддерживаются:")
+println("  - Псевдонимы примитивных типов")
+println("  - Псевдонимы коллекций")
+println("  - Цепочки псевдонимов") 
+println("  - Использование в переменных")
+println("  - Использование в функциях")
+println("  - Return type псевдонимы")

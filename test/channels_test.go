@@ -86,7 +86,7 @@ func TestChannelBasicOperations(t *testing.T) {
 				builtin.InitializeMathFunctions(scope.GlobalScope)
 				builtin.InitializeStringFunctions(scope.GlobalScope)
 				builtin.InitializeChannelFunctions(scope.GlobalScope)
-				
+
 				exprs := parser.NewParser(tt.code).Parse()
 				for _, expr := range exprs {
 					expr.Eval()
@@ -109,7 +109,7 @@ func TestChannelNonBlockingOperations(t *testing.T) {
 		result := captureChannelOutput(func() {
 			scope.GlobalScope = scope.NewScopeStack()
 			builtin.InitializeChannelFunctions(scope.GlobalScope)
-			
+
 			code := `
 				let ch = newChannel(1)
 				let result = tryReceive(ch)
@@ -130,7 +130,7 @@ func TestChannelNonBlockingOperations(t *testing.T) {
 		result := captureChannelOutput(func() {
 			scope.GlobalScope = scope.NewScopeStack()
 			builtin.InitializeChannelFunctions(scope.GlobalScope)
-			
+
 			code := `
 				let ch = newChannel(1)
 				send(ch, "available")
@@ -156,7 +156,7 @@ func TestChannelWithNumbers(t *testing.T) {
 	result := captureChannelOutput(func() {
 		scope.GlobalScope = scope.NewScopeStack()
 		builtin.InitializeChannelFunctions(scope.GlobalScope)
-		
+
 		code := `
 			let ch = newChannel(3)
 			send(ch, 42)
@@ -183,7 +183,7 @@ func TestChannelWithNumbers(t *testing.T) {
 
 func TestChannelDirectAPI(t *testing.T) {
 	// Тест прямого API каналов (без foo_lang кода)
-	
+
 	t.Run("channel_creation", func(t *testing.T) {
 		ch := value.NewChannel(2)
 		if ch.Cap() != 2 {
@@ -200,17 +200,17 @@ func TestChannelDirectAPI(t *testing.T) {
 	t.Run("send_and_receive", func(t *testing.T) {
 		ch := value.NewChannel(1)
 		testValue := value.NewString("test")
-		
+
 		err := ch.Send(testValue)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
-		
+
 		received, err := ch.Receive()
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
-		
+
 		if received.Any().(string) != "test" {
 			t.Errorf("expected 'test', got %v", received.Any())
 		}
@@ -219,14 +219,14 @@ func TestChannelDirectAPI(t *testing.T) {
 	t.Run("channel_closure", func(t *testing.T) {
 		ch := value.NewChannel(1)
 		testValue := value.NewString("before_close")
-		
+
 		ch.Send(testValue)
 		ch.Close()
-		
+
 		if !ch.IsClosed() {
 			t.Error("expected channel to be closed")
 		}
-		
+
 		// Должны все еще суметь получить данные, отправленные до закрытия
 		received, ok := ch.TryReceive()
 		if ok && received.Any().(string) != "before_close" {
@@ -236,13 +236,13 @@ func TestChannelDirectAPI(t *testing.T) {
 
 	t.Run("buffer_overflow", func(t *testing.T) {
 		ch := value.NewChannel(1)
-		
+
 		// Заполняем буфер
 		err := ch.Send(value.NewString("first"))
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
-		
+
 		// Проверяем, что канал полон
 		if !ch.IsFull() {
 			t.Error("expected channel to be full")
@@ -251,13 +251,13 @@ func TestChannelDirectAPI(t *testing.T) {
 
 	t.Run("empty_channel_check", func(t *testing.T) {
 		ch := value.NewChannel(1)
-		
+
 		if !ch.IsEmpty() {
 			t.Error("expected channel to be empty")
 		}
-		
+
 		ch.Send(value.NewString("data"))
-		
+
 		if ch.IsEmpty() {
 			t.Error("expected channel to not be empty")
 		}
@@ -267,7 +267,7 @@ func TestChannelDirectAPI(t *testing.T) {
 func TestChannelConcurrency(t *testing.T) {
 	// Тест конкурентности каналов
 	ch := value.NewChannel(20) // Увеличиваем буфер, чтобы вместить все сообщения
-	
+
 	// Запускаем несколько горутин для отправки данных
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
@@ -280,15 +280,15 @@ func TestChannelConcurrency(t *testing.T) {
 			}
 		}(i)
 	}
-	
+
 	// Ждем завершения всех горутин
 	wg.Wait()
-	
+
 	// Проверяем, что данные получены
 	if ch.Len() != 15 {
 		t.Errorf("expected 15 messages, got %d", ch.Len())
 	}
-	
+
 	// Получаем все сообщения
 	count := 0
 	for !ch.IsEmpty() {
@@ -297,7 +297,7 @@ func TestChannelConcurrency(t *testing.T) {
 			count++
 		}
 	}
-	
+
 	if count != 15 {
 		t.Errorf("expected to receive 15 messages, got %d", count)
 	}
@@ -308,26 +308,26 @@ func TestChannelSelect(t *testing.T) {
 	sel := value.NewSelect()
 	ch1 := value.NewChannel(1)
 	ch2 := value.NewChannel(1)
-	
+
 	// Добавляем receive cases
 	sel.AddReceiveCase(ch1)
 	sel.AddReceiveCase(ch2)
 	sel.AddDefaultCase()
-	
+
 	// Отправляем в первый канал
 	ch1.Send(value.NewString("from_ch1"))
-	
+
 	// Выполняем select
 	caseIndex, result, err := sel.Execute()
-	
+
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
-	
+
 	if caseIndex != 0 {
 		t.Errorf("expected case 0, got %d", caseIndex)
 	}
-	
+
 	if result.Any().(string) != "from_ch1" {
 		t.Errorf("expected 'from_ch1', got %v", result.Any())
 	}
@@ -337,7 +337,7 @@ func TestChannelErrorHandling(t *testing.T) {
 	t.Run("send_to_closed_channel", func(t *testing.T) {
 		ch := value.NewChannel(1)
 		ch.Close()
-		
+
 		err := ch.Send(value.NewString("test"))
 		if err == nil {
 			t.Error("expected error when sending to closed channel")

@@ -1,0 +1,149 @@
+// Продвинутые функции каналов в foo_lang v2
+// Демонстрация: trySend, channelSelect, channelTimeout, channelRange, channelDrain
+
+println("=== 🚀 Продвинутые функции каналов ===")
+
+// 1. trySend - неблокирующая отправка
+println("\n1. 📤 TrySend - неблокирующая отправка:")
+
+let bufferChannel = newChannel(2)  // Буфер на 2 элемента
+println("Канал создан с буфером 2")
+
+// Заполняем канал неблокирующими отправками
+let success1 = trySend(bufferChannel, "message1")
+let success2 = trySend(bufferChannel, "message2") 
+let success3 = trySend(bufferChannel, "message3")  // Должно вернуть false
+
+println("trySend результаты: " + success1.toString() + ", " + success2.toString() + ", " + success3.toString())
+println("Длина канала: " + len(bufferChannel).toString())
+
+// 2. channelDrain - очистка канала
+println("\n2. 🧽 ChannelDrain - очистка канала:")
+
+let drainChannel = newChannel(5)
+send(drainChannel, "item1")
+send(drainChannel, "item2")
+send(drainChannel, "item3")
+send(drainChannel, "item4")
+
+println("Перед очисткой - длина: " + len(drainChannel).toString())
+
+let drainedItems = channelDrain(drainChannel)
+println("Извлечено элементов: " + drainedItems.length().toString())
+println("После очистки - длина: " + len(drainChannel).toString())
+
+// 3. channelSelect - множественный выбор каналов
+println("\n3. 🔀 ChannelSelect - множественный выбор:")
+
+let selectCh1 = newChannel(1)
+let selectCh2 = newChannel(1)
+let selectCh3 = newChannel(1)
+
+// Отправляем данные в разные каналы
+send(selectCh1, "from channel 1")
+send(selectCh3, "from channel 3")
+
+let channels = [selectCh1, selectCh2, selectCh3]
+let selectResult = channelSelect(channels)
+
+println("Select выбрал канал " + selectResult.index.toString())
+println("Полученное значение: " + selectResult.value.toString())
+
+// Повторим select - должен выбрать другой канал
+let selectResult2 = channelSelect(channels)
+println("Второй select выбрал канал " + selectResult2.index.toString())
+println("Второе значение: " + selectResult2.value.toString())
+
+// 4. channelTimeout - операции с таймаутом
+println("\n4. ⏰ ChannelTimeout - операции с таймаутом:")
+
+let timeoutChannel = newChannel(0)  // Небуферизованный канал
+
+// Попробуем получить из пустого канала с коротким таймаутом
+let timeoutResult = channelTimeout(timeoutChannel, "receive", 50)
+println("Результат получения с таймаутом: " + timeoutResult.toString())
+
+// Отправим данные и попробуем получить с большим таймаутом
+send(timeoutChannel, "timeout test message")
+let successResult = channelTimeout(timeoutChannel, "receive", 1000)
+println("Успешное получение: " + successResult.toString())
+
+// 5. channelRange - итерация по каналу
+println("\n5. 🔄 ChannelRange - итерация по каналу:")
+
+let rangeChannel = newChannel(4)
+
+// Заполняем канал данными
+send(rangeChannel, "range_msg_1")
+send(rangeChannel, "range_msg_2")
+send(rangeChannel, "range_msg_3")
+send(rangeChannel, "range_msg_4")
+
+println("Канал заполнен, длина: " + len(rangeChannel).toString())
+
+// Закрываем канал для корректной работы range
+close(rangeChannel)
+
+// Получаем все сообщения
+let allMessages = channelRange(rangeChannel)
+println("Получено сообщений: " + allMessages.length().toString())
+println("Канал после range, длина: " + len(rangeChannel).toString())
+
+// 6. Комплексный пример - Producer-Consumer с продвинутыми функциями
+println("\n6. 🏭 Комплексный Producer-Consumer пример:")
+
+let producerCh = newChannel(10)
+let consumerCh = newChannel(5)
+let errorCh = newChannel(3)
+
+// Producer: заполняем канал заданиями
+println("📦 Producer: отправляем задания...")
+
+trySend(producerCh, "task_1")
+trySend(producerCh, "task_2")
+trySend(producerCh, "task_3")
+trySend(producerCh, "task_4")
+trySend(producerCh, "task_5")
+trySend(producerCh, "task_6")
+trySend(producerCh, "task_7")
+let success8 = trySend(producerCh, "task_8")
+
+if !success8 {
+    println("⚠️  Не удалось отправить задание 8")
+    trySend(errorCh, "failed_task_8")
+}
+
+println("Producer канал, длина: " + len(producerCh).toString())
+println("Error канал, длина: " + len(errorCh).toString())
+
+// Consumer: обрабатываем задания с select
+println("\n🔧 Consumer: обрабатываем задания...")
+
+let consumerChannels = [producerCh, errorCh]
+
+let selectResult1 = channelSelect(consumerChannels)
+println("1. Выбран канал " + selectResult1.index.toString() + ": " + selectResult1.value.toString())
+
+let selectResult2 = channelSelect(consumerChannels)
+println("2. Выбран канал " + selectResult2.index.toString() + ": " + selectResult2.value.toString())
+
+let selectResult3 = channelSelect(consumerChannels)
+println("3. Выбран канал " + selectResult3.index.toString() + ": " + selectResult3.value.toString())
+
+// Финальная статистика
+println("\n📊 Финальная статистика:")
+println("Producer оставшихся заданий: " + len(producerCh).toString())
+println("Consumer завершенных заданий: " + len(consumerCh).toString())
+println("Error необработанных ошибок: " + len(errorCh).toString())
+
+// Очищаем все оставшиеся данные
+let remainingTasks = channelDrain(producerCh)
+let completedTasks = channelDrain(consumerCh)
+let remainingErrors = channelDrain(errorCh)
+
+println("\n🧹 Очистка:")
+println("Слито оставшихся заданий: " + remainingTasks.length().toString())
+println("Слито завершенных заданий: " + completedTasks.length().toString())
+println("Слито оставшихся ошибок: " + remainingErrors.length().toString())
+
+println("\n✅ Демонстрация продвинутых функций каналов завершена!")

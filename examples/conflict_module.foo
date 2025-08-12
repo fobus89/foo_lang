@@ -1,0 +1,12 @@
+// Модуль с конфликтующими именами функций
+export fn add(a, b) {
+    println("Вызов add из conflict_module")
+    return a + b + 100  // Другая логика
+}
+
+export fn multiply(x, y) {
+    println("Вызов multiply из conflict_module") 
+    return x * y * 2    // Другая логика
+}
+
+export let PI = 2.71828  // Конфликт с константой
