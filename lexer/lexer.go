@@ -119,6 +119,10 @@ var keywords = MapType[string]{
 	"extension": token.EXTENSION,
 	"interface": token.INTERFACE,
 	"impl":      token.IMPL,
+	"async":     token.ASYNC,
+	"await":     token.AWAIT,
+	"sleep":     token.SLEEP,
+	"Promise":   token.PROMISE,
 }
 
 type Lexer struct {

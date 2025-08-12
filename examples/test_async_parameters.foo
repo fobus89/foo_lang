@@ -1,0 +1,22 @@
+// Тест для отладки параметров в async функциях
+print("=== Тест параметров в async ===")
+
+// Простая функция с параметрами
+fn testParams(name, value) {
+    print("Функция вызвана с: " + name + " = " + value.toString())
+    return "Результат: " + name + " = " + value.toString()
+}
+
+// Тест 1: Обычный вызов функции
+print("\n1. Обычный вызов:")
+let normalResult = testParams("param1", 42)
+print(normalResult)
+
+// Тест 2: Async вызов той же функции
+print("\n2. Async вызов:")
+let asyncResult = async testParams("param2", 100)
+print("Async создан, ждем результат...")
+let awaitedResult = await asyncResult
+print(awaitedResult)
+
+print("\nТест завершен")

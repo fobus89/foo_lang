@@ -1,0 +1,21 @@
+// Простой тест Promise.all
+print("=== Тест Promise.all ===")
+
+fn simpleTask(name) {
+    print("Выполняем: " + name)
+    return name + " готово"
+}
+
+// Создаем несколько задач
+print("Создаем задачи...")
+let task1 = async simpleTask("Задача1")
+let task2 = async simpleTask("Задача2")
+let task3 = async simpleTask("Задача3")
+
+// Ждем все
+print("Ждем все задачи...")
+let results = await Promise.all(task1, task2, task3)
+print("Все задачи завершены!")
+print("Количество результатов: " + results.length().toString())
+
+print("Тест завершен")

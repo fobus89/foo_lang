@@ -1,0 +1,33 @@
+// Отладочный тест для async
+print("=== Отладка async ===")
+
+fn simpleTask(name) {
+    print("Выполняем задачу: " + name)
+    return name + " выполнена"
+}
+
+// Тест 1: Простое создание переменных
+print("\n1. Создание переменных:")
+let var1 = "test1"
+print("var1 = " + var1)
+let var2 = "test2"
+print("var2 = " + var2)
+
+// Тест 2: Проверка async
+print("\n2. Проверка async:")
+let task1 = async simpleTask("Задача1")
+print("task1 создан")
+
+// Тест 3: Проверка await
+print("\n3. Проверка await:")
+let result1 = await task1
+print("result1 = " + result1)
+
+// Тест 4: Создание второго async
+print("\n4. Создание второго async:")
+let task2 = async simpleTask("Задача2")
+print("task2 создан")
+let result2 = await task2
+print("result2 = " + result2)
+
+print("\nОтладка завершена")

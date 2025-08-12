@@ -1,0 +1,35 @@
+// Базовый тест async/await
+
+print("=== Базовый тест async/await ===")
+
+// Простая функция без параметров
+fn simpleAsync() {
+    print("Async функция выполняется")
+    return "Результат из async"
+}
+
+// Тест 1: Простой async/await
+print("\n1. Простой async/await:")
+let promise = async simpleAsync()
+print("Создали промис")
+let result = await promise
+print("Результат: " + result)
+
+// Тест 2: Sleep
+print("\n2. Тест sleep:")
+print("Начинаем sleep на 100мс...")
+let sleepPromise = sleep(100)
+await sleepPromise
+print("Sleep завершен!")
+
+// Тест 3: Несколько промисов
+print("\n3. Несколько промисов:")
+let p1 = async simpleAsync()
+let p2 = async simpleAsync()
+print("Создали 2 промиса")
+
+let r1 = await p1
+let r2 = await p2
+print("Оба промиса выполнены")
+
+print("\nТест завершен!")

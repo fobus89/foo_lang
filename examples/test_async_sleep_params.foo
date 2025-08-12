@@ -1,0 +1,19 @@
+// Тест функций с sleep и параметрами
+print("=== Тест async + sleep + параметры ===")
+
+// Функция с sleep и параметрами (как в проблемном тесте)
+fn task(name, delay) {
+    print("Начинаем задачу: " + name + " с задержкой " + delay.toString())
+    await sleep(delay)
+    print("Завершаем задачу: " + name)
+    return name + " completed"
+}
+
+// Тест async функции с sleep
+print("\n1. Async функция с sleep:")
+let asyncTask = async task("Task1", 50)
+print("Задача запущена, ждем...")
+let result = await asyncTask
+print("Результат: " + result)
+
+print("\nТест завершен")

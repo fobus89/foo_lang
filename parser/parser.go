@@ -918,6 +918,69 @@ func (p *Parser) Primary() ast.Expr {
 	case token.IDENT:
 		p.Next()
 		return ast.NewVarExpr(tok.Value, nil)
+		
+	case token.ASYNC:
+		// async expression: async expr
+		p.Next() // consume async
+		expr := p.Unary()
+		return &ast.AsyncExpr{Expr: expr}
+		
+	case token.AWAIT:
+		// await expression: await expr
+		p.Next() // consume await
+		expr := p.Unary()
+		return &ast.AwaitExpr{Expr: expr}
+		
+	case token.SLEEP:
+		// sleep function: sleep(milliseconds)
+		p.Next() // consume sleep
+		if !p.MatchAndNext(token.LPAREN) {
+			p.error("expected '(' after sleep", p.Peek(0))
+		}
+		duration := p.Expression()
+		if !p.MatchAndNext(token.RPAREN) {
+			p.error("expected ')' after sleep duration", p.Peek(0))
+		}
+		return &ast.SleepExpr{Duration: duration}
+		
+	case token.PROMISE:
+		// Promise.all or Promise.any
+		p.Next() // consume Promise
+		if !p.MatchAndNext(token.DOT) {
+			p.error("expected '.' after Promise", p.Peek(0))
+		}
+		if !p.Match(token.IDENT) {
+			p.error("expected 'all' or 'any' after Promise.", p.Peek(0))
+		}
+		method := p.Next().Value
+		
+		if !p.MatchAndNext(token.LPAREN) {
+			p.error("expected '(' after Promise."+method, p.Peek(0))
+		}
+		
+		var args []ast.Expr
+		for !p.Match(token.RPAREN) {
+			args = append(args, p.Expression())
+			if p.Match(token.COMMA) {
+				p.Next()
+			} else if !p.Match(token.RPAREN) {
+				p.error("expected ',' or ')'", p.Peek(0))
+			}
+		}
+		
+		if !p.MatchAndNext(token.RPAREN) {
+			p.error("expected ')'", p.Peek(0))
+		}
+		
+		switch method {
+		case "all":
+			return &ast.PromiseAllExpr{Args: args}
+		case "any":
+			return &ast.PromiseAnyExpr{Args: args}
+		default:
+			p.error("unknown Promise method: "+method, p.Peek(-1))
+		}
+		return nil
 
 	case token.AT:
 		// Macro call: @macro_name(args)

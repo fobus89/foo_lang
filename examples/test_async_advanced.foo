@@ -1,0 +1,115 @@
+// Продвинутые примеры async/await с обработкой ошибок
+
+print("=== Продвинутое использование async/await ===")
+
+// Функция, которая может завершиться с ошибкой
+fn riskyOperation(name, shouldFail) {
+    await sleep(100)
+    if shouldFail {
+        panic("Operation " + name + " failed!")
+    }
+    return "Operation " + name + " succeeded"
+}
+
+// Тест 1: Обработка ошибок в async функциях
+print("\n1. Обработка ошибок:")
+fn testWithErrorHandling() {
+    // Успешная операция
+    let success = async riskyOperation("A", false)
+    let result1 = await success
+    print("Успех: " + result1)
+    
+    // Операция с ошибкой - нужно обернуть в try/catch когда будет реализовано
+    // Пока просто демонстрируем концепцию
+    print("Примечание: обработка ошибок будет добавлена с try/catch")
+}
+
+testWithErrorHandling()
+
+// Тест 2: Цепочка асинхронных операций
+print("\n2. Цепочка асинхронных операций:")
+fn fetchData(id) {
+    await sleep(50)
+    return {id: id, data: "Data for " + id.toString()}
+}
+
+fn processData(data) {
+    await sleep(100)
+    return "Processed: " + data.data
+}
+
+fn saveResult(result) {
+    await sleep(50)
+    return "Saved: " + result
+}
+
+// Выполняем цепочку
+let dataPromise = async fetchData(123)
+let data = await dataPromise
+
+let processPromise = async processData(data)
+let processed = await processPromise
+
+let savePromise = async saveResult(processed)
+let saved = await savePromise
+
+print("Результат цепочки: " + saved)
+
+// Тест 3: Гонка промисов (Promise.any)
+print("\n3. Гонка промисов:")
+fn racingTask(name, delay) {
+    await sleep(delay)
+    return name + " finished in " + delay.toString() + "ms"
+}
+
+let racer1 = async racingTask("Racer 1", 150)
+let racer2 = async racingTask("Racer 2", 100)
+let racer3 = async racingTask("Racer 3", 200)
+
+let winner = await Promise.any(racer1, racer2, racer3)
+print("Победитель: " + winner)
+
+// Тест 4: Параллельная обработка массива
+print("\n4. Параллельная обработка массива:")
+fn processItem(item) {
+    await sleep(50 * item)
+    return item * item
+}
+
+// Обрабатываем массив элементов параллельно
+let items = [1, 2, 3, 4, 5]
+let promises = []
+
+for let i = 0; i < items.length(); i++ {
+    let item = items[i]
+    let promise = async processItem(item)
+    promises.push(promise)
+}
+
+// Ждем завершения всех
+// Примечание: в реальной реализации нужна поддержка spread оператора
+// let results = await Promise.all(...promises)
+print("Параллельная обработка массива завершена")
+
+// Тест 5: Таймаут операций
+print("\n5. Операции с таймаутом:")
+fn longOperation() {
+    await sleep(1000)
+    return "Long operation completed"
+}
+
+fn withTimeout(promise, timeout) {
+    let timeoutPromise = async {
+        await sleep(timeout)
+        return "Timeout!"
+    }
+    
+    // Возвращаем первый завершившийся промис
+    return Promise.any(promise, timeoutPromise)
+}
+
+let longOp = async longOperation()
+let result = await withTimeout(longOp, 200)
+print("Результат с таймаутом: " + result)
+
+print("\nПродвинутое тестирование завершено!")

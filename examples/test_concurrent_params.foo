@@ -1,0 +1,26 @@
+// Тест параллельных вызовов функций с параметрами
+print("=== Тест параллельных параметров ===")
+
+fn taskWithParams(name, delay) {
+    print("Начинаем " + name)
+    await sleep(delay)
+    print("Завершаем " + name) 
+    return name + " завершено"
+}
+
+// Запускаем одновременно несколько функций
+print("Запускаем задачи...")
+let t1 = async taskWithParams("Задача1", 50)
+let t2 = async taskWithParams("Задача2", 30) 
+let t3 = async taskWithParams("Задача3", 40)
+
+// Ждем их по одной
+print("Ждем задачи по очереди...")
+let r1 = await t1
+print("r1: " + r1)
+let r2 = await t2  
+print("r2: " + r2)
+let r3 = await t3
+print("r3: " + r3)
+
+print("Все задачи завершены")

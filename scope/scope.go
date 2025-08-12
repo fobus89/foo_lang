@@ -3,12 +3,14 @@ package scope
 import (
 	"fmt"
 	"foo_lang/value"
+	"sync"
 )
 
 // Scope представляет область видимости переменных
 type Scope struct {
 	parent *Scope
 	vars   map[string]*value.Value
+	mu     sync.RWMutex
 }
 
 // NewScope создает новую область видимости
@@ -21,12 +23,18 @@ func NewScope(parent *Scope) *Scope {
 
 // Set устанавливает переменную в текущей области
 func (s *Scope) Set(name string, val *value.Value) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.vars[name] = val
 }
 
 // Get получает переменную, ищет в текущей области и родительских
 func (s *Scope) Get(name string) (*value.Value, bool) {
-	if val, exists := s.vars[name]; exists {
+	s.mu.RLock()
+	val, exists := s.vars[name]
+	s.mu.RUnlock()
+	
+	if exists {
 		return val, true
 	}
 	if s.parent != nil {
@@ -37,16 +45,23 @@ func (s *Scope) Get(name string) (*value.Value, bool) {
 
 // Has проверяет, существует ли переменная в текущей области (не в родительских)
 func (s *Scope) Has(name string) bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	_, exists := s.vars[name]
 	return exists
 }
 
 // Update обновляет существующую переменную (ищет в текущей и родительских областях)
 func (s *Scope) Update(name string, val *value.Value) bool {
-	if _, exists := s.vars[name]; exists {
+	s.mu.Lock()
+	_, exists := s.vars[name]
+	if exists {
 		s.vars[name] = val
+		s.mu.Unlock()
 		return true
 	}
+	s.mu.Unlock()
+	
 	if s.parent != nil {
 		return s.parent.Update(name, val)
 	}
@@ -136,12 +151,14 @@ func (ss *ScopeStack) GetAll() map[string]*value.Value {
 	// Собираем все переменные, начиная с глобальной области
 	scope := ss.current
 	for scope != nil {
+		scope.mu.RLock()
 		for name, val := range scope.vars {
 			// Переменные из более локальных областей имеют приоритет
 			if _, exists := result[name]; !exists {
 				result[name] = val
 			}
 		}
+		scope.mu.RUnlock()
 		scope = scope.parent
 	}
 	

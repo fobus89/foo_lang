@@ -1,0 +1,64 @@
+// Простой пример использования async/await
+
+print("=== Тестирование async/await ===")
+
+// Функция с задержкой
+fn delayedHello(name, delay) {
+    await sleep(delay)
+    return "Hello, " + name + "!"
+}
+
+// Тест 1: Базовое использование async/await
+print("\n1. Базовое использование async/await:")
+let promise1 = async delayedHello("World", 100)
+print("Запустили async функцию...")
+let result1 = await promise1
+print("Результат: " + result1)
+
+// Тест 2: Параллельное выполнение
+print("\n2. Параллельное выполнение:")
+let start = "Начали"
+print(start)
+
+// Запускаем 3 задачи параллельно
+print("Создаем task1...")
+let task1 = async delayedHello("Alice", 200)
+print("Создаем task2...")
+let task2 = async delayedHello("Bob", 100)  
+print("Создаем task3...")
+let task3 = async delayedHello("Charlie", 150)
+
+print("Ждем завершения всех задач...")
+// Ждем завершения всех
+let results = await Promise.all(task1, task2, task3)
+print("Все задачи завершены!")
+print("Результаты: " + results.toString())
+
+// Тест 3: Promise.any - ждем первый результат
+print("\n3. Promise.any - ждем первый результат:")
+let fast1 = async delayedHello("Fast", 50)
+let fast2 = async delayedHello("Faster", 100)
+let fast3 = async delayedHello("Fastest", 25)
+
+let firstResult = await Promise.any(fast1, fast2, fast3)
+print("Первый результат: " + firstResult)
+
+// Тест 4: Счетчик с async
+print("\n4. Асинхронный счетчик:")
+fn asyncCounter(name, count, delay) {
+    for let i = 1; i <= count; i++ {
+        await sleep(delay)
+        print(name + ": " + i.toString())
+    }
+    return name + " finished!"
+}
+
+// Запускаем два счетчика параллельно
+let counter1 = async asyncCounter("Counter A", 3, 100)
+let counter2 = async asyncCounter("Counter B", 3, 150)
+
+// Ждем завершения обоих
+let counterResults = await Promise.all(counter1, counter2)
+print("Все счетчики завершены!")
+
+print("\nТестирование завершено!")

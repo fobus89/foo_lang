@@ -52,6 +52,10 @@ const (
 	EXTENSION
 	INTERFACE
 	IMPL
+	ASYNC
+	AWAIT
+	SLEEP
+	PROMISE
 
 	operator_beg
 	ADD        // +
