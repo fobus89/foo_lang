@@ -1,0 +1,93 @@
+// Демонстрация файловой системы foo_lang
+
+print("=== Тестирование файловой системы ===")
+
+// Тест 1: Создание директории и запись файла
+print("\n1. Создание директории и запись файла:")
+let result = mkdir("temp_dir")
+print("mkdir('temp_dir'): " + result)
+
+let writeResult = writeFile("temp_dir/test.txt", "Hello, World!\nЭто тестовый файл.")
+print("writeFile result:", writeResult)
+
+// Тест 2: Проверка существования и чтение файла
+print("\n2. Проверка существования и чтение:")
+let fileExists = exists("temp_dir/test.txt")
+print("exists('temp_dir/test.txt'):", fileExists)
+
+if (fileExists) {
+    let content = readFile("temp_dir/test.txt")
+    print("Содержимое файла:")
+    print(content)
+}
+
+// Тест 3: Информация о файле
+print("\n3. Информация о файле:")
+let isFile = isFile("temp_dir/test.txt")
+let isDirectory = isDir("temp_dir")
+let fileSize = getFileSize("temp_dir/test.txt")
+
+print("isFile('temp_dir/test.txt'):", isFile)
+print("isDir('temp_dir'):", isDirectory)
+print("getFileSize('temp_dir/test.txt'):", fileSize, "байт")
+
+// Тест 4: Копирование файла
+print("\n4. Копирование файла:")
+let copyResult = copyFile("temp_dir/test.txt", "temp_dir/copy.txt")
+print("copyFile result:", copyResult)
+
+let copyContent = readFile("temp_dir/copy.txt")
+print("Содержимое копии:")
+print(copyContent)
+
+// Тест 5: Список файлов в директории
+print("\n5. Список файлов в директории:")
+let files = listDir("temp_dir")
+print("Файлы в temp_dir:", files)
+
+// Тест 6: Запись JSON данных
+print("\n6. Работа с JSON файлами:")
+let jsonData = {
+    "name": "foo_lang",
+    "version": "2.0",
+    "features": ["filesystem", "json", "generics"],
+    "count": 42
+}
+
+let jsonString = jsonStringify(jsonData)
+writeFile("temp_dir/data.json", jsonString)
+
+let loadedJson = readFile("temp_dir/data.json")
+print("JSON файл записан и прочитан:")
+print(loadedJson)
+
+let parsedData = jsonParse(loadedJson)
+print("Парсированные данные:")
+print("Название:", parsedData.name)
+print("Версия:", parsedData.version)
+print("Количество функций:", parsedData.count)
+
+// Тест 7: Создание нескольких уровней директорий
+print("\n7. Создание вложенных директорий:")
+mkdir("temp_dir/level1/level2/level3")
+writeFile("temp_dir/level1/level2/level3/deep.txt", "Глубоко вложенный файл")
+
+let deepExists = exists("temp_dir/level1/level2/level3/deep.txt")
+print("Вложенный файл существует:", deepExists)
+
+// Тест 8: Обработка ошибок
+print("\n8. Обработка ошибок:")
+let nonExistentFile = readFile("nonexistent.txt")
+print("Попытка прочитать несуществующий файл:", nonExistentFile)
+
+let badWrite = writeFile("", "содержимое")
+print("Попытка записи с пустым именем:", badWrite)
+
+// Очистка: удаление созданных файлов
+print("\n9. Очистка тестовых файлов:")
+removeFile("temp_dir/test.txt")
+removeFile("temp_dir/copy.txt")  
+removeFile("temp_dir/data.json")
+removeFile("temp_dir/level1/level2/level3/deep.txt")
+
+print("Тестирование файловой системы завершено!")

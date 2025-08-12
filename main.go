@@ -52,6 +52,9 @@ func main() {
 	// Инициализируем встроенные строковые функции
 	builtin.InitializeStringFunctions(scope.GlobalScope)
 	
+	// Инициализируем встроенные функции файловой системы
+	builtin.InitializeFilesystemFunctions(scope.GlobalScope)
+	
 	exprs := parser.NewParser(mainFile).Parse()
 
 	for _, expr := range exprs {

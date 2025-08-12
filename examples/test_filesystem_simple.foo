@@ -1,0 +1,27 @@
+// Простой тест файловой системы
+
+print("=== Тест файловой системы ===")
+
+// Создаем директорию
+let dirResult = mkdir("test_temp")
+print("Создание директории: " + dirResult)
+
+// Записываем файл
+let writeResult = writeFile("test_temp/hello.txt", "Hello from foo_lang!")
+print("Запись файла: " + writeResult)
+
+// Проверяем существование
+let fileExists = exists("test_temp/hello.txt")
+print("Файл существует: " + fileExists.toString())
+
+// Читаем файл
+if (fileExists) {
+    let content = readFile("test_temp/hello.txt")
+    print("Содержимое файла: " + content)
+}
+
+// Удаляем файл
+let removeResult = removeFile("test_temp/hello.txt") 
+print("Удаление файла: " + removeResult)
+
+print("Тест завершен!")
