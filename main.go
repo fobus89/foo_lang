@@ -54,6 +54,9 @@ func main() {
 
 	// Инициализируем встроенные функции файловой системы
 	builtin.InitializeFilesystemFunctions(scope.GlobalScope)
+	
+	// Инициализируем встроенные HTTP функции
+	builtin.InitializeHttpFunctions(scope.GlobalScope)
 
 	exprs := parser.NewParser(mainFile).Parse()
 

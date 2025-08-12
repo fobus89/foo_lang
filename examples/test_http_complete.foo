@@ -1,0 +1,173 @@
+// Полное демо HTTP клиента и сервера вместе
+print("=== Полное HTTP Демо: Клиент + Сервер ===")
+
+// Сначала запускаем сервер
+print("\n🚀 Запускаем тестовый HTTP сервер...")
+
+httpCreateServer()
+
+// Простой API сервер для тестирования
+fn apiHandler(request) {
+    print("Сервер получил: " + request.method + " " + request.path)
+    
+    if (request.path == "/api/users" && request.method == "GET") {
+        let users = {
+            "users": [
+                {"id": 1, "name": "Alice", "email": "alice@example.com"},
+                {"id": 2, "name": "Bob", "email": "bob@example.com"}
+            ],
+            "total": 2
+        }
+        return {
+            "status": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": jsonStringify(users)
+        }
+    }
+    
+    if (request.path == "/api/users" && request.method == "POST") {
+        let response = {
+            "message": "User created",
+            "received_data": request.body,
+            "id": 3
+        }
+        return {
+            "status": 201,
+            "headers": {"Content-Type": "application/json"},
+            "body": jsonStringify(response)
+        }
+    }
+    
+    if (request.path == "/api/ping") {
+        return {
+            "status": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": "{\\"message\\": \\"pong\\", \\"timestamp\\": \\"2025-01-12\\"}"
+        }
+    }
+    
+    // 404 для неизвестных маршрутов
+    return {
+        "status": 404,
+        "headers": {"Content-Type": "application/json"},
+        "body": "{\\"error\\": \\"Not found\\"}"
+    }
+}
+
+// Регистрируем маршруты
+httpRoute("GET", "/api/users", apiHandler)
+httpRoute("POST", "/api/users", apiHandler)
+httpRoute("GET", "/api/ping", apiHandler)
+
+// Запускаем сервер на порту 8080
+httpStartServer(8080)
+print("✅ Сервер запущен на http://localhost:8080")
+
+// Даем серверу время запуститься
+await sleep(500)
+
+print("\n📡 Тестируем HTTP клиент против нашего сервера...")
+
+// Тест 1: Простой GET запрос
+print("\n1. Тестируем GET /api/ping")
+let pingResponse = httpGet("http://localhost:8080/api/ping")
+print("Статус: " + pingResponse.status.toString())
+print("Ответ: " + pingResponse.body)
+
+// Тест 2: GET запрос для получения пользователей
+print("\n2. Тестируем GET /api/users")
+let usersResponse = httpGet("http://localhost:8080/api/users")
+print("Статус: " + usersResponse.status.toString())
+print("Пользователи: " + usersResponse.body)
+
+// Тест 3: POST запрос для создания пользователя
+print("\n3. Тестируем POST /api/users")
+let newUser = {
+    "name": "Charlie",
+    "email": "charlie@example.com",
+    "age": 25
+}
+let createResponse = httpPost("http://localhost:8080/api/users", newUser)
+print("Статус: " + createResponse.status.toString())
+print("Ответ сервера: " + createResponse.body)
+
+// Тест 4: 404 ошибка
+print("\n4. Тестируем 404 ошибку")
+let notFoundResponse = httpGet("http://localhost:8080/api/nonexistent")
+print("Статус: " + notFoundResponse.status.toString())
+print("Ошибка: " + notFoundResponse.body)
+
+// Тест 5: Асинхронные запросы к нашему серверу
+print("\n5. Тестируем асинхронные запросы")
+
+fn asyncPingTest(id) {
+    let response = httpGet("http://localhost:8080/api/ping")
+    return "Async ping " + id.toString() + " - статус: " + response.status.toString()
+}
+
+print("Запускаем 5 параллельных ping запросов...")
+let ping1 = async asyncPingTest(1)
+let ping2 = async asyncPingTest(2)
+let ping3 = async asyncPingTest(3)
+let ping4 = async asyncPingTest(4)
+let ping5 = async asyncPingTest(5)
+
+// Ждем завершения всех запросов
+let pingResults = await Promise.all(ping1, ping2, ping3, ping4, ping5)
+print("Все ping запросы завершены:")
+for (let i = 0; i < pingResults.length(); i++) {
+    print("  " + pingResults[i])
+}
+
+// Тест 6: Гонка запросов (первый завершившийся)
+print("\n6. Тестируем гонку запросов (Promise.any)")
+let race1 = async asyncPingTest(101)
+let race2 = async asyncPingTest(102)
+let race3 = async asyncPingTest(103)
+
+let winner = await Promise.any(race1, race2, race3)
+print("Победитель гонки: " + winner)
+
+// Тест производительности
+print("\n7. Тест производительности")
+print("Отправляем 10 последовательных запросов...")
+
+fn sequentialRequests() {
+    for (let i = 0; i < 10; i++) {
+        let response = httpGet("http://localhost:8080/api/ping")
+        print("Запрос " + (i + 1).toString() + " - статус: " + response.status.toString())
+    }
+    return "Последовательные запросы завершены"
+}
+
+fn parallelRequests() {
+    let tasks = []
+    for (let i = 0; i < 10; i++) {
+        tasks.push(async asyncPingTest(i + 1))
+    }
+    // В реальности здесь должен быть Promise.all для массива
+    // Но для демо делаем проще
+    return "Параллельные запросы запущены"
+}
+
+let seqResult = sequentialRequests()
+print(seqResult)
+
+// Финальный тест - проверяем, что сервер все еще работает
+print("\n8. Финальная проверка сервера")
+let finalCheck = httpGet("http://localhost:8080/api/ping")
+print("Финальный статус: " + finalCheck.status.toString())
+
+print("\n🛑 Останавливаем сервер...")
+let stopResult = httpStopServer()
+print(stopResult)
+
+print("\n✅ Полное HTTP демо завершено!")
+print("\n📊 Статистика:")
+print("  - Сервер обработал ~20+ HTTP запросов")
+print("  - Протестированы GET и POST методы")
+print("  - Работает JSON сериализация/десериализация")
+print("  - Асинхронные запросы выполняются параллельно")
+print("  - HTTP клиент и сервер полностью совместимы")
+
+print("\n🎉 foo_lang теперь поддерживает полноценный HTTP!")

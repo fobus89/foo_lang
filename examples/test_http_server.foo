@@ -1,0 +1,174 @@
+// Демонстрация HTTP сервера в foo_lang
+print("=== HTTP Сервер Демо ===")
+
+// Создаем HTTP сервер
+httpCreateServer()
+print("HTTP сервер создан")
+
+// Обработчик для главной страницы
+fn homeHandler(request) {
+    print("Обрабатываем запрос: " + request.method + " " + request.path)
+    
+    let html = "<!DOCTYPE html>
+<html>
+<head>
+    <title>foo_lang HTTP Server</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .header { color: #333; border-bottom: 2px solid #007acc; }
+        .info { background: #f0f8ff; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .endpoint { background: #f9f9f9; padding: 10px; margin: 10px 0; border-left: 4px solid #007acc; }
+    </style>
+</head>
+<body>
+    <h1 class='header'>🚀 foo_lang HTTP Server</h1>
+    <div class='info'>
+        <h2>Добро пожаловать!</h2>
+        <p>Это HTTP сервер, написанный на языке программирования <strong>foo_lang</strong>!</p>
+        <p>Время запроса: " + request.headers.Date + "</p>
+    </div>
+    
+    <h2>Доступные эндпоинты:</h2>
+    <div class='endpoint'><strong>GET /</strong> - эта страница</div>
+    <div class='endpoint'><strong>GET /api/status</strong> - статус сервера</div>
+    <div class='endpoint'><strong>GET /api/hello</strong> - приветствие</div>
+    <div class='endpoint'><strong>POST /api/echo</strong> - эхо сервис</div>
+    <div class='endpoint'><strong>GET /api/time</strong> - текущее время</div>
+</body>
+</html>"
+    
+    return {
+        "status": 200,
+        "headers": {"Content-Type": "text/html; charset=utf-8"},
+        "body": html
+    }
+}
+
+// API обработчик для статуса
+fn statusHandler(request) {
+    print("API запрос статуса")
+    
+    let status = {
+        "server": "foo_lang HTTP Server",
+        "version": "2.0",
+        "status": "running",
+        "features": ["async", "http", "json", "generics"],
+        "uptime": "just started",
+        "method": request.method,
+        "path": request.path
+    }
+    
+    return {
+        "status": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": jsonStringify(status)
+    }
+}
+
+// API обработчик для приветствия
+fn helloHandler(request) {
+    print("API запрос приветствия")
+    
+    // Извлекаем параметр name из query string
+    let name = "Guest"
+    if (request.query.name) {
+        name = request.query.name
+    }
+    
+    let greeting = {
+        "message": "Hello " + name + "!",
+        "from": "foo_lang HTTP Server",
+        "timestamp": "2025-01-12"
+    }
+    
+    return {
+        "status": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": jsonStringify(greeting)
+    }
+}
+
+// API обработчик для эхо
+fn echoHandler(request) {
+    print("API эхо запрос: " + request.method)
+    
+    if (request.method == "POST") {
+        let echo = {
+            "echo": request.body,
+            "method": request.method,
+            "headers": request.headers,
+            "received_at": "2025-01-12"
+        }
+        
+        return {
+            "status": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": jsonStringify(echo)
+        }
+    } else {
+        return {
+            "status": 405,
+            "headers": {"Content-Type": "application/json"},
+            "body": "{\\"error\\": \\"Method not allowed. Use POST.\\"}"
+        }
+    }
+}
+
+// API обработчик для времени
+fn timeHandler(request) {
+    print("API запрос времени")
+    
+    let timeInfo = {
+        "current_time": "2025-01-12T15:30:00Z",
+        "timezone": "UTC",
+        "format": "ISO 8601",
+        "server": "foo_lang"
+    }
+    
+    return {
+        "status": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": jsonStringify(timeInfo)
+    }
+}
+
+// Регистрируем все маршруты
+print("Регистрируем маршруты...")
+
+httpRoute("GET", "/", homeHandler)
+httpRoute("GET", "/api/status", statusHandler)
+httpRoute("GET", "/api/hello", helloHandler)
+httpRoute("POST", "/api/echo", echoHandler)
+httpRoute("GET", "/api/time", timeHandler)
+
+print("Маршруты зарегистрированы:")
+print("  GET  / - главная страница")
+print("  GET  /api/status - статус сервера")
+print("  GET  /api/hello?name=YourName - приветствие")
+print("  POST /api/echo - эхо сервис")
+print("  GET  /api/time - текущее время")
+
+// Запускаем сервер на порту 3000
+print("\nЗапускаем сервер на порту 3000...")
+let serverResult = httpStartServer(3000)
+print(serverResult)
+
+print("\n🌟 Сервер запущен! Откройте в браузере:")
+print("   http://localhost:3000")
+print("\n📡 Попробуйте API эндпоинты:")
+print("   curl http://localhost:3000/api/status")
+print("   curl http://localhost:3000/api/hello?name=Test")
+print("   curl -X POST -d 'Hello Server!' http://localhost:3000/api/echo")
+print("   curl http://localhost:3000/api/time")
+
+print("\n⏰ Сервер будет работать 30 секунд для демонстрации...")
+
+// Ждем 30 секунд для демонстрации
+await sleep(30000)
+
+// Останавливаем сервер
+print("\n🛑 Останавливаем сервер...")
+let stopResult = httpStopServer()
+print(stopResult)
+
+print("\n=== HTTP Сервер Демо завершено ===")

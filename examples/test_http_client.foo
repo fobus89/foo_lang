@@ -1,0 +1,83 @@
+// Демонстрация HTTP клиента в foo_lang
+print("=== HTTP Клиент Демо ===")
+
+// Настройка таймаута
+httpSetTimeout(10)
+print("Таймаут установлен: 10 секунд")
+
+// GET запрос
+print("\n1. GET запрос к httpbin.org/get")
+let getResponse = httpGet("https://httpbin.org/get")
+print("Статус: " + getResponse.status.toString())
+print("Статус текст: " + getResponse.statusText)
+print("Тело ответа (первые 100 символов):")
+print(getResponse.body.substring(0, 100) + "...")
+
+// GET запрос с заголовками
+print("\n2. GET запрос с кастомными заголовками")
+let headers = {
+    "User-Agent": "foo_lang/2.0",
+    "X-Custom-Header": "Hello from foo_lang!"
+}
+let getWithHeaders = httpGet("https://httpbin.org/headers", headers)
+print("Статус: " + getWithHeaders.status.toString())
+
+// POST запрос с JSON данными
+print("\n3. POST запрос с JSON данными")
+let jsonData = {
+    "name": "foo_lang",
+    "version": "2.0",
+    "features": ["async", "http", "generics"],
+    "active": true
+}
+let postResponse = httpPost("https://httpbin.org/post", jsonData)
+print("Статус: " + postResponse.status.toString())
+print("Отправлены JSON данные")
+
+// POST запрос с текстом
+print("\n4. POST запрос с текстовыми данными")
+let textData = "Hello from foo_lang HTTP client!"
+let postText = httpPost("https://httpbin.org/post", textData)
+print("Статус: " + postText.status.toString())
+
+// PUT запрос
+print("\n5. PUT запрос")
+let updateData = {
+    "id": 123,
+    "operation": "update",
+    "timestamp": "2025-01-12"
+}
+let putResponse = httpPut("https://httpbin.org/put", updateData)
+print("Статус: " + putResponse.status.toString())
+
+// DELETE запрос
+print("\n6. DELETE запрос")
+let deleteResponse = httpDelete("https://httpbin.org/delete")
+print("Статус: " + deleteResponse.status.toString())
+
+// URL кодирование/декодирование
+print("\n7. URL утилиты")
+let originalUrl = "Hello World & Special Chars: éüöä"
+let encoded = urlEncode(originalUrl)
+let decoded = urlDecode(encoded)
+print("Оригинал: " + originalUrl)
+print("Закодировано: " + encoded) 
+print("Декодировано: " + decoded)
+print("Корректность: " + (decoded == originalUrl).toString())
+
+// Последовательные запросы
+print("\n8. Последовательные запросы")
+print("Отправляем 3 последовательных запроса...")
+
+let response1 = httpGet("https://httpbin.org/get")
+print("Запрос 1 - статус: " + response1.status.toString())
+
+let response2 = httpGet("https://httpbin.org/get") 
+print("Запрос 2 - статус: " + response2.status.toString())
+
+let response3 = httpGet("https://httpbin.org/get")
+print("Запрос 3 - статус: " + response3.status.toString())
+
+print("Все последовательные запросы завершены!")
+
+print("\n=== HTTP Клиент Демо завершено ===")
