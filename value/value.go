@@ -343,6 +343,8 @@ func GetValueTypeName(v *Value) string {
 		return "array"
 	case map[string]interface{}:
 		return "object"
+	case *Channel:
+		return "channel"
 	default:
 		// Проверяем на StructObject через рефлексию
 		typeName := fmt.Sprintf("%T", v.data)

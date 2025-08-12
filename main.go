@@ -83,6 +83,9 @@ func main() {
 	
 	// Инициализируем встроенные HTTP функции
 	builtin.InitializeHttpFunctions(scope.GlobalScope)
+	
+	// Инициализируем встроенные функции каналов
+	builtin.InitializeChannelFunctions(scope.GlobalScope)
 
 	exprs := parser.NewParser(mainFile).Parse()
 

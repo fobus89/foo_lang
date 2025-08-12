@@ -324,6 +324,10 @@ func NewArray(elements []*Value) *Value {
 	return NewValue(elements)
 }
 
+func NewChannelValue(ch *Channel) *Value {
+	return NewValue(ch)
+}
+
 // IsTruthy определяет, является ли значение истинным
 func (v *Value) IsTruthy() bool {
 	switch val := v.Any().(type) {

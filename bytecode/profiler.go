@@ -222,7 +222,11 @@ func (p *Profiler) PrintReport() {
 	}
 	
 	// Проверяем часто используемые инструкции
-	for _, stat := range stats[:3] { // топ-3 инструкции
+	topCount := len(stats)
+	if topCount > 3 {
+		topCount = 3
+	}
+	for _, stat := range stats[:topCount] { // топ-3 инструкции (или меньше, если stats короче)
 		if stat.count > 100 {
 			opcodeStr := p.getOpCodeString(stat.opcode)
 			fmt.Printf("💡 Инструкция %s выполняется %d раз - можно оптимизировать\n", 
