@@ -253,11 +253,8 @@ func InitializeStringFunctions(scopeStack interface {
 	Set(name string, val *value.Value)
 }) {
 	functions := GetBuiltinStringFunctions()
-	fmt.Println("Registering string functions:")
 	for name, fn := range functions {
-		fmt.Printf("  - %s\n", name)
 		scopeStack.Set(name, fn)
 	}
-	fmt.Printf("Total string functions registered: %d\n", len(functions))
 }
 

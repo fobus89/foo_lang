@@ -8,8 +8,6 @@ import (
 
 // InitializeChannelFunctions инициализирует встроенные функции для работы с каналами
 func InitializeChannelFunctions(globalScope *scope.ScopeStack) {
-	fmt.Println("Registering channel functions:")
-	
 	// newChannel - создание канала
 	newChannelFunc := func(args []*value.Value) *value.Value {
 		if len(args) > 1 {
@@ -28,7 +26,6 @@ func InitializeChannelFunctions(globalScope *scope.ScopeStack) {
 		return value.NewChannelValue(ch)
 	}
 	globalScope.Set("newChannel", value.NewValue(newChannelFunc))
-	fmt.Println("  - newChannel")
 	
 	// send - отправка в канал (синтаксический сахар для ch <- value)
 	sendFunc := func(args []*value.Value) *value.Value {
@@ -49,7 +46,6 @@ func InitializeChannelFunctions(globalScope *scope.ScopeStack) {
 		return value.NewString("sent")
 	}
 	globalScope.Set("send", value.NewValue(sendFunc))
-	fmt.Println("  - send")
 	
 	// receive - получение из канала (синтаксический сахар для <-ch)
 	receiveFunc := func(args []*value.Value) *value.Value {
@@ -70,7 +66,6 @@ func InitializeChannelFunctions(globalScope *scope.ScopeStack) {
 		return result
 	}
 	globalScope.Set("receive", value.NewValue(receiveFunc))
-	fmt.Println("  - receive")
 	
 	// close - закрытие канала
 	closeFunc := func(args []*value.Value) *value.Value {
@@ -87,7 +82,6 @@ func InitializeChannelFunctions(globalScope *scope.ScopeStack) {
 		return value.NewString("closed")
 	}
 	globalScope.Set("close", value.NewValue(closeFunc))
-	fmt.Println("  - close")
 	
 	// len - количество элементов в канале
 	lenFunc := func(args []*value.Value) *value.Value {
@@ -107,7 +101,6 @@ func InitializeChannelFunctions(globalScope *scope.ScopeStack) {
 		}
 	}
 	globalScope.Set("len", value.NewValue(lenFunc))
-	fmt.Println("  - len")
 	
 	// cap - емкость канала
 	capFunc := func(args []*value.Value) *value.Value {
@@ -123,7 +116,6 @@ func InitializeChannelFunctions(globalScope *scope.ScopeStack) {
 		return value.NewInt64(int64(chVal.Cap()))
 	}
 	globalScope.Set("cap", value.NewValue(capFunc))
-	fmt.Println("  - cap")
 	
 	// tryReceive - неблокирующее получение из канала
 	tryReceiveFunc := func(args []*value.Value) *value.Value {
@@ -144,7 +136,6 @@ func InitializeChannelFunctions(globalScope *scope.ScopeStack) {
 		return result
 	}
 	globalScope.Set("tryReceive", value.NewValue(tryReceiveFunc))
-	fmt.Println("  - tryReceive")
 	
 	// channelInfo - информация о канале
 	channelInfoFunc := func(args []*value.Value) *value.Value {
@@ -160,9 +151,6 @@ func InitializeChannelFunctions(globalScope *scope.ScopeStack) {
 		return value.NewString(chVal.String())
 	}
 	globalScope.Set("channelInfo", value.NewValue(channelInfoFunc))
-	fmt.Println("  - channelInfo")
-	
-	fmt.Printf("Total channel functions registered: %d\n", 8)
 }
 
 // Worker представляет worker для обработки задач из канала

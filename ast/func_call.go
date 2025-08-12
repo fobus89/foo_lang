@@ -59,6 +59,11 @@ func (f *FuncCallExpr) Eval() *Value {
 		return callable.Call(evalArgs)
 	}
 
+	// Проверяем на Go-функцию (встроенные функции)
+	if goFunc, ok := val.Any().(func([]*Value) *Value); ok {
+		return goFunc(evalArgs)
+	}
+
 	// Старый код для совместимости с FuncStatment
 	fnStatment, ok := val.Any().(*FuncStatment)
 	if !ok {

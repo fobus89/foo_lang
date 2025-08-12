@@ -9,8 +9,8 @@ import (
 	"io"
 	"os"
 	"strings"
+	"sync"
 	"testing"
-	"time"
 )
 
 func TestChannelBasicOperations(t *testing.T) {
@@ -80,8 +80,11 @@ func TestChannelBasicOperations(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := captureOutput(func() {
+			result := captureChannelOutput(func() {
 				scope.GlobalScope = scope.NewScopeStack()
+				// Регистрируем все встроенные функции
+				builtin.InitializeMathFunctions(scope.GlobalScope)
+				builtin.InitializeStringFunctions(scope.GlobalScope)
 				builtin.InitializeChannelFunctions(scope.GlobalScope)
 				
 				exprs := parser.NewParser(tt.code).Parse()
@@ -103,7 +106,7 @@ func TestChannelNonBlockingOperations(t *testing.T) {
 	builtin.InitializeChannelFunctions(scope.GlobalScope)
 
 	t.Run("try_receive_empty_channel", func(t *testing.T) {
-		result := captureOutput(func() {
+		result := captureChannelOutput(func() {
 			scope.GlobalScope = scope.NewScopeStack()
 			builtin.InitializeChannelFunctions(scope.GlobalScope)
 			
@@ -124,7 +127,7 @@ func TestChannelNonBlockingOperations(t *testing.T) {
 	})
 
 	t.Run("try_receive_with_data", func(t *testing.T) {
-		result := captureOutput(func() {
+		result := captureChannelOutput(func() {
 			scope.GlobalScope = scope.NewScopeStack()
 			builtin.InitializeChannelFunctions(scope.GlobalScope)
 			
@@ -150,7 +153,7 @@ func TestChannelWithNumbers(t *testing.T) {
 	scope.GlobalScope = scope.NewScopeStack()
 	builtin.InitializeChannelFunctions(scope.GlobalScope)
 
-	result := captureOutput(func() {
+	result := captureChannelOutput(func() {
 		scope.GlobalScope = scope.NewScopeStack()
 		builtin.InitializeChannelFunctions(scope.GlobalScope)
 		
@@ -263,11 +266,14 @@ func TestChannelDirectAPI(t *testing.T) {
 
 func TestChannelConcurrency(t *testing.T) {
 	// Тест конкурентности каналов
-	ch := value.NewChannel(10)
+	ch := value.NewChannel(20) // Увеличиваем буфер, чтобы вместить все сообщения
 	
 	// Запускаем несколько горутин для отправки данных
+	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
+		wg.Add(1)
 		go func(n int) {
+			defer wg.Done()
 			for j := 0; j < 3; j++ {
 				msg := value.NewString("msg_" + string(rune(n)) + "_" + string(rune(j)))
 				ch.Send(msg)
@@ -275,8 +281,8 @@ func TestChannelConcurrency(t *testing.T) {
 		}(i)
 	}
 	
-	// Даем время для отправки
-	time.Sleep(100 * time.Millisecond)
+	// Ждем завершения всех горутин
+	wg.Wait()
 	
 	// Проверяем, что данные получены
 	if ch.Len() != 15 {
@@ -347,7 +353,7 @@ func TestChannelErrorHandling(t *testing.T) {
 }
 
 // captureOutput захватывает stdout для тестирования
-func captureOutput(f func()) string {
+func captureChannelOutput(f func()) string {
 	old := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
