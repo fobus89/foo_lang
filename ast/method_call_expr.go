@@ -481,7 +481,7 @@ func (m *MethodCallExpr) Eval() *Value {
 					// TODO: Нужно установить 'this' как текущий объект
 					
 					// Пока что вызываем метод как обычную функцию  
-					closure := NewTypedClosure(method.FuncName, method.Params, method.Body)
+					closure := NewTypedClosure(method.FuncName, method.Params, method.Body, method.ReturnType)
 					return closure.Call(args)
 				}
 			}

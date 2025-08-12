@@ -1,0 +1,67 @@
+// Полный пример системы типизации в foo_lang
+
+println("=== ПОЛНАЯ СИСТЕМА ТИПИЗАЦИИ ===")
+
+// 1. Типизированные переменные с валидацией
+let count: int = 42
+let price: float = 99.99
+let productName: string = "Laptop"
+let inStock: bool = true
+
+println("Товар: " + productName)
+println("Цена: " + price.toString())
+println("Количество: " + count.toString())
+println("В наличии: " + inStock.toString())
+
+// 2. Типизированные функции с параметрами по умолчанию
+fn calculateTotal(price: float, quantity: int, discount: float = 0.0) -> float {
+    let subtotal = price * quantity  // auto-cast int to float
+    return subtotal * (1.0 - discount)
+}
+
+fn formatCurrency(amount: float, currency: string) -> string {
+    return amount.toString() + " " + currency
+}
+
+// Тестируем функции с типами
+let total1 = calculateTotal(29.99, 3)           // без скидки
+let total2 = calculateTotal(29.99, 3, 0.15)     // со скидкой 15%
+
+println("Общая стоимость без скидки: " + formatCurrency(total1, "USD"))
+println("Общая стоимость со скидкой: " + formatCurrency(total2, "EUR"))
+
+// 3. Арифметические операции с сохранением типов
+let a: int = 10
+let b: int = 20
+let intResult = a + b        // int + int = int
+let floatResult = a + 3.14   // int + float = float
+
+println("Целочисленное сложение: " + intResult.toString())
+println("Смешанное сложение: " + floatResult.toString())
+
+// 4. Type inference (автоматический вывод типов)
+let inferredInt = 100        // выведен как int
+let inferredFloat = 3.14159  // выведен как float
+let inferredString = "Hello" // выведен как string
+let inferredBool = false     // выведен как bool
+
+println("Автоматический вывод типов работает!")
+
+// 5. Валидация типов (должна пройти проверки)
+fn processOrder(id: int, amount: float, approved: bool) -> string {
+    if approved {
+        return "Заказ " + id.toString() + " на сумму " + amount.toString() + " одобрен"
+    } else {
+        return "Заказ " + id.toString() + " отклонен"
+    }
+}
+
+let orderResult = processOrder(12345, 299.99, true)
+println(orderResult)
+
+println("=== ВСЕ ПРОВЕРКИ ТИПИЗАЦИИ ПРОШЛИ УСПЕШНО ===")
+
+// Комментируем проблемные строки (раскомментируйте для тестирования ошибок):
+// let wrongType: int = "string"  // Ошибка типа переменной
+// fn badReturn() -> int { return "wrong" }  // Ошибка типа возврата
+// let result = badReturn()  // Не выполнится из-за ошибки

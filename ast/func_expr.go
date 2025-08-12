@@ -80,28 +80,35 @@ func NewTypedFuncStatement(funcName string, params []FuncParam, body Expr, retur
 
 func (f *TypedFuncStatement) Eval() *Value {
 	// Создаем замыкание с типизированными параметрами
-	closure := NewTypedClosure(f.FuncName, f.Params, f.Body)
+	closure := NewTypedClosure(f.FuncName, f.Params, f.Body, f.ReturnType)
 	
 	// Создаем сигнатуру для перегрузки
 	signature := CreateSignatureFromFunction(f.FuncName, f.Params, "")
 	
-	// Пытаемся зарегистрировать как перегруженную функцию
-	err := RegisterOverloadedMethod(signature, closure)
-	if err != nil {
-		// Если это метод интерфейса, не выдаем ошибку
-		// Методы интерфейсов могут иметь одинаковые имена и сигнатуры
-		if !isInterfaceMethod(f.FuncName) {
-			panic(fmt.Sprintf("Function overload error: %v", err))
+	// Регистрируем как перегруженную функцию только если нет параметров по умолчанию
+	hasDefaultParams := false
+	for _, param := range f.Params {
+		if param.Default != nil {
+			hasDefaultParams = true
+			break
+		}
+	}
+	
+	// Если нет параметров по умолчанию, регистрируем в системе перегрузки
+	if !hasDefaultParams {
+		err := RegisterOverloadedMethod(signature, closure)
+		if err != nil {
+			// Если это метод интерфейса, не выдаем ошибку
+			// Методы интерфейсов могут иметь одинаковые имена и сигнатуры
+			if !isInterfaceMethod(f.FuncName) {
+				panic(fmt.Sprintf("Function overload error: %v", err))
+			}
 		}
 	}
 	
 	// Также регистрируем в обычном scope для обратной совместимости
-	// (если это первая функция с таким именем)
-	if existingValue, exists := scope.GlobalScope.Get(f.FuncName); !exists {
-		scope.GlobalScope.Set(f.FuncName, NewValue(closure))
-	} else if existingValue == nil {
-		scope.GlobalScope.Set(f.FuncName, NewValue(closure))
-	}
+	// Всегда регистрируем как основную функцию (перегрузка будет работать через систему overloading)
+	scope.GlobalScope.Set(f.FuncName, NewValue(closure))
 	
 	return NewValue(nil)
 }

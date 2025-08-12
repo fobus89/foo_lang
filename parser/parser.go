@@ -210,7 +210,20 @@ func (p *Parser) Statement() ast.Expr {
 		}
 		names = append(names, p.Next().Value)
 		
-		// Check for additional identifiers
+		// Check for type annotation: let name: type = value
+		var varType string
+		if p.MatchAndNext(token.COLON) {
+			if !p.Match(token.IDENT) {
+				p.error("expected type name after ':'", p.Peek(0))
+			}
+			varType = p.Next().Value
+			// Проверяем валидность типа
+			if varType != "int" && varType != "string" && varType != "float" && varType != "bool" {
+				p.error("unknown type: " + varType, p.Peek(0))
+			}
+		}
+		
+		// Check for additional identifiers (multiple assignment)
 		for p.MatchAndNext(token.COMMA) {
 			if !p.Match(token.IDENT) {
 				p.error("expected identifier after comma", p.Peek(0))
@@ -231,19 +244,31 @@ func (p *Parser) Statement() ast.Expr {
 		ident := names[0]
 
 
+		// Выбираем тип выражения для создания LetExpr или TypedLetExpr
+		var createLetExpr func(string, ast.Expr) ast.Expr
+		if varType != "" {
+			createLetExpr = func(name string, expr ast.Expr) ast.Expr {
+				return ast.NewTypedLetExpr(name, varType, expr)
+			}
+		} else {
+			createLetExpr = func(name string, expr ast.Expr) ast.Expr {
+				return ast.NewLetExpr(name, expr)
+			}
+		}
+
 		if p.MatchAndNext(token.IF) {
-			return ast.NewLetExpr(ident, p.IfStatement())
+			return createLetExpr(ident, p.IfStatement())
 		}
 
 		if p.Match(token.MATCH) {
-			return ast.NewLetExpr(ident, p.MatchStatement())
+			return createLetExpr(ident, p.MatchStatement())
 		}
 
 		if p.MatchAndNext(token.FOR) {
-			return ast.NewLetExpr(ident, p.ForStatement())
+			return createLetExpr(ident, p.ForStatement())
 		}
 
-		return ast.NewLetExpr(ident, p.Expression())
+		return createLetExpr(ident, p.Expression())
 	}
 
 	if p.MatchAnyNext(token.PRINT, token.PRINTLN) {
@@ -1665,6 +1690,16 @@ func (p *Parser) hasTypedParameters() bool {
 		p.Next()
 	}
 	
+	// Пропускаем закрывающую скобку параметров
+	if p.Match(token.RPAREN) {
+		p.Next()
+	}
+	
+	// Проверяем наличие типа возврата -> Type
+	if p.Match(token.SUB) && p.pos + 1 < len(p.tokens) && p.tokens[p.pos + 1].Token == token.GT {
+		return true // Найден тип возврата
+	}
+	
 	return false
 }
 
@@ -1792,7 +1827,7 @@ func (p *Parser) TypedFunctionStatement() ast.Expr {
 	
 	// Проверяем на return тип -> ReturnType
 	var returnType string
-	if p.Match(token.SUB) && p.Peek(1).Token == token.GT {
+	if p.Peek(0).Token == token.SUB && p.Peek(1).Token == token.GT {
 		p.Next() // consume '-'
 		p.Next() // consume '>'
 		
@@ -1916,7 +1951,7 @@ func (p *Parser) parseInterfaceMethod() ast.InterfaceMethod {
 	
 	// Возвращаемый тип (опционально)
 	var returnType string
-	if p.Match(token.SUB) && p.Peek(1).Token == token.GT {
+	if p.Peek(0).Token == token.SUB && p.Peek(1).Token == token.GT {
 		p.Next() // consume '-'
 		p.Next() // consume '>'
 		

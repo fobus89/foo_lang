@@ -27,7 +27,7 @@ func (f *FuncCallExpr) Eval() *Value {
 		evalArgs[i] = arg.Eval()
 	}
 	
-	// Проверяем, есть ли перегрузки для этой функции
+	// Если функция зарегистрирована как перегружаемая, используем систему перегрузки
 	if IsOverloadedMethod(f.funcName) {
 		argTypes := GetArgTypesFromValues(evalArgs)
 		
@@ -41,16 +41,19 @@ func (f *FuncCallExpr) Eval() *Value {
 		return overloadedFunc.Call(evalArgs)
 	}
 	
-	// Если перегрузок нет, используем обычную логику
+	// Иначе проверяем обычную функцию (это поддерживает параметры по умолчанию)
 	val, ok := scope.GlobalScope.Get(f.funcName)
+	if ok {
+		// Проверяем на TypedClosure (поддерживает параметры по умолчанию)
+		if typedClosure, ok := val.Any().(*TypedClosure); ok {
+			// Вызываем типизированное замыкание
+			return typedClosure.Call(evalArgs)
+		}
+	}
+	
+	// Если перегрузок нет, используем обычную логику
 	if !ok {
 		panic("function '" + f.funcName + "' is not defined")
-	}
-
-	// Проверяем на TypedClosure
-	if typedClosure, ok := val.Any().(*TypedClosure); ok {
-		// Вызываем типизированное замыкание
-		return typedClosure.Call(evalArgs)
 	}
 	
 	// Пробуем найти Callable объект (может быть FuncStatment или встроенная функция)

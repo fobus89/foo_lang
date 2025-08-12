@@ -20,6 +20,7 @@ type TypedClosure struct {
 	funcName     string
 	params       []FuncParam
 	body         Expr
+	returnType   string                   // Ожидаемый тип возвращаемого значения
 	capturedVars map[string]*value.Value  // Захваченные переменные
 }
 
@@ -160,7 +161,7 @@ func (c *Closure) GetCapturedVars() map[string]*value.Value {
 }
 
 // NewTypedClosure создает новое типизированное замыкание
-func NewTypedClosure(funcName string, params []FuncParam, body Expr) *TypedClosure {
+func NewTypedClosure(funcName string, params []FuncParam, body Expr, returnType string) *TypedClosure {
 	// Захватываем все переменные из текущей области видимости
 	capturedVars := make(map[string]*value.Value)
 	
@@ -171,6 +172,7 @@ func NewTypedClosure(funcName string, params []FuncParam, body Expr) *TypedClosu
 		funcName:     funcName,
 		params:       params,
 		body:         body,
+		returnType:   returnType,
 		capturedVars: capturedVars,
 	}
 }
@@ -231,17 +233,40 @@ func (tc *TypedClosure) Call(args []*Value) *Value {
 	}
 	
 	// Выполняем тело функции
+	var result *Value
 	if bodyStm, ok := tc.body.(*BodyExpr); ok {
 		for _, stmt := range bodyStm.Statments {
-			result := stmt.Eval()
-			if result.IsReturn() {
-				return result
+			result = stmt.Eval()
+			if result != nil && result.IsReturn() {
+				break
 			}
 		}
-		return NewValue(nil)
+		if result == nil || (result != nil && !result.IsReturn()) {
+			result = NewValue(nil)
+		}
 	} else {
-		return tc.body.Eval()
+		result = tc.body.Eval()
 	}
+	
+	// Проверяем тип возвращаемого значения, если он указан
+	if tc.returnType != "" && result != nil {
+		if err := tc.validateReturnType(result); err != nil {
+			panic(fmt.Sprintf("function '%s' return type error: %s", tc.funcName, err.Error()))
+		}
+	}
+	
+	return result
+}
+
+// validateReturnType проверяет соответствие типа возвращаемого значения ожидаемому
+func (tc *TypedClosure) validateReturnType(returnValue *Value) error {
+	// Извлекаем значение из return-обертки, если оно есть
+	actualValue := returnValue
+	if returnValue.IsReturn() {
+		actualValue = NewValue(returnValue.Any())
+	}
+	
+	return validateFunctionParameterType(actualValue, tc.returnType)
 }
 
 // validateFunctionParameterType проверяет соответствие типа аргумента ожидаемому примитивному типу

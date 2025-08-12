@@ -3,7 +3,6 @@ package ast
 import (
 	"fmt"
 	"foo_lang/token"
-	"math"
 )
 
 type BinaryExpr struct {
@@ -26,13 +25,13 @@ func (b *BinaryExpr) Eval() *Value {
 	case token.ADD:
 		return b.add(left, right)
 	case token.SUB:
-		return NewValue(left.Float64() - right.Float64())
+		return b.subtract(left, right)
 	case token.MUL:
-		return NewValue(left.Float64() * right.Float64())
+		return b.multiply(left, right)
 	case token.QUO:
-		return NewValue(left.Float64() / right.Float64())
+		return b.divide(left, right)
 	case token.REM:
-		return NewValue(math.Mod(left.Float64(), right.Float64()))
+		return b.modulo(left, right)
 
 	case token.GT:
 		return NewValue(left.Float64() > right.Float64())
@@ -72,7 +71,12 @@ func (b *BinaryExpr) Eval() *Value {
 func (b *BinaryExpr) add(left, right *Value) *Value {
 
 	if left.IsNumber() && right.IsNumber() {
-		return NewValue(left.Float64() + right.Float64())
+		// Сохраняем типы: int + int = int, иначе float
+		if left.IsInt64() && right.IsInt64() {
+			return NewValue(left.Int64() + right.Int64())
+		} else {
+			return NewValue(left.Float64() + right.Float64())
+		}
 	}
 
 	if left.IsString() && right.IsString() {
@@ -131,4 +135,51 @@ func (b *BinaryExpr) AndAnd(left, right *Value) *Value {
 		return right
 	}
 	return left
+}
+
+// Арифметические операции с сохранением типов
+
+func (b *BinaryExpr) subtract(left, right *Value) *Value {
+	if left.IsNumber() && right.IsNumber() {
+		// int - int = int, иначе float
+		if left.IsInt64() && right.IsInt64() {
+			return NewValue(left.Int64() - right.Int64())
+		} else {
+			return NewValue(left.Float64() - right.Float64())
+		}
+	}
+	panic("subtract operation requires numeric operands")
+}
+
+func (b *BinaryExpr) multiply(left, right *Value) *Value {
+	if left.IsNumber() && right.IsNumber() {
+		// int * int = int, иначе float
+		if left.IsInt64() && right.IsInt64() {
+			return NewValue(left.Int64() * right.Int64())
+		} else {
+			return NewValue(left.Float64() * right.Float64())
+		}
+	}
+	panic("multiply operation requires numeric operands")
+}
+
+func (b *BinaryExpr) divide(left, right *Value) *Value {
+	if left.IsNumber() && right.IsNumber() {
+		// Деление всегда возвращает float для точности
+		return NewValue(left.Float64() / right.Float64())
+	}
+	panic("divide operation requires numeric operands")
+}
+
+func (b *BinaryExpr) modulo(left, right *Value) *Value {
+	if left.IsNumber() && right.IsNumber() {
+		// int % int = int, float % float = float
+		if left.IsInt64() && right.IsInt64() {
+			return NewValue(left.Int64() % right.Int64())
+		} else {
+			// Нужен import math для Mod
+			return NewValue(left.Float64() - right.Float64()*float64(int64(left.Float64()/right.Float64())))
+		}
+	}
+	panic("modulo operation requires numeric operands")
 }
