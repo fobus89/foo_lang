@@ -14,7 +14,7 @@ import (
 // Helper function to create parse function for tests
 func createParseFunc() modules.ParseFunc {
 	return func(code string) []modules.Expr {
-		exprs := parser.NewParser(code).Parse()
+		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
 		for i, expr := range exprs {
 			result[i] = expr
@@ -24,7 +24,7 @@ func createParseFunc() modules.ParseFunc {
 }
 
 func TestModuleLoading(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 	
 	// Set up global parse function
 	parseFunc := createParseFunc()
@@ -68,7 +68,7 @@ let product = multiply(4, 6)
 let piValue = PI
 `
 	
-	exprs := parser.NewParser(testCode).Parse()
+	exprs := parser.NewParser(testCode).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -103,7 +103,7 @@ let piValue = PI
 }
 
 func TestSelectiveImport(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 	
 	// Set up global parse function
 	parseFunc := createParseFunc()
@@ -147,7 +147,7 @@ let greeting = greet("World")
 let version = VERSION
 `
 	
-	exprs := parser.NewParser(testCode).Parse()
+	exprs := parser.NewParser(testCode).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -184,7 +184,7 @@ let version = VERSION
 }
 
 func TestAliasImport(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 	
 	// Set up global parse function
 	parseFunc := createParseFunc()
@@ -248,7 +248,7 @@ export let NAME = "Calculator"
 }
 
 func TestModuleCaching(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	InitTestEnvironment()
 	
 	// Set up global parse function
 	parseFunc := createParseFunc()

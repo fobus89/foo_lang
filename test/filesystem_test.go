@@ -9,9 +9,11 @@ import (
 )
 
 func TestFilesystemOperations(t *testing.T) {
-	// Инициализируем встроенные функции
-	builtin.InitializeFilesystemFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeFilesystemFunctions,
+		builtin.InitializeStringFunctions,
+	)
 	
 	// Очистка перед тестом
 	os.RemoveAll("test_fs_dir")
@@ -59,7 +61,7 @@ let files = listDir("test_fs_dir")
 print("Directory files count: " + files.length().toString())
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()
@@ -103,7 +105,7 @@ let existsResult = exists("definitely_does_not_exist.txt")
 print("Nonexistent file exists: " + existsResult.toString())
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		expr.Eval() 
@@ -144,7 +146,7 @@ let jsonReadContent = readFile("complex_test_dir/data.json")
 print("JSON file read successfully: " + (jsonReadContent != "").toString())
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()

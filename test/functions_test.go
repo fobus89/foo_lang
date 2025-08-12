@@ -8,7 +8,8 @@ import (
 )
 
 func TestFunctionDefinition(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `
 		fn add(a, b) {
@@ -17,7 +18,7 @@ func TestFunctionDefinition(t *testing.T) {
 		let result = add(5, 3)
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -34,7 +35,8 @@ func TestFunctionDefinition(t *testing.T) {
 }
 
 func TestFunctionWithoutReturn(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `
 		fn setGlobal(val) {
@@ -43,7 +45,7 @@ func TestFunctionWithoutReturn(t *testing.T) {
 		setGlobal(5)
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -53,7 +55,8 @@ func TestFunctionWithoutReturn(t *testing.T) {
 }
 
 func TestRecursiveFunction(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `
 		fn factorial(n) {
@@ -65,7 +68,7 @@ func TestRecursiveFunction(t *testing.T) {
 		let result = factorial(5)
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -82,7 +85,8 @@ func TestRecursiveFunction(t *testing.T) {
 }
 
 func TestMutualRecursion(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `
 		fn isEven(n) {
@@ -103,7 +107,7 @@ func TestMutualRecursion(t *testing.T) {
 		let odd5 = isOdd(5)
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -130,7 +134,8 @@ func TestMutualRecursion(t *testing.T) {
 }
 
 func TestRecursionDepthLimit(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `
 		fn infiniteRecursion(n) {
@@ -139,7 +144,7 @@ func TestRecursionDepthLimit(t *testing.T) {
 		infiniteRecursion(1)
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	
 	// This should panic with recursion limit exceeded
 	defer func() {
@@ -159,7 +164,8 @@ func TestRecursionDepthLimit(t *testing.T) {
 }
 
 func TestFunctionScope(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `
 		let globalVar = "global"
@@ -172,7 +178,7 @@ func TestFunctionScope(t *testing.T) {
 		let result = testScope("param")
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -218,7 +224,7 @@ func TestFunctionScope(t *testing.T) {
 //		let result2 = greet("Jane", "Hi")
 //	`
 //	
-//	exprs := parser.NewParser(code).Parse()
+//	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 //	for _, expr := range exprs {
 //		expr.Eval()
 //	}

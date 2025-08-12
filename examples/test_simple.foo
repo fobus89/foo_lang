@@ -1,0 +1,10 @@
+// Простой тест для проверки работы
+let x = 42
+println("x = " + x.toString())
+
+fn add(a, b) {
+    return a + b
+}
+
+let result = add(10, 20)
+println("10 + 20 = " + result.toString())

@@ -2,12 +2,12 @@ package test
 
 import (
 	"foo_lang/parser"
-	"foo_lang/scope"
 	"testing"
 )
 
 func TestAnonymousFunctionArrow(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 	
 	input := `
 	let add = fn(x, y) => x + y
@@ -15,7 +15,7 @@ func TestAnonymousFunctionArrow(t *testing.T) {
 	println(result)
 	`
 
-	program := parser.NewParser(input).Parse()
+	program := parser.NewParser(input).ParseWithoutScopeInit()
 
 	if len(program) != 3 {
 		t.Errorf("expected 3 statements, got %d", len(program))
@@ -31,7 +31,8 @@ func TestAnonymousFunctionArrow(t *testing.T) {
 }
 
 func TestAnonymousFunctionBlock(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 	
 	input := `
 	let multiply = fn(x, y) {
@@ -41,7 +42,7 @@ func TestAnonymousFunctionBlock(t *testing.T) {
 	println(result)
 	`
 
-	program := parser.NewParser(input).Parse()
+	program := parser.NewParser(input).ParseWithoutScopeInit()
 
 	if len(program) != 3 {
 		t.Errorf("expected 3 statements, got %d", len(program))
@@ -57,7 +58,8 @@ func TestAnonymousFunctionBlock(t *testing.T) {
 }
 
 func TestAnonymousFunctionWithDefaults(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 	
 	input := `
 	let greet = fn(name, prefix = "Hello") => prefix + ", " + name + "!"
@@ -67,7 +69,7 @@ func TestAnonymousFunctionWithDefaults(t *testing.T) {
 	println(result2)
 	`
 
-	program := parser.NewParser(input).Parse()
+	program := parser.NewParser(input).ParseWithoutScopeInit()
 
 	if len(program) != 5 {
 		t.Errorf("expected 5 statements, got %d", len(program))
@@ -83,7 +85,8 @@ func TestAnonymousFunctionWithDefaults(t *testing.T) {
 }
 
 func TestAnonymousFunctionWithClosures(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 	
 	input := `
 	let counter = 0
@@ -98,7 +101,7 @@ func TestAnonymousFunctionWithClosures(t *testing.T) {
 	println(val2)
 	`
 
-	program := parser.NewParser(input).Parse()
+	program := parser.NewParser(input).ParseWithoutScopeInit()
 
 	if len(program) != 6 {
 		t.Errorf("expected 6 statements, got %d", len(program))
@@ -114,7 +117,8 @@ func TestAnonymousFunctionWithClosures(t *testing.T) {
 }
 
 func TestAnonymousFunctionAssignedToVariable(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 	
 	input := `
 	let add = fn(a, b) => a + b
@@ -130,7 +134,7 @@ func TestAnonymousFunctionAssignedToVariable(t *testing.T) {
 	println(difference)
 	`
 
-	program := parser.NewParser(input).Parse()
+	program := parser.NewParser(input).ParseWithoutScopeInit()
 
 	if len(program) != 9 {
 		t.Errorf("expected 9 statements, got %d", len(program))

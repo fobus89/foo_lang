@@ -8,11 +8,12 @@ import (
 )
 
 func TestArrayLiterals(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `let arr = [1, 2, 3, 4, 5]`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -41,7 +42,8 @@ func TestArrayLiterals(t *testing.T) {
 }
 
 func TestArrayIndexing(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `
 		let arr = [10, 20, 30]
@@ -50,7 +52,7 @@ func TestArrayIndexing(t *testing.T) {
 		let third = arr[2]
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -81,7 +83,8 @@ func TestArrayIndexing(t *testing.T) {
 }
 
 func TestArrayMethods(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `
 		let arr = [1, 2, 3]
@@ -89,7 +92,7 @@ func TestArrayMethods(t *testing.T) {
 		let newArr = arr.push(4)
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -128,11 +131,12 @@ func TestArrayMethods(t *testing.T) {
 }
 
 func TestObjectLiterals(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `let obj = { name: "John", age: 30, active: true }`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -166,7 +170,8 @@ func TestObjectLiterals(t *testing.T) {
 }
 
 func TestObjectPropertyAccess(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `
 		let person = { name: "Alice", age: 25 }
@@ -174,7 +179,7 @@ func TestObjectPropertyAccess(t *testing.T) {
 		let personAge = person.age
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -203,7 +208,8 @@ func TestObjectPropertyAccess(t *testing.T) {
 }
 
 func TestObjectStringIndexing(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
+	// Инициализируем тестовое окружение
+	InitTestEnvironment()
 
 	const code = `
 		let data = { key1: "value1", key2: 42 }
@@ -211,7 +217,7 @@ func TestObjectStringIndexing(t *testing.T) {
 		let val2 = data["key2"]
 	`
 	
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}

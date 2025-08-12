@@ -165,5 +165,6 @@ func (ss *ScopeStack) GetAll() map[string]*value.Value {
 	return result
 }
 
-// Глобальный стек областей видимости
-var GlobalScope = NewScopeStack()
+// GlobalScope - глобальный стек областей видимости
+// ВАЖНО: Эта переменная инициализируется парсером при создании
+var GlobalScope *ScopeStack

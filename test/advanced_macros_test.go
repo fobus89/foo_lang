@@ -12,8 +12,9 @@ import (
 
 func TestStructDefinition(t *testing.T) {
 	tests := []struct {
-		name   string
-		code   string
+		name string
+		code string
+
 		checks func(*testing.T)
 	}{
 		{
@@ -31,7 +32,7 @@ func TestStructDefinition(t *testing.T) {
 					t.Error("Person type not found in scope")
 					return
 				}
-				
+
 				// Дополнительные проверки можно добавить здесь
 				if personType == nil {
 					t.Error("Person type is nil")
@@ -63,12 +64,12 @@ func TestStructDefinition(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			scope.GlobalScope = scope.NewScopeStack()
-			
+
 			exprs := parser.NewParser(tt.code).Parse()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
-			
+
 			if tt.checks != nil {
 				tt.checks(t)
 			}
@@ -131,13 +132,13 @@ func TestTypeofExpression(t *testing.T) {
 			})
 			expected := strings.TrimSpace(tt.output)
 			actual := strings.TrimSpace(result)
-			
+
 			// Специальная обработка для typeof_object - порядок полей может меняться
 			if tt.name == "typeof object" {
 				// Проверяем, что содержит нужные части
-				if !strings.Contains(actual, "struct object") || 
-				   !strings.Contains(actual, "name: string") || 
-				   !strings.Contains(actual, "value: int") {
+				if !strings.Contains(actual, "struct object") ||
+					!strings.Contains(actual, "name: string") ||
+					!strings.Contains(actual, "value: int") {
 					t.Errorf("Expected struct with name: string and value: int, got: %s", actual)
 				}
 			} else if actual != expected {
@@ -190,7 +191,7 @@ func TestTypeExpression(t *testing.T) {
 			})
 			expected := strings.TrimSpace(tt.output)
 			actual := strings.TrimSpace(result)
-			
+
 			if actual != expected {
 				t.Errorf("Expected output:\n%s\n\nGot:\n%s", expected, actual)
 			}
@@ -275,7 +276,7 @@ func TestAdvancedMacrosWithTypes(t *testing.T) {
 			})
 			expected := strings.TrimSpace(tt.output)
 			actual := strings.TrimSpace(result)
-			
+
 			if actual != expected {
 				t.Errorf("Expected output:\n%s\n\nGot:\n%s", expected, actual)
 			}
@@ -340,7 +341,7 @@ func TestMacroCodeGeneration(t *testing.T) {
 			})
 			expected := strings.TrimSpace(tt.output)
 			actual := strings.TrimSpace(result)
-			
+
 			if actual != expected {
 				t.Errorf("Expected output:\n%s\n\nGot:\n%s", expected, actual)
 			}

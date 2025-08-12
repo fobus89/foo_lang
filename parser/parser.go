@@ -13,19 +13,26 @@ import (
 )
 
 type Parser struct {
-	tokens     []token.TokenType
-	pos        int
-	currentFile string // Путь к текущему файлу для обработки импортов
+	tokens      []token.TokenType
+	pos         int
+	currentFile string            // Путь к текущему файлу для обработки импортов
+	scopeStack  *scope.ScopeStack // Стек областей видимости для парсера
 }
 
 func (p *Parser) error(msg string, tok token.TokenType) {
 	panic(fmt.Sprintf("Parse error at line %d, column %d: %s (got '%s')", tok.Line, tok.Col, msg, tok.Value))
 }
 
+// GetScopeStack возвращает стек областей видимости парсера
+func (p *Parser) GetScopeStack() *scope.ScopeStack {
+	return p.scopeStack
+}
+
 func NewParser[T []rune | string | []byte](input T) *Parser {
 	tokens := lexer.NewLexer(input).Tokens()
 	return &Parser{
-		tokens: tokens,
+		tokens:     tokens,
+		scopeStack: scope.NewScopeStack(),
 	}
 }
 
@@ -35,6 +42,7 @@ func NewParserWithFile[T []rune | string | []byte](input T, filePath string) *Pa
 	return &Parser{
 		tokens:      tokens,
 		currentFile: filePath,
+		scopeStack:  scope.NewScopeStack(),
 	}
 }
 
@@ -49,6 +57,7 @@ func NewParserFromFile(filePath string) (*Parser, error) {
 	return &Parser{
 		tokens:      tokens,
 		currentFile: filePath,
+		scopeStack:  scope.NewScopeStack(),
 	}, nil
 }
 
@@ -125,6 +134,21 @@ func (p *Parser) MatchAnyNext(tokens ...token.Token) bool {
 
 func (p *Parser) Parse() []ast.Expr {
 	var exprs []ast.Expr
+	
+	// Устанавливаем глобальный scope для использования в AST узлах
+	scope.GlobalScope = p.scopeStack
+
+	for !p.Match(token.EOF) {
+		expr := p.Statement()
+		exprs = append(exprs, expr)
+	}
+
+	return exprs
+}
+
+// ParseWithoutScopeInit парсит код без установки GlobalScope (для модулей)
+func (p *Parser) ParseWithoutScopeInit() []ast.Expr {
+	var exprs []ast.Expr
 
 	for !p.Match(token.EOF) {
 		expr := p.Statement()
@@ -137,6 +161,9 @@ func (p *Parser) Parse() []ast.Expr {
 // ParseWithModules парсит код с правильной поддержкой импортов модулей
 func (p *Parser) ParseWithModules() []ast.Expr {
 	var exprs []ast.Expr
+	
+	// Устанавливаем глобальный scope для использования в AST узлах
+	scope.GlobalScope = p.scopeStack
 	
 	// Устанавливаем контекст текущего файла для корректной работы импортов
 	if p.currentFile != "" {

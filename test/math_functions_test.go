@@ -11,11 +11,9 @@ import (
 )
 
 func TestBasicMathFunctions(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-	
-	// Set up global parse function for any potential imports
+	// Устанавливаем глобальную parseFunc для import
 	parseFunc := func(code string) []modules.Expr {
-		exprs := parser.NewParser(code).Parse()
+		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
 		for i, expr := range exprs {
 			result[i] = expr
@@ -24,8 +22,10 @@ func TestBasicMathFunctions(t *testing.T) {
 	}
 	ast.SetGlobalParseFunc(parseFunc)
 	
-	// Initialize math functions
-	builtin.InitializeMathFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeMathFunctions,
+	)
 
 	tests := []struct {
 		name     string
@@ -51,11 +51,12 @@ func TestBasicMathFunctions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Reset scope for each test
-			scope.GlobalScope = scope.NewScopeStack()
-			builtin.InitializeMathFunctions(scope.GlobalScope)
+			// Сбрасываем окружение для каждого теста
+			InitTestEnvironment(
+				builtin.InitializeMathFunctions,
+			)
 			
-			exprs := parser.NewParser(tt.code).Parse()
+			exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -75,8 +76,10 @@ func TestBasicMathFunctions(t *testing.T) {
 }
 
 func TestMathFunctionErrors(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeMathFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeMathFunctions,
+	)
 
 	errorTests := []struct {
 		name string
@@ -105,7 +108,7 @@ func TestMathFunctionErrors(t *testing.T) {
 				}
 			}()
 
-			exprs := parser.NewParser(tt.code).Parse()
+			exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -114,8 +117,10 @@ func TestMathFunctionErrors(t *testing.T) {
 }
 
 func TestMathFunctionIntegration(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeMathFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeMathFunctions,
+	)
 
 	// Test using math functions in user-defined functions
 	const code = `
@@ -128,7 +133,7 @@ func TestMathFunctionIntegration(t *testing.T) {
 	let result = distance(0, 0, 3, 4)
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -147,8 +152,10 @@ func TestMathFunctionIntegration(t *testing.T) {
 }
 
 func TestTrigonometricFunctions(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeMathFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeMathFunctions,
+	)
 
 	// Test trigonometric identities
 	const code = `
@@ -158,7 +165,7 @@ func TestTrigonometricFunctions(t *testing.T) {
 	let tanPiOver4 = tan(pi / 4)
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}

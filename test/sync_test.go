@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"foo_lang/builtin"
 	"foo_lang/parser"
-	"foo_lang/scope"
 	"io"
 	"os"
 	"strings"
@@ -57,11 +56,12 @@ func TestMutexFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureSyncOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeSyncFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeSyncFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -108,11 +108,12 @@ func TestRWMutexFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureSyncOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeSyncFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeSyncFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -167,11 +168,12 @@ func TestSemaphoreFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureSyncOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeSyncFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeSyncFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -220,11 +222,12 @@ func TestWaitGroupFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureSyncOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeSyncFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeSyncFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -286,11 +289,12 @@ func TestAtomicFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureSyncOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeSyncFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeSyncFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -330,11 +334,12 @@ func TestBarrierFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureSyncOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeSyncFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeSyncFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -387,11 +392,12 @@ func TestSyncErrorHandling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureSyncOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeSyncFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeSyncFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -430,11 +436,12 @@ func TestSyncCleanupFunction(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureSyncOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeSyncFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeSyncFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -492,11 +499,12 @@ func TestSyncConcurrencyBasic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureSyncOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeSyncFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeSyncFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}

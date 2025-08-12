@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"foo_lang/builtin"
 	"foo_lang/parser"
-	"foo_lang/scope"
 	"io"
 	"os"
 	"strings"
@@ -62,12 +61,13 @@ func TestRegexMatchFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureRegexOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeRegexFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeMathFunctions,
+					builtin.InitializeRegexFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -123,12 +123,13 @@ func TestRegexFindFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureRegexOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeRegexFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeMathFunctions,
+					builtin.InitializeRegexFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -182,12 +183,13 @@ func TestRegexFindAllFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureRegexOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeRegexFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeMathFunctions,
+					builtin.InitializeRegexFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -243,12 +245,13 @@ func TestRegexReplaceFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureRegexOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeRegexFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeMathFunctions,
+					builtin.InitializeRegexFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -312,12 +315,13 @@ func TestRegexSplitFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureRegexOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeRegexFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeMathFunctions,
+					builtin.InitializeRegexFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -371,12 +375,13 @@ func TestRegexGroupsFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureRegexOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeRegexFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeMathFunctions,
+					builtin.InitializeRegexFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -432,12 +437,13 @@ func TestRegexUtilityFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureRegexOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeRegexFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeMathFunctions,
+					builtin.InitializeRegexFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -489,12 +495,13 @@ func TestRegexErrorHandling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureRegexOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeRegexFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeMathFunctions,
+					builtin.InitializeRegexFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -558,12 +565,13 @@ func TestRegexPracticalExamples(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureRegexOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeRegexFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeMathFunctions,
+					builtin.InitializeRegexFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}

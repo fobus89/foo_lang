@@ -2,9 +2,7 @@ package test
 
 import (
 	"bytes"
-	"foo_lang/builtin"
 	"foo_lang/parser"
-	"foo_lang/scope"
 	"foo_lang/value"
 	"io"
 	"os"
@@ -14,11 +12,8 @@ import (
 )
 
 func TestChannelBasicOperations(t *testing.T) {
-	// Инициализируем scope с функциями каналов
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeMathFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
-	builtin.InitializeChannelFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение с функциями каналов
+	InitWithChannels()
 
 	tests := []struct {
 		name string
@@ -81,13 +76,9 @@ func TestChannelBasicOperations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureChannelOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				// Регистрируем все встроенные функции
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeChannelFunctions(scope.GlobalScope)
+				InitWithChannels()
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -101,21 +92,19 @@ func TestChannelBasicOperations(t *testing.T) {
 }
 
 func TestChannelNonBlockingOperations(t *testing.T) {
-	// Инициализируем scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeChannelFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitWithChannels()
 
 	t.Run("try_receive_empty_channel", func(t *testing.T) {
 		result := captureChannelOutput(func() {
-			scope.GlobalScope = scope.NewScopeStack()
-			builtin.InitializeChannelFunctions(scope.GlobalScope)
+			InitWithChannels()
 
 			code := `
 				let ch = newChannel(1)
 				let result = tryReceive(ch)
 				println(result)
 			`
-			exprs := parser.NewParser(code).Parse()
+			exprs := parser.NewParser(code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -128,8 +117,7 @@ func TestChannelNonBlockingOperations(t *testing.T) {
 
 	t.Run("try_receive_with_data", func(t *testing.T) {
 		result := captureChannelOutput(func() {
-			scope.GlobalScope = scope.NewScopeStack()
-			builtin.InitializeChannelFunctions(scope.GlobalScope)
+			InitWithChannels()
 
 			code := `
 				let ch = newChannel(1)
@@ -137,7 +125,7 @@ func TestChannelNonBlockingOperations(t *testing.T) {
 				let result = tryReceive(ch)
 				println(result)
 			`
-			exprs := parser.NewParser(code).Parse()
+			exprs := parser.NewParser(code).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -150,12 +138,11 @@ func TestChannelNonBlockingOperations(t *testing.T) {
 }
 
 func TestChannelWithNumbers(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeChannelFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitWithChannels()
 
 	result := captureChannelOutput(func() {
-		scope.GlobalScope = scope.NewScopeStack()
-		builtin.InitializeChannelFunctions(scope.GlobalScope)
+		InitWithChannels()
 
 		code := `
 			let ch = newChannel(3)
@@ -169,7 +156,7 @@ func TestChannelWithNumbers(t *testing.T) {
 			
 			println(num1.toString() + "," + num2.toString() + "," + num3.toString())
 		`
-		exprs := parser.NewParser(code).Parse()
+		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		for _, expr := range exprs {
 			expr.Eval()
 		}
@@ -179,6 +166,23 @@ func TestChannelWithNumbers(t *testing.T) {
 	if result != expected {
 		t.Errorf("expected %q, got %q", expected, result)
 	}
+}
+
+// captureOutput захватывает stdout для тестирования
+func captureChannelOutput(f func()) string {
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	f()
+
+	w.Close()
+	os.Stdout = old
+
+	var buf bytes.Buffer
+	io.Copy(&buf, r)
+	result := buf.String()
+	return strings.TrimSpace(result)
 }
 
 func TestChannelDirectAPI(t *testing.T) {
@@ -350,21 +354,4 @@ func TestChannelErrorHandling(t *testing.T) {
 			t.Errorf("expected capacity 0 for negative buffer size, got %d", ch.Cap())
 		}
 	})
-}
-
-// captureOutput захватывает stdout для тестирования
-func captureChannelOutput(f func()) string {
-	old := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	f()
-
-	w.Close()
-	os.Stdout = old
-
-	var buf bytes.Buffer
-	io.Copy(&buf, r)
-	result := buf.String()
-	return strings.TrimSpace(result)
 }

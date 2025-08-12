@@ -25,7 +25,13 @@
       "Bash(del debug_*.foo)",
       "Bash(.foo_lang.exe:*)",
       "Bash(ls:*)",
-      "Bash(timeout 30 go test:*)"
+      "Bash(timeout 30 go test:*)",
+      "Bash(sed:*)",
+      "Bash(for:*)",
+      "Bash(do if grep -q \"InitTestEnvironment\" \"$file\")",
+      "Bash(then echo \"$file\")",
+      "Bash(fi)",
+      "Bash(done)"
     ],
     "deny": []
   },

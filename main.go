@@ -6,7 +6,6 @@ import (
 	"foo_lang/builtin"
 	"foo_lang/modules"
 	"foo_lang/parser"
-	"foo_lang/scope"
 	"os"
 	"strings"
 )
@@ -49,9 +48,8 @@ func main() {
 
 	// Set up global parse function for module imports
 	parseFunc := func(code string) []modules.Expr {
-		// Для модулей пока используем базовый Parser, так как у нас нет пути файла модуля
-		// TODO: Передавать путь файла модуля в parseFunc для лучшей поддержки вложенных импортов
-		exprs := parser.NewParser(code).Parse()
+		// Для модулей используем специальный парсер, который не перезаписывает GlobalScope
+		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
 		for i, expr := range exprs {
 			result[i] = expr
@@ -60,39 +58,26 @@ func main() {
 	}
 	ast.SetGlobalParseFunc(parseFunc)
 
-	// Инициализируем встроенные математические функции
-	builtin.InitializeMathFunctions(scope.GlobalScope)
-
-	// Инициализируем встроенные строковые функции
-	builtin.InitializeStringFunctions(scope.GlobalScope)
-
-	// Инициализируем встроенные функции файловой системы
-	builtin.InitializeFilesystemFunctions(scope.GlobalScope)
-	
-	// Инициализируем встроенные HTTP функции
-	builtin.InitializeHttpFunctions(scope.GlobalScope)
-	
-	// Инициализируем встроенные функции каналов
-	builtin.InitializeChannelFunctions(scope.GlobalScope)
-	
-	// Инициализируем встроенные функции времени
-	builtin.InitializeTimeFunctions(scope.GlobalScope)
-	
-	// Инициализируем встроенные криптографические функции
-	builtin.InitializeCryptoFunctions(scope.GlobalScope)
-	
-	// Инициализируем встроенные функции регулярных выражений
-	builtin.InitializeRegexFunctions(scope.GlobalScope)
-	
-	// Инициализируем встроенные функции синхронизации
-	builtin.InitializeSyncFunctions(scope.GlobalScope)
-
 	// Используем NewParserFromFile для упрощения API
 	p, err := parser.NewParserFromFile(filename)
 	if err != nil {
 		fmt.Printf("Error creating parser: %v\n", err)
 		return
 	}
+	
+	// Получаем scope из парсера и инициализируем встроенные функции
+	scopeStack := p.GetScopeStack()
+	
+	// Инициализируем встроенные функции с этим scope
+	builtin.InitializeMathFunctions(scopeStack)
+	builtin.InitializeStringFunctions(scopeStack)
+	builtin.InitializeFilesystemFunctions(scopeStack)
+	builtin.InitializeHttpFunctions(scopeStack)
+	builtin.InitializeChannelFunctions(scopeStack)
+	builtin.InitializeTimeFunctions(scopeStack)
+	builtin.InitializeCryptoFunctions(scopeStack)
+	builtin.InitializeRegexFunctions(scopeStack)
+	builtin.InitializeSyncFunctions(scopeStack)
 	
 	exprs := p.ParseWithModules()
 

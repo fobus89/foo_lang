@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"foo_lang/builtin"
 	"foo_lang/parser"
-	"foo_lang/scope"
 	"io"
 	"os"
 	"strings"
@@ -59,11 +58,12 @@ func TestCryptoHashFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureCryptoOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeCryptoFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeCryptoFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -121,11 +121,12 @@ func TestCryptoBase64Functions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureCryptoOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeCryptoFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeCryptoFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -166,11 +167,12 @@ func TestCryptoHexFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureCryptoOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeCryptoFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeCryptoFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -237,11 +239,12 @@ func TestCryptoHMACFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureCryptoOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeCryptoFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeCryptoFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -366,12 +369,13 @@ func TestCryptoRandomFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureCryptoOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeMathFunctions(scope.GlobalScope)
-				builtin.InitializeCryptoFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeMathFunctions,
+					builtin.InitializeCryptoFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -426,11 +430,12 @@ func TestCryptoPasswordFunctions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureCryptoOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeCryptoFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeCryptoFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -478,11 +483,12 @@ func TestCryptoConstantTimeCompare(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureCryptoOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeCryptoFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeCryptoFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -543,11 +549,12 @@ func TestCryptoErrorHandling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := captureCryptoOutput(func() {
-				scope.GlobalScope = scope.NewScopeStack()
-				builtin.InitializeStringFunctions(scope.GlobalScope)
-				builtin.InitializeCryptoFunctions(scope.GlobalScope)
+				InitTestEnvironment(
+					builtin.InitializeStringFunctions,
+					builtin.InitializeCryptoFunctions,
+				)
 
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -566,14 +573,15 @@ func TestCryptoKnownVectors(t *testing.T) {
 		expected := fmt.Sprintf("%x", md5.Sum([]byte("The quick brown fox jumps over the lazy dog")))
 		
 		result := captureCryptoOutput(func() {
-			scope.GlobalScope = scope.NewScopeStack()
-			builtin.InitializeStringFunctions(scope.GlobalScope)
-			builtin.InitializeCryptoFunctions(scope.GlobalScope)
+			InitTestEnvironment(
+				builtin.InitializeStringFunctions,
+				builtin.InitializeCryptoFunctions,
+			)
 
 			exprs := parser.NewParser(`
 				let hash = md5Hash("The quick brown fox jumps over the lazy dog")
 				println(hash)
-			`).Parse()
+			`).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}
@@ -588,14 +596,15 @@ func TestCryptoKnownVectors(t *testing.T) {
 		expected := fmt.Sprintf("%x", sha256.Sum256([]byte("abc")))
 		
 		result := captureCryptoOutput(func() {
-			scope.GlobalScope = scope.NewScopeStack()
-			builtin.InitializeStringFunctions(scope.GlobalScope)
-			builtin.InitializeCryptoFunctions(scope.GlobalScope)
+			InitTestEnvironment(
+				builtin.InitializeStringFunctions,
+				builtin.InitializeCryptoFunctions,
+			)
 
 			exprs := parser.NewParser(`
 				let hash = sha256Hash("abc")
 				println(hash)
-			`).Parse()
+			`).ParseWithoutScopeInit()
 			for _, expr := range exprs {
 				expr.Eval()
 			}

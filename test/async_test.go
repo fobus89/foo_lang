@@ -5,15 +5,13 @@ import (
 	"time"
 	"foo_lang/parser"
 	"foo_lang/builtin"
-	"foo_lang/scope"
 )
 
 func TestAsyncBasic(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	
-	// Инициализируем встроенные функции
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Простая async функция
@@ -27,7 +25,7 @@ let result = await promise
 print("Result: " + result)
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()
@@ -41,9 +39,10 @@ print("Result: " + result)
 }
 
 func TestAsyncAwaitWithSleep(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Функция с задержкой
@@ -62,7 +61,7 @@ print("Result: " + result)
 `
 
 	startTime := time.Now()
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		expr.Eval()
@@ -76,9 +75,10 @@ print("Result: " + result)
 }
 
 func TestPromiseAll(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Простые async операции без параметров (избегаем race conditions)
@@ -111,7 +111,7 @@ print("Results count: " + results.length().toString())
 `
 
 	startTime := time.Now()
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		expr.Eval()
@@ -125,9 +125,10 @@ print("Results count: " + results.length().toString())
 }
 
 func TestPromiseAny(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Простые async операции с разными задержками (без параметров)
@@ -157,7 +158,7 @@ print("Winner: " + winner)
 `
 
 	startTime := time.Now()
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		expr.Eval()
@@ -171,9 +172,10 @@ print("Winner: " + winner)
 }
 
 func TestAsyncErrorHandling(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Простая успешная async функция
@@ -188,7 +190,7 @@ let successResult = await successPromise
 print("Success result: " + successResult)
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()
@@ -202,9 +204,10 @@ print("Success result: " + successResult)
 }
 
 func TestAsyncParallelExecution(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Простая async функция для тестирования параллельного выполнения
@@ -223,7 +226,7 @@ print("Parallel execution test completed")
 print(result)
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		expr.Eval()
@@ -234,9 +237,10 @@ print(result)
 }
 
 func TestAsyncWithClosures(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Простой async тест с замыканием (без параметров)
@@ -259,7 +263,7 @@ print("Result: " + result)
 print("Final shared value: " + sharedValue)
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		expr.Eval()

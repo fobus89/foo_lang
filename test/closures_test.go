@@ -10,11 +10,9 @@ import (
 )
 
 func TestBasicClosure(t *testing.T) {
-	scope.GlobalScope = scope.NewScopeStack()
-	
-	// Set up global parse function
+	// Устанавливаем global parse function
 	parseFunc := func(code string) []modules.Expr {
-		exprs := parser.NewParser(code).Parse()
+		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
 		for i, expr := range exprs {
 			result[i] = expr
@@ -22,7 +20,11 @@ func TestBasicClosure(t *testing.T) {
 		return result
 	}
 	ast.SetGlobalParseFunc(parseFunc)
-	builtin.InitializeMathFunctions(scope.GlobalScope)
+	
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeMathFunctions,
+	)
 
 	// Тест базового замыкания - функция захватывает внешнюю переменную
 	const code = `
@@ -35,7 +37,7 @@ func TestBasicClosure(t *testing.T) {
 	let result = inner()
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -55,7 +57,7 @@ func TestClosureModification(t *testing.T) {
 	scope.GlobalScope = scope.NewScopeStack()
 	
 	parseFunc := func(code string) []modules.Expr {
-		exprs := parser.NewParser(code).Parse()
+		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
 		for i, expr := range exprs {
 			result[i] = expr
@@ -63,7 +65,11 @@ func TestClosureModification(t *testing.T) {
 		return result
 	}
 	ast.SetGlobalParseFunc(parseFunc)
-	builtin.InitializeMathFunctions(scope.GlobalScope)
+	
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeMathFunctions,
+	)
 
 	// Тест замыкания с изменением захваченной переменной
 	const code = `
@@ -78,7 +84,7 @@ func TestClosureModification(t *testing.T) {
 	let second = increment()
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -108,7 +114,7 @@ func TestNestedClosures(t *testing.T) {
 	scope.GlobalScope = scope.NewScopeStack()
 	
 	parseFunc := func(code string) []modules.Expr {
-		exprs := parser.NewParser(code).Parse()
+		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
 		for i, expr := range exprs {
 			result[i] = expr
@@ -116,7 +122,11 @@ func TestNestedClosures(t *testing.T) {
 		return result
 	}
 	ast.SetGlobalParseFunc(parseFunc)
-	builtin.InitializeMathFunctions(scope.GlobalScope)
+	
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeMathFunctions,
+	)
 
 	// Тест вложенных замыканий
 	const code = `
@@ -135,7 +145,7 @@ func TestNestedClosures(t *testing.T) {
 	let result = outer()
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -155,7 +165,7 @@ func TestClosureWithParameters(t *testing.T) {
 	scope.GlobalScope = scope.NewScopeStack()
 	
 	parseFunc := func(code string) []modules.Expr {
-		exprs := parser.NewParser(code).Parse()
+		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
 		for i, expr := range exprs {
 			result[i] = expr
@@ -163,7 +173,11 @@ func TestClosureWithParameters(t *testing.T) {
 		return result
 	}
 	ast.SetGlobalParseFunc(parseFunc)
-	builtin.InitializeMathFunctions(scope.GlobalScope)
+	
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeMathFunctions,
+	)
 
 	// Тест замыкания с параметрами и захваченными переменными
 	const code = `
@@ -180,7 +194,7 @@ func TestClosureWithParameters(t *testing.T) {
 	let result = mult(5)
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}
@@ -200,7 +214,7 @@ func TestClosureWithMathFunctions(t *testing.T) {
 	scope.GlobalScope = scope.NewScopeStack()
 	
 	parseFunc := func(code string) []modules.Expr {
-		exprs := parser.NewParser(code).Parse()
+		exprs := parser.NewParser(code).ParseWithoutScopeInit()
 		result := make([]modules.Expr, len(exprs))
 		for i, expr := range exprs {
 			result[i] = expr
@@ -208,7 +222,11 @@ func TestClosureWithMathFunctions(t *testing.T) {
 		return result
 	}
 	ast.SetGlobalParseFunc(parseFunc)
-	builtin.InitializeMathFunctions(scope.GlobalScope)
+	
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeMathFunctions,
+	)
 
 	// Тест замыканий с математическими функциями
 	const code = `
@@ -222,7 +240,7 @@ func TestClosureWithMathFunctions(t *testing.T) {
 	let area = calculateArea()
 	`
 
-	exprs := parser.NewParser(code).Parse()
+	exprs := parser.NewParser(code).ParseWithoutScopeInit()
 	for _, expr := range exprs {
 		expr.Eval()
 	}

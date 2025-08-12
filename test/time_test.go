@@ -88,7 +88,7 @@ func TestTimeBasicOperations(t *testing.T) {
 				builtin.InitializeStringFunctions(scope.GlobalScope)
 				builtin.InitializeTimeFunctions(scope.GlobalScope)
 				
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -162,7 +162,7 @@ func TestTimeArithmetic(t *testing.T) {
 				builtin.InitializeStringFunctions(scope.GlobalScope)
 				builtin.InitializeTimeFunctions(scope.GlobalScope)
 				
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -226,7 +226,7 @@ func TestTimeComparison(t *testing.T) {
 				builtin.InitializeStringFunctions(scope.GlobalScope)
 				builtin.InitializeTimeFunctions(scope.GlobalScope)
 				
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -285,7 +285,7 @@ func TestTimeFormatting(t *testing.T) {
 				builtin.InitializeStringFunctions(scope.GlobalScope)
 				builtin.InitializeTimeFunctions(scope.GlobalScope)
 				
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}
@@ -385,7 +385,7 @@ func TestTimeErrorHandling(t *testing.T) {
 				builtin.InitializeStringFunctions(scope.GlobalScope)
 				builtin.InitializeTimeFunctions(scope.GlobalScope)
 				
-				exprs := parser.NewParser(tt.code).Parse()
+				exprs := parser.NewParser(tt.code).ParseWithoutScopeInit()
 				for _, expr := range exprs {
 					expr.Eval()
 				}

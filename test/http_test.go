@@ -5,16 +5,14 @@ import (
 	"time"
 	"foo_lang/parser"
 	"foo_lang/builtin"
-	"foo_lang/scope"
 )
 
 func TestHttpClientFunctions(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	
-	// Инициализируем HTTP функции
-	builtin.InitializeHttpFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeHttpFunctions,
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Тест HTTP клиента без реальных запросов
@@ -32,7 +30,7 @@ print("URL кодирование работает: " + (decoded == "Hello World
 print("HTTP клиент тесты завершены")
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()
@@ -46,12 +44,11 @@ print("HTTP клиент тесты завершены")
 }
 
 func TestHttpServerBasic(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	
-	// Инициализируем HTTP функции
-	builtin.InitializeHttpFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeHttpFunctions,
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Тест HTTP сервера
@@ -87,7 +84,7 @@ print("Сервер остановлен: " + stopResult)
 print("HTTP сервер тесты завершены")
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()
@@ -101,12 +98,11 @@ print("HTTP сервер тесты завершены")
 }
 
 func TestHttpUtilityFunctions(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	
-	// Инициализируем HTTP функции
-	builtin.InitializeHttpFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeHttpFunctions,
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Тест утилит HTTP
@@ -131,7 +127,7 @@ if (decoded == originalText) {
 print("HTTP утилиты тесты завершены")
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()
@@ -145,12 +141,11 @@ print("HTTP утилиты тесты завершены")
 }
 
 func TestHttpMethods(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	
-	// Инициализируем HTTP функции
-	builtin.InitializeHttpFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeHttpFunctions,
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Тест всех HTTP методов
@@ -167,7 +162,7 @@ print("HTTP сервер создан")
 print("Все HTTP методы протестированы")
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()
@@ -181,12 +176,11 @@ print("Все HTTP методы протестированы")
 }
 
 func TestHttpHeaders(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	
-	// Инициализируем HTTP функции
-	builtin.InitializeHttpFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeHttpFunctions,
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Тест работы с заголовками
@@ -208,7 +202,7 @@ print("URL кодирование работает")
 print("HTTP заголовки тесты завершены")
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()
@@ -222,12 +216,11 @@ print("HTTP заголовки тесты завершены")
 }
 
 func TestHttpServerRouting(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	
-	// Инициализируем HTTP функции
-	builtin.InitializeHttpFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeHttpFunctions,
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Тест роутинга HTTP сервера
@@ -276,7 +269,7 @@ print("Сервер остановлен")
 print("HTTP роутинг тесты завершены")
 `
 
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()
@@ -290,12 +283,11 @@ print("HTTP роутинг тесты завершены")
 }
 
 func TestHttpAsyncRequests(t *testing.T) {
-	// Сбрасываем глобальный scope
-	scope.GlobalScope = scope.NewScopeStack()
-	
-	// Инициализируем HTTP функции
-	builtin.InitializeHttpFunctions(scope.GlobalScope)
-	builtin.InitializeStringFunctions(scope.GlobalScope)
+	// Инициализируем тестовое окружение
+	InitTestEnvironment(
+		builtin.InitializeHttpFunctions,
+		builtin.InitializeStringFunctions,
+	)
 	
 	code := `
 // Тест асинхронных HTTP запросов
@@ -322,7 +314,7 @@ print("Асинхронные HTTP тесты завершены")
 `
 
 	startTime := time.Now()
-	exprs := parser.NewParser([]byte(code)).Parse()
+	exprs := parser.NewParser([]byte(code)).ParseWithoutScopeInit()
 	
 	for _, expr := range exprs {
 		result := expr.Eval()
