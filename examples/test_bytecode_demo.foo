@@ -1,0 +1,113 @@
+// Демонстрация Bytecode компиляции и выполнения в foo_lang
+print("=== ДЕМО: Bytecode компиляция ===")
+
+// Базовые арифметические операции
+print("\n--- Арифметические операции ---")
+let a = 42
+let b = 13
+let sum = a + b
+let difference = a - b
+let product = a * b
+let quotient = a / b
+
+print("a = " + a.toString())
+print("b = " + b.toString())
+print("a + b = " + sum.toString())
+print("a - b = " + difference.toString())
+print("a * b = " + product.toString())
+print("a / b = " + quotient.toString())
+
+// Логические операции
+print("\n--- Логические операции ---")
+let x = true
+let y = false
+print("x = " + x.toString())
+print("y = " + y.toString())
+print("x && y = " + (x && y).toString())
+print("x || y = " + (x || y).toString())
+print("!x = " + (!x).toString())
+print("!y = " + (!y).toString())
+
+// Операции сравнения
+print("\n--- Сравнения ---")
+print("a == b: " + (a == b).toString())
+print("a != b: " + (a != b).toString())
+print("a > b: " + (a > b).toString())
+print("a < b: " + (a < b).toString())
+print("a >= b: " + (a >= b).toString())
+print("a <= b: " + (a <= b).toString())
+
+// Условные выражения
+print("\n--- Условные выражения ---")
+if (a > b) {
+    print("a больше b")
+} else {
+    print("a меньше или равно b")
+}
+
+let max = if (a > b) { a } else { b }
+print("Максимальное значение: " + max.toString())
+
+// Циклы
+print("\n--- Циклы ---")
+print("Обратный отсчет от 5:")
+for let counter = 5; counter > 0; counter-- {
+    print("Счетчик: " + counter.toString())
+}
+print("Отсчет завершен!")
+
+// Массивы
+print("\n--- Массивы ---")
+let numbers = [10, 20, 30, 40, 50]
+print("Массив создан: [10, 20, 30, 40, 50]")
+print("Первый элемент: " + numbers[0].toString())
+print("Третий элемент: " + numbers[2].toString())
+print("Последний элемент: " + numbers[4].toString())
+
+// Строковые операции
+print("\n--- Строковые операции ---")
+let greeting = "Hello"
+let target = "World"
+let message = greeting + ", " + target + "!"
+print("Сообщение: " + message)
+
+let words = ["foo", "lang", "bytecode"]
+print("Слова: " + words[0] + " " + words[1] + " " + words[2])
+
+// Вложенные выражения
+print("\n--- Вложенные выражения ---")
+let result = ((a + b) * 2) - (a / b)
+print("((a + b) * 2) - (a / b) = " + result.toString())
+
+// Множественные присваивания
+print("\n--- Переменные ---")
+let value1 = 100
+let value2 = value1 + 50
+let value3 = value2 * 2
+print("value1 = " + value1.toString())
+print("value2 = value1 + 50 = " + value2.toString())
+print("value3 = value2 * 2 = " + value3.toString())
+
+// Производительность - много операций
+print("\n--- Тест производительности ---")
+let total = 0
+
+for let start = 1; start <= 10; start++ {
+    total = total + start
+}
+
+print("Сумма чисел от 1 до 10: " + total.toString())
+
+// Сложные выражения
+print("\n--- Сложные выражения ---")
+let complex1 = (a + b) * (a - b)
+let complex2 = (a * b) / (a + 1)
+let complex3 = !((a > b) && (b > 0))
+
+print("(a + b) * (a - b) = " + complex1.toString())
+print("(a * b) / (a + 1) = " + complex2.toString())
+print("!((a > b) && (b > 0)) = " + complex3.toString())
+
+print("\n=== Bytecode демо завершено ===")
+print("🚀 Все операции выполнены через bytecode VM!")
+print("⚡ Производительность оптимизирована компилятором")

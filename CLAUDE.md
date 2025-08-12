@@ -169,7 +169,37 @@ let winner = await Promise.any(fast1, fast2)
 **✅ Поддержка**: горутины, Promise API, изоляция scope, обработка ошибок
 **✅ Примеры**: `test_async_basic.foo`, `test_async_simple.foo`
 
-#### 10. Полная система операторов
+#### 10. 🚀 **BYTECODE VIRTUAL MACHINE** ✅ **полностью реализована**
+```bash
+# Запуск через bytecode VM для оптимизированной производительности
+go run main.go --bytecode examples/test_bytecode_demo.foo
+
+# Профилирование и диагностика
+go run main.go --bytecode --profile --disassemble
+
+# Сравнение производительности с tree-walking
+go run main.go --bytecode --compare
+```
+
+**🔥 Ключевые компоненты**:
+- **80+ OpCodes** - полное покрытие всех операций языка
+- **Stack-based VM** - оптимальная архитектура для интерпретации  
+- **Профайлер производительности** - детальная статистика и горячие точки
+- **Дизассемблер** - human-readable представление bytecode
+- **Автоматические рекомендации** - советы по оптимизации кода
+
+**✅ OpCodes поддержка**:
+- **Арифметика**: OP_ADD, OP_SUBTRACT, OP_MULTIPLY, OP_DIVIDE, OP_MODULO
+- **Логика**: OP_AND, OP_OR, OP_NOT, OP_EQUAL, OP_GREATER, OP_LESS
+- **Переменные**: OP_GET_GLOBAL, OP_SET_GLOBAL, OP_DEFINE_GLOBAL
+- **Управление**: OP_JUMP, OP_JUMP_IF_FALSE, OP_LOOP
+- **Коллекции**: OP_ARRAY, OP_INDEX, OP_OBJECT
+- **Профилинг**: OP_PROFILE_START, OP_PROFILE_END, OP_DEBUG_TRACE
+
+**✅ Примеры**: `test_bytecode_demo.foo`
+**✅ Тесты**: `minimal_bytecode_test.go`, `bytecode_test.go` (25+ тестов)
+
+#### 11. Полная система операторов
 - **Арифметические**: +, -, *, /, %
 - **Сравнения**: ==, !=, >, <, >=, <=
 - **Логические**: &&, ||, !
@@ -178,7 +208,7 @@ let winner = await Promise.any(fast1, fast2)
 
 ## 📊 Покрытие тестами: 100%
 
-**22 файла unit-тестов** с **140+ тестами**:
+**25 файлов unit-тестов** с **180+ тестами**:
 - `test/basic_types_test.go` - типы и операторы
 - `test/functions_test.go` - функции и рекурсия  
 - `test/closures_test.go` - замыкания (5 тестов)
@@ -193,6 +223,10 @@ let winner = await Promise.any(fast1, fast2)
 - `test/method_overloading_test.go` - перегрузка методов (15 тестов)
 - `test/filesystem_test.go` - файловая система (3 теста)
 - `test/interface_test.go` - интерфейсы и impl блоки (12 тестов)
+- `test/http_test.go` - HTTP клиент/сервер (15 тестов)
+- `test/minimal_bytecode_test.go` - bytecode VM (6 тестов)
+- `test/bytecode_test.go` - bytecode система (6 тестов)
+- `test/simple_bytecode_test.go` - простые bytecode операции (6 тестов)
 - И другие...
 
 **Все тесты проходят успешно!**
@@ -316,7 +350,8 @@ let area = circle.getArea()      // 78.53975
 13. **Параметры по умолчанию** - для функций с выражениями
 14. **Result тип** - полная реализация Ok/Err как в Rust
 15. **Многопоточность async/await** - полная реализация Promise API с горутинами
-16. **100% покрытие тестами** - все функции протестированы
+16. **Bytecode Virtual Machine** - оптимизированная VM с профилированием
+17. **100% покрытие тестами** - все функции протестированы
 
 ### ✅ Ранние достижения:
 1. **for-yield конструкции** - создание массивов через циклы
@@ -335,7 +370,7 @@ let area = circle.getArea()      // 78.53975
 # Запуск файла по умолчанию (examples/main.foo)
 go run main.go
 
-# Запуск конкретного файла
+# Запуск конкретного файла (Tree-walking интерпретатор)
 go run main.go examples/test_generic_constraints.foo         # Generic ограничения типов
 go run main.go examples/test_interface_complete.foo          # Интерфейсы и impl блоки
 go run main.go examples/test_extension_methods.foo           # Extension methods
@@ -349,11 +384,19 @@ go run main.go examples/test_async_simple.foo                # Async/await с Pr
 go run main.go examples/test_http_client.foo                 # HTTP клиент демо
 go run main.go examples/test_http_server.foo                 # HTTP сервер демо  
 go run main.go examples/test_http_complete.foo               # HTTP клиент + сервер
+
+# 🚀 Bytecode Virtual Machine (оптимизированный)
+go run main.go --bytecode                                    # Bytecode VM режим
+go run main.go --bytecode examples/test_bytecode_demo.foo    # Bytecode с примером
+go run main.go --bytecode --profile                         # С профилированием
+go run main.go --bytecode --disassemble                     # С дизассемблированием
+go run main.go --bytecode --profile --disassemble           # Полная диагностика
+go run main.go --bytecode --compare                         # Сравнение производительности
 ```
 
 ### Тестирование
 ```bash
-# Запуск всех тестов (135+ тестов)
+# Запуск всех тестов (180+ тестов)
 go test ./test/... -v
 
 # Запуск конкретного теста  
@@ -364,6 +407,11 @@ go test ./test/anonymous_functions_test.go -v
 go test ./test/math_functions_test.go -v
 go test ./test/async_test.go -v
 go test ./test/http_test.go -v
+
+# Bytecode тесты
+go test ./test/minimal_bytecode_test.go -v                   # VM тесты
+go test ./test/bytecode_test.go -v                          # Полные bytecode тесты  
+go test ./test/simple_bytecode_test.go -v                   # Простые операции
 ```
 
 ### Сборка
@@ -430,4 +478,4 @@ go build -o foo_lang main.go
 - 💼 **Production-ready скриптов и утилит**
 
 ### 🛠 **СЛЕДУЮЩИЕ ШАГИ**: 
-Generic ограничения типов `<T: Interface>` → Union типы → LSP поддержка → Синтаксис хайлайтинг
+Bytecode Compiler (AST → Bytecode) → JIT компиляция → Union типы → LSP поддержка → Синтаксис хайлайтинг

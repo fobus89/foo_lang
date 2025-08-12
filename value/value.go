@@ -286,13 +286,6 @@ func (n *Value) SetConst(constant bool) {
 	n.isConst = constant
 }
 
-func (n *Value) SetReturn(ret bool) {
-	n.isReturn = ret
-}
-
-func (n *Value) IsReturn() bool {
-	return n.isReturn
-}
 
 func (n *Value) SetYield(yield bool) {
 	n.isYield = yield

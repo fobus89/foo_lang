@@ -24,3 +24,13 @@ func (n *LetExpr) Eval() *Value {
 
 	return nil
 }
+
+// GetName возвращает имя переменной
+func (n *LetExpr) GetName() string {
+	return n.name
+}
+
+// GetExpr возвращает выражение
+func (n *LetExpr) GetExpr() Expr {
+	return n.expr
+}

@@ -17,3 +17,8 @@ func (b *BodyExpr) Eval() *Value {
 
 	return result
 }
+
+// GetBody возвращает список выражений в теле
+func (b *BodyExpr) GetBody() []Expr {
+	return b.Statments
+}
