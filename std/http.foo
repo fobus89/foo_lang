@@ -1,0 +1,487 @@
+// std/http.foo - Стандартная библиотека для HTTP клиента и сервера
+// 🌐 Модуль для веб-разработки и HTTP коммуникации
+
+// 🌍 HTTP клиент функции
+export fn get(url, options = {}) {
+    let headers = options["headers"] || {}
+    return __builtin_httpGet(url, headers)
+}
+
+export fn post(url, data, options = {}) {
+    let headers = options["headers"] || {}
+    let contentType = headers["Content-Type"] || "application/json"
+    headers["Content-Type"] = contentType
+    
+    let body = data
+    if contentType == "application/json" && typeof(data) == "object" {
+        body = JSON.stringify(data)
+    }
+    
+    return __builtin_httpPost(url, body, headers)
+}
+
+export fn put(url, data, options = {}) {
+    let headers = options["headers"] || {}
+    let contentType = headers["Content-Type"] || "application/json"
+    headers["Content-Type"] = contentType
+    
+    let body = data
+    if contentType == "application/json" && typeof(data) == "object" {
+        body = JSON.stringify(data)
+    }
+    
+    return __builtin_httpPut(url, body, headers)
+}
+
+export fn delete(url, options = {}) {
+    let headers = options["headers"] || {}
+    return __builtin_httpDelete(url, headers)
+}
+
+export fn patch(url, data, options = {}) {
+    // PATCH пока не реализован в builtin, используем POST
+    return post(url, data, options)
+}
+
+// 📡 Продвинутые HTTP клиент функции
+export fn request(method, url, options = {}) {
+    switch method.toUpper() {
+        case "GET":
+            return get(url, options)
+        case "POST":
+            return post(url, options["data"], options)
+        case "PUT":
+            return put(url, options["data"], options)
+        case "DELETE":
+            return delete(url, options)
+        case "PATCH":
+            return patch(url, options["data"], options)
+        default:
+            return Err("Unsupported HTTP method: " + method)
+    }
+}
+
+export fn downloadFile(url, filePath) {
+    let response = get(url)
+    if response.isErr() {
+        return response
+    }
+    
+    let data = response.unwrap()
+    let content = data["body"]
+    
+    return fs.writeFile(filePath, content)
+}
+
+export fn uploadFile(url, filePath, fieldName = "file") {
+    let content = fs.readFile(filePath)
+    if content.isErr() {
+        return content
+    }
+    
+    let fileContent = content.unwrap()
+    let filename = fs.basename(filePath)
+    
+    // Простая заглушка для multipart/form-data
+    let boundary = "----FooLangFormBoundary" + randomString(16)
+    let body = "--" + boundary + "\\r\\n"
+    body = body + "Content-Disposition: form-data; name=\\"" + fieldName + "\\"; filename=\\"" + filename + "\\"\\r\\n"
+    body = body + "Content-Type: application/octet-stream\\r\\n\\r\\n"
+    body = body + fileContent + "\\r\\n"
+    body = body + "--" + boundary + "--\\r\\n"
+    
+    let headers = {
+        "Content-Type": "multipart/form-data; boundary=" + boundary
+    }
+    
+    return __builtin_httpPost(url, body, headers)
+}
+
+// 🔗 URL утилиты
+export fn encodeURL(str) {
+    return __builtin_urlEncode(str)
+}
+
+export fn decodeURL(str) {
+    return __builtin_urlDecode(str)
+}
+
+export fn buildURL(baseUrl, params = {}) {
+    let url = baseUrl
+    let queryParts = []
+    
+    for let key in params {
+        let value = params[key]
+        let encodedKey = encodeURL(key)
+        let encodedValue = encodeURL(value.toString())
+        queryParts.push(encodedKey + "=" + encodedValue)
+    }
+    
+    if queryParts.length() > 0 {
+        url = url + "?" + queryParts.join("&")
+    }
+    
+    return url
+}
+
+export fn parseURL(url) {
+    // Простой парсер URL
+    let parts = {
+        "protocol": "",
+        "host": "",
+        "port": "",
+        "path": "",
+        "query": {},
+        "fragment": ""
+    }
+    
+    let remaining = url
+    
+    // Протокол
+    if remaining.indexOf("://") >= 0 {
+        let protocolEnd = remaining.indexOf("://")
+        parts["protocol"] = remaining.substring(0, protocolEnd)
+        remaining = remaining.substring(protocolEnd + 3)
+    }
+    
+    // Хост и порт
+    let pathStart = remaining.indexOf("/")
+    if pathStart < 0 {
+        pathStart = remaining.length()
+    }
+    
+    let hostPart = remaining.substring(0, pathStart)
+    if hostPart.indexOf(":") >= 0 {
+        let colonPos = hostPart.indexOf(":")
+        parts["host"] = hostPart.substring(0, colonPos)
+        parts["port"] = hostPart.substring(colonPos + 1)
+    } else {
+        parts["host"] = hostPart
+    }
+    
+    remaining = remaining.substring(pathStart)
+    
+    // Фрагмент
+    if remaining.indexOf("#") >= 0 {
+        let fragmentPos = remaining.indexOf("#")
+        parts["fragment"] = remaining.substring(fragmentPos + 1)
+        remaining = remaining.substring(0, fragmentPos)
+    }
+    
+    // Query параметры
+    if remaining.indexOf("?") >= 0 {
+        let queryPos = remaining.indexOf("?")
+        let queryString = remaining.substring(queryPos + 1)
+        parts["path"] = remaining.substring(0, queryPos)
+        
+        let queryPairs = queryString.split("&")
+        for let i = 0; i < queryPairs.length(); i++ {
+            let pair = queryPairs[i]
+            if pair.indexOf("=") >= 0 {
+                let eqPos = pair.indexOf("=")
+                let key = decodeURL(pair.substring(0, eqPos))
+                let value = decodeURL(pair.substring(eqPos + 1))
+                parts["query"][key] = value
+            }
+        }
+    } else {
+        parts["path"] = remaining
+    }
+    
+    return Ok(parts)
+}
+
+// 🖥️ HTTP сервер функции
+let server = null
+
+export fn createServer() {
+    server = __builtin_httpCreateServer()
+    return Ok(server)
+}
+
+export fn route(method, path, handler) {
+    if server == null {
+        return Err("Server not created. Call createServer() first.")
+    }
+    
+    return __builtin_httpRoute(method, path, handler)
+}
+
+export fn get_route(path, handler) {
+    return route("GET", path, handler)
+}
+
+export fn post_route(path, handler) {
+    return route("POST", path, handler)
+}
+
+export fn put_route(path, handler) {
+    return route("PUT", path, handler)
+}
+
+export fn delete_route(path, handler) {
+    return route("DELETE", path, handler)
+}
+
+export fn static_files(prefix, directory) {
+    return route("GET", prefix + "/*", fn(req, res) {
+        let filePath = req["path"].substring(prefix.length())
+        let fullPath = directory + filePath
+        
+        if fs.exists(fullPath) && fs.isFile(fullPath) {
+            let content = fs.readFile(fullPath)
+            if content.isOk() {
+                res.send(content.unwrap())
+            } else {
+                res.status(404).send("File not found")
+            }
+        } else {
+            res.status(404).send("File not found")
+        }
+    })
+}
+
+export fn startServer(port = 8080, callback = null) {
+    if server == null {
+        return Err("Server not created. Call createServer() first.")
+    }
+    
+    let result = __builtin_httpStartServer(port)
+    if result.isOk() && callback != null {
+        callback(port)
+    }
+    
+    return result
+}
+
+export fn stopServer() {
+    if server == null {
+        return Err("Server not running.")
+    }
+    
+    let result = __builtin_httpStopServer()
+    server = null
+    return result
+}
+
+// ⏱️ Таймауты и настройки
+export fn setTimeout(seconds) {
+    return __builtin_httpSetTimeout(seconds)
+}
+
+// 🍪 Cookie утилиты
+export fn parseCookies(cookieString) {
+    let cookies = {}
+    
+    if cookieString == "" || cookieString == null {
+        return cookies
+    }
+    
+    let pairs = cookieString.split("; ")
+    for let i = 0; i < pairs.length(); i++ {
+        let pair = pairs[i]
+        if pair.indexOf("=") >= 0 {
+            let eqPos = pair.indexOf("=")
+            let name = pair.substring(0, eqPos)
+            let value = pair.substring(eqPos + 1)
+            cookies[name] = value
+        }
+    }
+    
+    return cookies
+}
+
+export fn buildCookie(name, value, options = {}) {
+    let cookie = name + "=" + value
+    
+    if options["maxAge"] != null {
+        cookie = cookie + "; Max-Age=" + options["maxAge"]
+    }
+    
+    if options["expires"] != null {
+        cookie = cookie + "; Expires=" + options["expires"]
+    }
+    
+    if options["domain"] != null {
+        cookie = cookie + "; Domain=" + options["domain"]
+    }
+    
+    if options["path"] != null {
+        cookie = cookie + "; Path=" + options["path"]
+    }
+    
+    if options["secure"] {
+        cookie = cookie + "; Secure"
+    }
+    
+    if options["httpOnly"] {
+        cookie = cookie + "; HttpOnly"
+    }
+    
+    if options["sameSite"] != null {
+        cookie = cookie + "; SameSite=" + options["sameSite"]
+    }
+    
+    return cookie
+}
+
+// 📧 Content-Type утилиты
+export fn getContentType(filename) {
+    let ext = fs.extname(filename).toLowerCase()
+    
+    let mimeTypes = {
+        ".html": "text/html",
+        ".css": "text/css",
+        ".js": "application/javascript",
+        ".json": "application/json",
+        ".png": "image/png",
+        ".jpg": "image/jpeg", 
+        ".jpeg": "image/jpeg",
+        ".gif": "image/gif",
+        ".svg": "image/svg+xml",
+        ".pdf": "application/pdf",
+        ".txt": "text/plain",
+        ".xml": "application/xml",
+        ".zip": "application/zip"
+    }
+    
+    return mimeTypes[ext] || "application/octet-stream"
+}
+
+// 🔐 Базовая аутентификация
+export fn basicAuth(username, password) {
+    let credentials = username + ":" + password
+    let encoded = base64Encode(credentials)
+    return "Basic " + encoded
+}
+
+export fn parseBasicAuth(authHeader) {
+    if !authHeader.startsWith("Basic ") {
+        return Err("Not a Basic auth header")
+    }
+    
+    let encoded = authHeader.substring(6)
+    let decoded = base64Decode(encoded)
+    
+    if decoded.indexOf(":") >= 0 {
+        let colonPos = decoded.indexOf(":")
+        let username = decoded.substring(0, colonPos)
+        let password = decoded.substring(colonPos + 1)
+        
+        return Ok({
+            "username": username,
+            "password": password
+        })
+    }
+    
+    return Err("Invalid Basic auth format")
+}
+
+// 📊 HTTP статус коды
+export let STATUS_CODES = {
+    // 2xx Success
+    "OK": 200,
+    "CREATED": 201,
+    "ACCEPTED": 202,
+    "NO_CONTENT": 204,
+    
+    // 3xx Redirection
+    "MOVED_PERMANENTLY": 301,
+    "FOUND": 302,
+    "NOT_MODIFIED": 304,
+    
+    // 4xx Client Error
+    "BAD_REQUEST": 400,
+    "UNAUTHORIZED": 401,
+    "FORBIDDEN": 403,
+    "NOT_FOUND": 404,
+    "METHOD_NOT_ALLOWED": 405,
+    "CONFLICT": 409,
+    "UNPROCESSABLE_ENTITY": 422,
+    
+    // 5xx Server Error
+    "INTERNAL_SERVER_ERROR": 500,
+    "NOT_IMPLEMENTED": 501,
+    "BAD_GATEWAY": 502,
+    "SERVICE_UNAVAILABLE": 503
+}
+
+export let METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+
+// 🚀 Экспресс-стиль middleware
+let middleware = []
+
+export fn use(handler) {
+    middleware.push(handler)
+    return Ok("Middleware added")
+}
+
+export fn applyMiddleware(req, res, next) {
+    let index = 0
+    
+    fn runNext() {
+        if index >= middleware.length() {
+            return next()
+        }
+        
+        let currentMiddleware = middleware[index]
+        index = index + 1
+        
+        return currentMiddleware(req, res, runNext)
+    }
+    
+    return runNext()
+}
+
+// 📝 Логирование запросов
+export fn logger() {
+    return fn(req, res, next) {
+        let start = now()
+        println("[" + timeFormat(start, "15:04:05") + "] " + req["method"] + " " + req["path"])
+        
+        let originalSend = res.send
+        res.send = fn(data) {
+            let end = now()
+            let duration = timeDiff(end, start)
+            println("[" + timeFormat(end, "15:04:05") + "] " + res["statusCode"] + " - " + duration + "ms")
+            return originalSend(data)
+        }
+        
+        return next()
+    }
+}
+
+// 🛡️ CORS middleware
+export fn cors(options = {}) {
+    let origin = options["origin"] || "*"
+    let methods = options["methods"] || METHODS.join(", ")
+    let headers = options["headers"] || "Content-Type, Authorization"
+    
+    return fn(req, res, next) {
+        res.setHeader("Access-Control-Allow-Origin", origin)
+        res.setHeader("Access-Control-Allow-Methods", methods)
+        res.setHeader("Access-Control-Allow-Headers", headers)
+        
+        if req["method"] == "OPTIONS" {
+            res.status(200).send("")
+        } else {
+            return next()
+        }
+    }
+}
+
+// 📦 JSON middleware
+export fn json() {
+    return fn(req, res, next) {
+        if req["headers"]["Content-Type"] == "application/json" {
+            let body = req["body"]
+            if body != null && body != "" {
+                let parsed = JSON.parse(body)
+                if parsed.isOk() {
+                    req["json"] = parsed.unwrap()
+                }
+            }
+        }
+        return next()
+    }
+}

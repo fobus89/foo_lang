@@ -1,0 +1,22 @@
+println("Testing abs with async context...")
+
+fn normalFunction() -> float {
+    println("In normal function:")
+    return abs(-42)
+}
+
+fn asyncFunction() {
+    await sleep(100)
+    println("In async function:")
+    let result = abs(-99)
+    println("abs(-99) = " + result.toString())
+    return "done"
+}
+
+println("1. Normal function with abs:")
+println(normalFunction())
+
+println("2. Starting async function with abs:")
+let promise = async asyncFunction()
+let result = await promise
+println("Async result: " + result)

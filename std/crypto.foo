@@ -1,0 +1,494 @@
+// std/crypto.foo - Стандартная библиотека для криптографии и безопасности
+// 🔐 Модуль для работы с хешированием, кодированием и безопасностью
+
+// 🔢 Хеш функции
+export fn md5(data) {
+    return __builtin_md5Hash(data)
+}
+
+export fn sha1(data) {
+    return __builtin_sha1Hash(data)
+}
+
+export fn sha256(data) {
+    return __builtin_sha256Hash(data)
+}
+
+export fn sha512(data) {
+    return __builtin_sha512Hash(data)
+}
+
+// 🔗 HMAC подписи
+export fn hmacSHA256(data, key) {
+    return __builtin_hmacSHA256(data, key)
+}
+
+export fn hmacSHA1(data, key) {
+    return __builtin_hmacSHA1(data, key)
+}
+
+export fn hmacMD5(data, key) {
+    return __builtin_hmacMD5(data, key)
+}
+
+// 📦 Base64 кодирование
+export fn base64Encode(data) {
+    return __builtin_base64Encode(data)
+}
+
+export fn base64Decode(data) {
+    return __builtin_base64Decode(data)
+}
+
+export fn base64URLEncode(data) {
+    return __builtin_base64URLEncode(data)
+}
+
+export fn base64URLDecode(data) {
+    return __builtin_base64URLDecode(data)
+}
+
+// 🔤 Hex кодирование
+export fn hexEncode(data) {
+    return __builtin_hexEncode(data)
+}
+
+export fn hexDecode(data) {
+    return __builtin_hexDecode(data)
+}
+
+// 🎲 Генерация случайных данных
+export fn randomBytes(length) {
+    return __builtin_randomBytes(length)
+}
+
+export fn randomString(length) {
+    return __builtin_randomString(length)
+}
+
+export fn randomInt(min, max) {
+    return __builtin_randomInt(min, max)
+}
+
+export fn randomUUID() {
+    return __builtin_randomUUID()
+}
+
+// 🔑 Работа с паролями
+export fn hashPassword(password, salt = null) {
+    if salt == null {
+        salt = randomString(32)
+    }
+    
+    let combined = password + salt
+    let hashed = sha256(combined)
+    
+    return Ok({
+        "hash": hashed,
+        "salt": salt,
+        "algorithm": "SHA256"
+    })
+}
+
+export fn verifyPassword(password, storedHash, salt) {
+    let combined = password + salt
+    let computedHash = sha256(combined)
+    
+    return constantTimeCompare(computedHash, storedHash)
+}
+
+// 🛡️ Безопасные сравнения
+export fn constantTimeCompare(a, b) {
+    return __builtin_constantTimeCompare(a, b)
+}
+
+// 🔐 Продвинутые хеш функции
+export fn pbkdf2(password, salt, iterations, keyLength, hashFunc = "sha256") {
+    // Простая реализация PBKDF2 (заглушка для demo)
+    let result = password
+    
+    for let i = 0; i < iterations; i++ {
+        switch hashFunc {
+            case "sha256":
+                result = sha256(result + salt)
+            case "sha1":
+                result = sha1(result + salt)
+            case "md5":
+                result = md5(result + salt)
+            default:
+                return Err("Unsupported hash function: " + hashFunc)
+        }
+    }
+    
+    // Обрезаем до нужной длины
+    if keyLength > 0 && result.length() > keyLength * 2 {
+        result = result.substring(0, keyLength * 2)
+    }
+    
+    return Ok(result)
+}
+
+export fn bcrypt(password, cost = 12) {
+    // Заглушка для bcrypt - в реальности нужна серьезная криптобиблиотека
+    let salt = randomString(22)
+    let rounds = cost
+    
+    let hashed = password
+    for let i = 0; i < rounds; i++ {
+        hashed = sha256(hashed + salt + i.toString())
+    }
+    
+    return Ok({
+        "hash": hashed,
+        "salt": salt,
+        "cost": cost,
+        "algorithm": "bcrypt-like"
+    })
+}
+
+// 🔀 Генерация ключей и токенов
+export fn generateSecretKey(length = 32) {
+    let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+    let result = ""
+    
+    for let i = 0; i < length; i++ {
+        let index = randomInt(0, chars.length() - 1)
+        result = result + chars.charAt(index)
+    }
+    
+    return result
+}
+
+export fn generateJWT(payload, secret, algorithm = "HS256") {
+    // Простая реализация JWT (для демо)
+    let header = {
+        "alg": algorithm,
+        "typ": "JWT"
+    }
+    
+    let encodedHeader = base64URLEncode(JSON.stringify(header))
+    let encodedPayload = base64URLEncode(JSON.stringify(payload))
+    
+    let message = encodedHeader + "." + encodedPayload
+    let signature = ""
+    
+    switch algorithm {
+        case "HS256":
+            signature = hmacSHA256(message, secret)
+        case "HS1":
+            signature = hmacSHA1(message, secret)
+        default:
+            return Err("Unsupported JWT algorithm: " + algorithm)
+    }
+    
+    let encodedSignature = base64URLEncode(signature)
+    
+    return Ok(message + "." + encodedSignature)
+}
+
+export fn verifyJWT(token, secret, algorithm = "HS256") {
+    let parts = token.split(".")
+    if parts.length() != 3 {
+        return Err("Invalid JWT format")
+    }
+    
+    let header = parts[0]
+    let payload = parts[1]
+    let signature = parts[2]
+    
+    let message = header + "." + payload
+    let expectedSignature = ""
+    
+    switch algorithm {
+        case "HS256":
+            expectedSignature = hmacSHA256(message, secret)
+        case "HS1":
+            expectedSignature = hmacSHA1(message, secret)
+        default:
+            return Err("Unsupported JWT algorithm: " + algorithm)
+    }
+    
+    let encodedExpectedSignature = base64URLEncode(expectedSignature)
+    
+    if constantTimeCompare(signature, encodedExpectedSignature) {
+        let decodedPayload = base64URLDecode(payload)
+        let parsedPayload = JSON.parse(decodedPayload)
+        if parsedPayload.isOk() {
+            return Ok(parsedPayload.unwrap())
+        } else {
+            return Err("Invalid JWT payload")
+        }
+    } else {
+        return Err("JWT signature verification failed")
+    }
+}
+
+// 🎯 Криптостойкие утилиты
+export fn secureRandom(min, max) {
+    // Используем криптостойкий генератор
+    let range = max - min + 1
+    let randomValue = randomBytes(4) // 4 байта для 32-битного числа
+    
+    // Простое преобразование байтов в число
+    let bytes = hexDecode(randomValue)
+    let num = 0
+    for let i = 0; i < bytes.length(); i++ {
+        num = num * 256 + bytes.charAt(i).charCodeAt(0)
+    }
+    
+    return min + (num % range)
+}
+
+export fn generateNonce(length = 16) {
+    return randomString(length)
+}
+
+export fn generateCSRFToken() {
+    return base64URLEncode(randomBytes(32))
+}
+
+export fn generateAPIKey(prefix = "foo") {
+    let randomPart = base64URLEncode(randomBytes(24))
+    return prefix + "_" + randomPart
+}
+
+// 🔍 Проверки безопасности
+export fn checkPasswordStrength(password) {
+    let score = 0
+    let feedback = []
+    
+    // Длина
+    if password.length() >= 8 {
+        score += 2
+    } else {
+        feedback.push("Password should be at least 8 characters long")
+    }
+    
+    // Заглавные буквы
+    if password.match("[A-Z]") {
+        score += 1
+    } else {
+        feedback.push("Password should contain uppercase letters")
+    }
+    
+    // Строчные буквы  
+    if password.match("[a-z]") {
+        score += 1
+    } else {
+        feedback.push("Password should contain lowercase letters")
+    }
+    
+    // Цифры
+    if password.match("[0-9]") {
+        score += 1
+    } else {
+        feedback.push("Password should contain numbers")
+    }
+    
+    // Специальные символы
+    if password.match("[!@#$%^&*()_+\\-=\\[\\]{}|;':\",./<>?]") {
+        score += 2
+    } else {
+        feedback.push("Password should contain special characters")
+    }
+    
+    let strength = "Very Weak"
+    if score >= 7 {
+        strength = "Very Strong"
+    } else if score >= 5 {
+        strength = "Strong"
+    } else if score >= 3 {
+        strength = "Medium"
+    } else if score >= 1 {
+        strength = "Weak"
+    }
+    
+    return {
+        "score": score,
+        "strength": strength,
+        "feedback": feedback
+    }
+}
+
+export fn sanitizeInput(input, options = {}) {
+    let maxLength = options["maxLength"] || 1000
+    let allowHTML = options["allowHTML"] || false
+    let allowSQL = options["allowSQL"] || false
+    
+    let sanitized = input.substring(0, maxLength)
+    
+    if !allowHTML {
+        sanitized = sanitized.replace("<", "&lt;")
+        sanitized = sanitized.replace(">", "&gt;")
+        sanitized = sanitized.replace("\"", "&quot;")
+        sanitized = sanitized.replace("'", "&#x27;")
+    }
+    
+    if !allowSQL {
+        let sqlKeywords = ["SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "UNION", "OR", "AND"]
+        for let keyword in sqlKeywords {
+            let pattern = keyword.toLowerCase()
+            if sanitized.toLowerCase().indexOf(pattern) >= 0 {
+                return Err("Input contains potentially dangerous SQL keywords")
+            }
+        }
+    }
+    
+    return Ok(sanitized)
+}
+
+// 🎲 Криптографические примитивы
+export fn xor(data1, data2) {
+    if data1.length() != data2.length() {
+        return Err("Data lengths must be equal for XOR operation")
+    }
+    
+    let result = ""
+    for let i = 0; i < data1.length(); i++ {
+        let char1 = data1.charAt(i).charCodeAt(0)
+        let char2 = data2.charAt(i).charCodeAt(0)
+        let xored = char1 ^ char2
+        result = result + String.fromCharCode(xored)
+    }
+    
+    return Ok(result)
+}
+
+export fn rotateLeft(value, positions) {
+    // Простая циклическая ротация влево для 32-битных чисел
+    let mask = 0xFFFFFFFF
+    return ((value << positions) | (value >> (32 - positions))) & mask
+}
+
+export fn rotateRight(value, positions) {
+    // Простая циклическая ротация вправо для 32-битных чисел
+    let mask = 0xFFFFFFFF
+    return ((value >> positions) | (value << (32 - positions))) & mask
+}
+
+// 📊 Утилиты для анализа
+export fn entropyAnalysis(data) {
+    let frequency = {}
+    let totalChars = data.length()
+    
+    // Подсчитываем частоту символов
+    for let i = 0; i < totalChars; i++ {
+        let char = data.charAt(i)
+        if frequency[char] == null {
+            frequency[char] = 0
+        }
+        frequency[char] = frequency[char] + 1
+    }
+    
+    // Вычисляем энтропию
+    let entropy = 0.0
+    for let char in frequency {
+        let p = frequency[char] / totalChars
+        if p > 0 {
+            entropy = entropy - (p * Math.log2(p))
+        }
+    }
+    
+    return {
+        "entropy": entropy,
+        "maxEntropy": Math.log2(Object.keys(frequency).length()),
+        "uniqueChars": Object.keys(frequency).length(),
+        "totalChars": totalChars,
+        "randomness": entropy / Math.log2(256) // Normalized to 0-1
+    }
+}
+
+// 🔐 Константы и конфигурация
+export let HASH_ALGORITHMS = ["md5", "sha1", "sha256", "sha512"]
+export let HMAC_ALGORITHMS = ["hmac-sha256", "hmac-sha1", "hmac-md5"]
+export let JWT_ALGORITHMS = ["HS256", "HS1"]
+
+export let DEFAULT_BCRYPT_COST = 12
+export let DEFAULT_PBKDF2_ITERATIONS = 100000
+export let MIN_PASSWORD_LENGTH = 8
+export let RECOMMENDED_KEY_LENGTH = 32
+
+// 🎯 Валидаторы
+export fn isValidHash(hash, algorithm) {
+    let expectedLengths = {
+        "md5": 32,
+        "sha1": 40,
+        "sha256": 64,
+        "sha512": 128
+    }
+    
+    if expectedLengths[algorithm] == null {
+        return false
+    }
+    
+    if hash.length() != expectedLengths[algorithm] {
+        return false
+    }
+    
+    // Проверяем, что hash содержит только hex символы
+    let hexPattern = "0123456789abcdefABCDEF"
+    for let i = 0; i < hash.length(); i++ {
+        if hexPattern.indexOf(hash.charAt(i)) < 0 {
+            return false
+        }
+    }
+    
+    return true
+}
+
+export fn isValidBase64(data) {
+    let base64Pattern = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+    
+    for let i = 0; i < data.length(); i++ {
+        if base64Pattern.indexOf(data.charAt(i)) < 0 {
+            return false
+        }
+    }
+    
+    // Base64 должен быть кратен 4 символам (с учетом padding)
+    return data.length() % 4 == 0
+}
+
+// 🚀 Высокоуровневые функции
+export fn createSecureSession() {
+    return {
+        "sessionId": randomUUID(),
+        "csrfToken": generateCSRFToken(),
+        "createdAt": now(),
+        "expiresAt": timeAddHours(now(), 24)
+    }
+}
+
+export fn encryptText(plaintext, password) {
+    // Простое XOR шифрование с расширенным ключом
+    let key = sha256(password)
+    let keyRepeated = ""
+    
+    // Расширяем ключ до длины текста
+    while keyRepeated.length() < plaintext.length() {
+        keyRepeated = keyRepeated + key
+    }
+    
+    keyRepeated = keyRepeated.substring(0, plaintext.length())
+    let encrypted = xor(plaintext, keyRepeated)
+    
+    if encrypted.isOk() {
+        return Ok(base64Encode(encrypted.unwrap()))
+    } else {
+        return encrypted
+    }
+}
+
+export fn decryptText(ciphertext, password) {
+    let decoded = base64Decode(ciphertext)
+    let key = sha256(password)
+    let keyRepeated = ""
+    
+    // Расширяем ключ до длины зашифрованного текста
+    while keyRepeated.length() < decoded.length() {
+        keyRepeated = keyRepeated + key
+    }
+    
+    keyRepeated = keyRepeated.substring(0, decoded.length())
+    return xor(decoded, keyRepeated)
+}

@@ -1,0 +1,280 @@
+// examples/test_std_libraries.foo - Демонстрация всех стандартных библиотек
+// 🚀 Полное тестирование модулей std.fs, std.http, std.crypto, std.time
+
+println("=== 🚀 ДЕМО: СТАНДАРТНЫЕ БИБЛИОТЕКИ FOO LANG ===")
+println()
+
+// Импортируем все стандартные модули
+import * as fs from "std/fs.foo"
+import * as http from "std/http.foo"
+import * as crypto from "std/crypto.foo"
+import * as time from "std/time.foo"
+
+println("📦 Все стандартные модули загружены успешно!")
+println()
+
+// 🗂️ === ФАЙЛОВАЯ СИСТЕМА (std.fs) ===
+println("1️⃣ === ТЕСТИРОВАНИЕ std.fs ===")
+
+// Создаем тестовую директорию
+let testDir = "test_std_demo"
+println("📁 Создаем директорию: " + testDir)
+let mkResult = fs.mkdir(testDir)
+if mkResult.isOk() {
+    println("✅ Директория создана")
+} else {
+    println("ℹ️ Директория уже существует или ошибка создания")
+}
+
+// Создаем тестовый файл
+let testFile = testDir + "/demo.txt"
+let content = "Привет от foo_lang! Время создания: " + time.formatISO(time.now())
+println("📄 Записываем файл: " + testFile)
+let writeResult = fs.writeFile(testFile, content)
+if writeResult.isOk() {
+    println("✅ Файл записан")
+} else {
+    println("❌ Ошибка записи: " + writeResult.unwrap_err())
+}
+
+// Читаем файл
+println("📖 Читаем файл...")
+let readResult = fs.readFile(testFile)
+if readResult.isOk() {
+    println("✅ Содержимое: " + readResult.unwrap())
+} else {
+    println("❌ Ошибка чтения: " + readResult.unwrap_err())
+}
+
+// Получаем информацию о файле
+let fileInfo = fs.getFileInfo(testFile)
+if fileInfo.isOk() {
+    let info = fileInfo.unwrap()
+    println("📊 Размер файла: " + info["size"].toString() + " байт")
+} else {
+    println("❌ Не удалось получить информацию о файле")
+}
+
+println()
+
+// 🔐 === КРИПТОГРАФИЯ (std.crypto) ===
+println("2️⃣ === ТЕСТИРОВАНИЕ std.crypto ===")
+
+let testData = "Hello, foo_lang!"
+println("🔍 Тестовые данные: " + testData)
+
+// Хеширование
+let md5Hash = crypto.md5(testData)
+let sha256Hash = crypto.sha256(testData)
+println("🔑 MD5: " + md5Hash)
+println("🔑 SHA256: " + sha256Hash)
+
+// Base64 кодирование
+let encoded = crypto.base64Encode(testData)
+let decoded = crypto.base64Decode(encoded)
+println("📦 Base64 encoded: " + encoded)
+println("📦 Base64 decoded: " + decoded)
+
+// Генерация случайных данных
+let randomStr = crypto.randomString(16)
+let uuid = crypto.randomUUID()
+println("🎲 Случайная строка: " + randomStr)
+println("🆔 UUID: " + uuid)
+
+// Хеширование пароля
+let password = "mySecurePassword123"
+let hashResult = crypto.hashPassword(password)
+if hashResult.isOk() {
+    let hashData = hashResult.unwrap()
+    println("🔐 Хеш пароля: " + hashData["hash"].substring(0, 20) + "...")
+    println("🧂 Соль: " + hashData["salt"].substring(0, 10) + "...")
+    
+    // Проверяем пароль
+    let verifyResult = crypto.verifyPassword(password, hashData["hash"], hashData["salt"])
+    println("✅ Проверка пароля: " + (verifyResult ? "SUCCESS" : "FAILED"))
+}
+
+// Анализ надежности пароля
+let strengthCheck = crypto.checkPasswordStrength(password)
+println("💪 Надежность пароля: " + strengthCheck["strength"] + " (Score: " + strengthCheck["score"].toString() + ")")
+
+println()
+
+// ⏰ === РАБОТА СО ВРЕМЕНЕМ (std.time) ===
+println("3️⃣ === ТЕСТИРОВАНИЕ std.time ===")
+
+// Текущее время
+let currentTime = time.now()
+println("🕐 Текущее время: " + time.format(currentTime))
+println("🌍 ISO формат: " + time.formatISO(currentTime))
+println("📊 Unix timestamp: " + time.toUnix(currentTime).toString())
+
+// Компоненты времени
+println("📅 Год: " + time.year(currentTime).toString())
+println("📅 Месяц: " + time.month(currentTime).toString())
+println("📅 День: " + time.day(currentTime).toString())
+println("🕐 Час: " + time.hour(currentTime).toString())
+println("🕐 Минута: " + time.minute(currentTime).toString())
+
+// Арифметика времени
+let tomorrow = time.addDays(currentTime, 1)
+let nextWeek = time.addDays(currentTime, 7)
+println("📅 Завтра: " + time.format(tomorrow, time.FORMATS["DATE"]))
+println("📅 Через неделю: " + time.format(nextWeek, time.FORMATS["DATE"]))
+
+// Разности времени
+let diffDays = time.diffDays(nextWeek, currentTime)
+let diffHours = time.diffHours(tomorrow, currentTime)
+if diffDays.isOk() && diffHours.isOk() {
+    println("📏 До следующей недели: " + diffDays.unwrap().toString() + " дней")
+    println("📏 До завтра: " + diffHours.unwrap().toString() + " часов")
+}
+
+// Форматирование для людей
+let pastTime = time.addHours(currentTime, -2)
+println("🕐 2 часа назад: " + time.formatHuman(pastTime))
+
+// Работа с продолжительностью
+let durationResult = time.parseDuration("2d12h30m45s")
+if durationResult.isOk() {
+    let totalSeconds = durationResult.unwrap()
+    println("⏱️ Продолжительность '2d12h30m45s': " + totalSeconds.toString() + " секунд")
+    
+    let futureTime = time.addSeconds(currentTime, totalSeconds)
+    println("🔮 Время через эту продолжительность: " + time.format(futureTime))
+}
+
+// Проверки
+println("🏖️ Сегодня выходной: " + (time.isWeekend(currentTime) ? "Да" : "Нет"))
+println("🏢 Сегодня рабочий день: " + (time.isWorkday(currentTime) ? "Да" : "Нет"))
+
+// Високосный год
+let currentYear = time.year(currentTime)
+println("📅 " + currentYear.toString() + " високосный год: " + (time.isLeapYear(currentYear) ? "Да" : "Нет"))
+
+println()
+
+// 🌐 === HTTP (std.http) - КЛИЕНТ (демо) ===
+println("4️⃣ === ТЕСТИРОВАНИЕ std.http (КЛИЕНТ) ===")
+
+println("🌍 HTTP клиент функции доступны:")
+println("  - http.get(url)")
+println("  - http.post(url, data)")
+println("  - http.put(url, data)")
+println("  - http.delete(url)")
+
+// Демонстрация URL утилит
+let baseUrl = "https://api.example.com/users"
+let params = {
+    "page": 1,
+    "limit": 10,
+    "filter": "active"
+}
+
+let builtUrl = http.buildURL(baseUrl, params)
+println("🔗 Построенный URL: " + builtUrl)
+
+let parsedUrl = http.parseURL(builtUrl)
+if parsedUrl.isOk() {
+    let urlParts = parsedUrl.unwrap()
+    println("🔍 Протокол: " + urlParts["protocol"])
+    println("🔍 Хост: " + urlParts["host"])
+    println("🔍 Путь: " + urlParts["path"])
+}
+
+// Cookie утилиты
+let cookieString = "sessionid=abc123; userid=42; theme=dark"
+let cookies = http.parseCookies(cookieString)
+println("🍪 Распарсенные cookies: " + JSON.stringify(cookies))
+
+let newCookie = http.buildCookie("newcookie", "value123", {
+    "maxAge": 3600,
+    "secure": true,
+    "httpOnly": true
+})
+println("🍪 Новый cookie: " + newCookie)
+
+println()
+
+// 📊 === ОБЩАЯ ДЕМОНСТРАЦИЯ ===
+println("5️⃣ === ИНТЕГРАЦИОННАЯ ДЕМОНСТРАЦИЯ ===")
+
+// Создаем файл с криптографической информацией и временными метками
+let reportContent = "=== ОТЧЕТ СИСТЕМЫ ===\n"
+reportContent = reportContent + "Время создания: " + time.formatISO(time.now()) + "\n"
+reportContent = reportContent + "UUID сессии: " + crypto.randomUUID() + "\n"
+reportContent = reportContent + "Хеш системы: " + crypto.sha256("foo_lang_system_" + time.toUnix(time.now()).toString()) + "\n"
+reportContent = reportContent + "Случайный токен: " + crypto.randomString(32) + "\n"
+
+// Шифруем содержимое
+let encryptionKey = "mySecretKey123"
+let encryptedResult = crypto.encryptText(reportContent, encryptionKey)
+
+if encryptedResult.isOk() {
+    let encryptedContent = encryptedResult.unwrap()
+    let reportFile = testDir + "/encrypted_report.txt"
+    
+    println("🔐 Создаем зашифрованный отчет...")
+    let writeEncryptedResult = fs.writeFile(reportFile, encryptedContent)
+    
+    if writeEncryptedResult.isOk() {
+        println("✅ Зашифрованный отчет сохранен в: " + reportFile)
+        
+        // Читаем и расшифровываем
+        let readEncryptedResult = fs.readFile(reportFile)
+        if readEncryptedResult.isOk() {
+            let encryptedData = readEncryptedResult.unwrap()
+            let decryptedResult = crypto.decryptText(encryptedData, encryptionKey)
+            
+            if decryptedResult.isOk() {
+                println("🔓 Отчет успешно расшифрован:")
+                println(decryptedResult.unwrap())
+            }
+        }
+    }
+}
+
+// Генерируем JWT токен
+let jwtPayload = {
+    "user": "demo_user",
+    "created": time.toUnix(time.now()),
+    "expires": time.toUnix(time.addHours(time.now(), 24))
+}
+
+let jwtSecret = crypto.generateSecretKey(32)
+let jwtResult = crypto.generateJWT(jwtPayload, jwtSecret, "HS256")
+
+if jwtResult.isOk() {
+    let token = jwtResult.unwrap()
+    println("🎫 JWT токен создан: " + token.substring(0, 50) + "...")
+    
+    // Проверяем токен
+    let verifyResult = crypto.verifyJWT(token, jwtSecret, "HS256")
+    if verifyResult.isOk() {
+        println("✅ JWT токен валиден!")
+    }
+}
+
+println()
+
+// 🧹 Очистка
+println("6️⃣ === ОЧИСТКА ===")
+println("🧹 Удаляем тестовые файлы...")
+let removeResult = fs.removeDir(testDir, true)
+if removeResult.isOk() {
+    println("✅ Тестовая директория удалена")
+} else {
+    println("ℹ️ Ошибка удаления или директория не существует")
+}
+
+println()
+println("=== 🎉 ДЕМОНСТРАЦИЯ ЗАВЕРШЕНА ===")
+println("🚀 Все стандартные библиотеки foo_lang работают отлично!")
+println("📚 Доступные модули:")
+println("  • std.fs - файловая система (40+ функций)")
+println("  • std.http - HTTP клиент/сервер (50+ функций)") 
+println("  • std.crypto - криптография и безопасность (30+ функций)")
+println("  • std.time - дата и время (60+ функций)")
+println()
+println("💡 Используйте: import * as fs from \"std/fs.foo\"")
+println("💡 Документация: каждый модуль содержит подробные комментарии")

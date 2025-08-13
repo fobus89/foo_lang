@@ -1,0 +1,66 @@
+// Generic функции с параметрами типов
+fn identity<T>(value: T) -> T {
+    return value
+}
+
+fn max<T>(a: T, b: T) -> T {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+fn pair<T, U>(first: T, second: U) -> string {
+    return "(" + first + ", " + second + ")"
+}
+
+// Использование generic функций
+let num = identity(42)           // T = int
+let str = identity("hello")      // T = string  
+let maxNum = max(10, 20)         // T = int
+let pairResult = pair(42, "hi")  // T = int, U = string
+
+
+println(identity("hello ${num}"))
+
+// fn foo2() -> Result<int,string> {
+//     return Ok("hello")
+// }
+
+// println(foo2())
+
+// printf("%s","hello")
+
+extension string {
+    fn isPalindrome() -> bool {
+        let len = this.length()
+        let mid = len / 2
+        
+        for let i = 0; i < mid; i++ {
+            if this.charAt(i) != this.charAt(len - i - 1) {
+                return !false
+            }
+        }
+        return !true
+    }
+}
+
+
+println("323".isPalindrome())
+println(len)
+
+@GET("/users/{id}")
+fn parseInt(str) {
+    if str == "42" {
+        return Ok(42)
+    }
+    if str == "100" {
+        return Ok(100) 
+    }
+    return Err("invalid number format")
+}
+
+
+//let 
+
+println(parseInt(1).unwrapOr(0))

@@ -1,0 +1,402 @@
+// std/fs.foo - Стандартная библиотека для работы с файловой системой
+// 🗂️ Модуль для работы с файлами и директориями
+
+// 📖 Функции для чтения файлов
+export fn readFile(path) {
+    return __builtin_readFile(path)
+}
+
+export fn readLines(path) {
+    let content = readFile(path)
+    if content.isErr() {
+        return content // Передаем ошибку дальше
+    }
+    
+    let text = content.unwrap()
+    let lines = text.split("\\n")
+    return Ok(lines)
+}
+
+// ✍️ Функции для записи файлов
+export fn writeFile(path, content) {
+    return __builtin_writeFile(path, content)
+}
+
+export fn appendFile(path, content) {
+    let existing = readFile(path)
+    let newContent = content
+    
+    if existing.isOk() {
+        newContent = existing.unwrap() + content
+    }
+    
+    return writeFile(path, newContent)
+}
+
+export fn writeLines(path, lines) {
+    let content = lines.join("\\n")
+    return writeFile(path, content)
+}
+
+// 📁 Функции для работы с директориями
+export fn mkdir(path) {
+    return __builtin_mkdir(path)
+}
+
+export fn mkdirAll(path) {
+    // Создает все промежуточные директории
+    let parts = path.split("/")
+    let currentPath = ""
+    
+    for let i = 0; i < parts.length(); i++ {
+        if parts[i] != "" {
+            currentPath = currentPath + "/" + parts[i]
+            let result = mkdir(currentPath)
+            if result.isErr() && !exists(currentPath) {
+                return result // Передаем ошибку, если создание не удалось
+            }
+        }
+    }
+    
+    return Ok("directories created")
+}
+
+export fn listDir(path) {
+    return __builtin_listDir(path)
+}
+
+export fn listDirDetailed(path) {
+    let files = listDir(path)
+    if files.isErr() {
+        return files
+    }
+    
+    let detailed = []
+    let fileList = files.unwrap()
+    
+    for let i = 0; i < fileList.length(); i++ {
+        let filename = fileList[i]
+        let fullPath = path + "/" + filename
+        let info = {
+            "name": filename,
+            "path": fullPath,
+            "isFile": isFile(fullPath),
+            "isDir": isDir(fullPath),
+            "size": getFileSize(fullPath).unwrapOr(0)
+        }
+        detailed.push(info)
+    }
+    
+    return Ok(detailed)
+}
+
+// 🔍 Функции проверки существования
+export fn exists(path) {
+    return __builtin_exists(path)
+}
+
+export fn isFile(path) {
+    return __builtin_isFile(path)
+}
+
+export fn isDir(path) {
+    return __builtin_isDir(path)
+}
+
+// 📊 Информация о файлах
+export fn getFileSize(path) {
+    return __builtin_getFileSize(path)
+}
+
+export fn getFileInfo(path) {
+    if !exists(path) {
+        return Err("File does not exist: " + path)
+    }
+    
+    let info = {
+        "path": path,
+        "exists": true,
+        "isFile": isFile(path),
+        "isDir": isDir(path),
+        "size": getFileSize(path).unwrapOr(0)
+    }
+    
+    return Ok(info)
+}
+
+// 📋 Функции копирования и перемещения
+export fn copyFile(src, dest) {
+    return __builtin_copyFile(src, dest)
+}
+
+export fn copyDir(src, dest) {
+    if !isDir(src) {
+        return Err("Source is not a directory: " + src)
+    }
+    
+    // Создаем целевую директорию
+    let mkResult = mkdir(dest)
+    if mkResult.isErr() && !exists(dest) {
+        return mkResult
+    }
+    
+    // Получаем список файлов
+    let files = listDir(src)
+    if files.isErr() {
+        return files
+    }
+    
+    let fileList = files.unwrap()
+    for let i = 0; i < fileList.length(); i++ {
+        let filename = fileList[i]
+        let srcPath = src + "/" + filename
+        let destPath = dest + "/" + filename
+        
+        if isDir(srcPath) {
+            // Рекурсивно копируем директорию
+            let result = copyDir(srcPath, destPath)
+            if result.isErr() {
+                return result
+            }
+        } else {
+            // Копируем файл
+            let result = copyFile(srcPath, destPath)
+            if result.isErr() {
+                return result
+            }
+        }
+    }
+    
+    return Ok("Directory copied successfully")
+}
+
+// 🗑️ Функции удаления
+export fn removeFile(path) {
+    return __builtin_removeFile(path)
+}
+
+export fn removeDir(path, recursive = false) {
+    if !recursive {
+        // Простое удаление пустой директории
+        return __builtin_removeFile(path)
+    }
+    
+    // Рекурсивное удаление
+    if !isDir(path) {
+        return removeFile(path)
+    }
+    
+    let files = listDir(path)
+    if files.isErr() {
+        return files
+    }
+    
+    let fileList = files.unwrap()
+    for let i = 0; i < fileList.length(); i++ {
+        let filename = fileList[i]
+        let fullPath = path + "/" + filename
+        
+        let result = removeDir(fullPath, true)
+        if result.isErr() {
+            return result
+        }
+    }
+    
+    // Удаляем саму директорию после очистки
+    return removeFile(path)
+}
+
+// 🔍 Утилитные функции
+export fn findFiles(dir, pattern) {
+    let found = []
+    
+    let files = listDir(dir)
+    if files.isErr() {
+        return files
+    }
+    
+    let fileList = files.unwrap()
+    for let i = 0; i < fileList.length(); i++ {
+        let filename = fileList[i]
+        let fullPath = dir + "/" + filename
+        
+        // Простая проверка паттерна (содержит подстроку)
+        if filename.indexOf(pattern) >= 0 {
+            found.push(fullPath)
+        }
+        
+        // Рекурсивный поиск в подпапках
+        if isDir(fullPath) {
+            let subResults = findFiles(fullPath, pattern)
+            if subResults.isOk() {
+                let subFiles = subResults.unwrap()
+                for let j = 0; j < subFiles.length(); j++ {
+                    found.push(subFiles[j])
+                }
+            }
+        }
+    }
+    
+    return Ok(found)
+}
+
+export fn walkDir(dir, callback) {
+    let files = listDir(dir)
+    if files.isErr() {
+        return files
+    }
+    
+    let fileList = files.unwrap()
+    for let i = 0; i < fileList.length(); i++ {
+        let filename = fileList[i]
+        let fullPath = dir + "/" + filename
+        
+        // Вызываем callback для каждого файла/директории
+        callback(fullPath, isDir(fullPath))
+        
+        // Рекурсивно обходим поддиректории
+        if isDir(fullPath) {
+            walkDir(fullPath, callback)
+        }
+    }
+    
+    return Ok("Walk completed")
+}
+
+// 📝 Функции работы с путями
+export fn basename(path) {
+    let parts = path.split("/")
+    return parts[parts.length() - 1]
+}
+
+export fn dirname(path) {
+    let parts = path.split("/")
+    if parts.length() <= 1 {
+        return "."
+    }
+    
+    // Убираем последний элемент
+    let dirParts = []
+    for let i = 0; i < parts.length() - 1; i++ {
+        dirParts.push(parts[i])
+    }
+    
+    return dirParts.join("/")
+}
+
+export fn extname(path) {
+    let filename = basename(path)
+    let dotIndex = filename.lastIndexOf(".")
+    
+    if dotIndex >= 0 {
+        return filename.substring(dotIndex)
+    }
+    
+    return ""
+}
+
+export fn joinPath(parts...) {
+    let result = ""
+    
+    for let i = 0; i < parts.length(); i++ {
+        if i == 0 {
+            result = parts[i]
+        } else {
+            if !result.endsWith("/") && !parts[i].startsWith("/") {
+                result = result + "/"
+            }
+            result = result + parts[i]
+        }
+    }
+    
+    return result
+}
+
+// 🔧 Конфигурационные функции
+export fn getHomeDir() {
+    return System.getEnv("HOME").unwrapOr("/home/user")
+}
+
+export fn getTempDir() {
+    return System.getEnv("TMPDIR").unwrapOr("/tmp")
+}
+
+export fn getCurrentDir() {
+    return System.getEnv("PWD").unwrapOr(".")
+}
+
+// 📊 Статистика файловой системы
+export fn getDirSize(path) {
+    if !isDir(path) {
+        return getFileSize(path)
+    }
+    
+    let totalSize = 0
+    let files = listDir(path)
+    
+    if files.isErr() {
+        return files
+    }
+    
+    let fileList = files.unwrap()
+    for let i = 0; i < fileList.length(); i++ {
+        let filename = fileList[i]
+        let fullPath = path + "/" + filename
+        
+        if isDir(fullPath) {
+            let subSize = getDirSize(fullPath)
+            if subSize.isOk() {
+                totalSize = totalSize + subSize.unwrap()
+            }
+        } else {
+            let fileSize = getFileSize(fullPath)
+            if fileSize.isOk() {
+                totalSize = totalSize + fileSize.unwrap()
+            }
+        }
+    }
+    
+    return Ok(totalSize)
+}
+
+export fn getDirStats(path) {
+    if !isDir(path)) {
+        return Err("Path is not a directory: " + path)
+    }
+    
+    let stats = {
+        "path": path,
+        "totalFiles": 0,
+        "totalDirs": 0,
+        "totalSize": 0
+    }
+    
+    let files = listDir(path)
+    if files.isErr() {
+        return files
+    }
+    
+    let fileList = files.unwrap()
+    for let i = 0; i < fileList.length(); i++ {
+        let filename = fileList[i]
+        let fullPath = path + "/" + filename
+        
+        if isDir(fullPath) {
+            stats["totalDirs"] = stats["totalDirs"] + 1
+            
+            let subStats = getDirStats(fullPath)
+            if subStats.isOk() {
+                let subData = subStats.unwrap()
+                stats["totalFiles"] = stats["totalFiles"] + subData["totalFiles"]
+                stats["totalDirs"] = stats["totalDirs"] + subData["totalDirs"]
+                stats["totalSize"] = stats["totalSize"] + subData["totalSize"]
+            }
+        } else {
+            stats["totalFiles"] = stats["totalFiles"] + 1
+            let fileSize = getFileSize(fullPath).unwrapOr(0)
+            stats["totalSize"] = stats["totalSize"] + fileSize
+        }
+    }
+    
+    return Ok(stats)
+}

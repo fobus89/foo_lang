@@ -34,3 +34,7 @@ func (n *LetExpr) GetName() string {
 func (n *LetExpr) GetExpr() Expr {
 	return n.expr
 }
+
+func (n *LetExpr) PrintGO() string {
+	return "var "
+}

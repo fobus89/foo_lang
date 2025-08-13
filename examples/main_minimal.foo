@@ -1,0 +1,14 @@
+// Минимальная версия main.foo для отладки
+
+fn identity<T>(value: T) -> T {
+    return value
+}
+
+println("identity(12) = " + identity(12).toString())
+
+fn foo() -> float {
+    println("Calling abs in foo()...")
+    return abs(-12.00)
+}
+
+println("foo() = " + foo().toString())

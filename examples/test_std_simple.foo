@@ -1,0 +1,63 @@
+// examples/test_std_simple.foo - Простое тестирование стандартных библиотек
+
+println("=== ТЕСТИРОВАНИЕ СТАНДАРТНЫХ БИБЛИОТЕК ===")
+
+// Тестируем встроенные функции времени
+let currentTime = now()
+println("Текущее время: " + timeFormat(currentTime, "2006-01-02 15:04:05"))
+
+let year = timeYear(currentTime)
+let month = timeMonth(currentTime)  
+let day = timeDay(currentTime)
+println("Дата: " + year.toString() + "-" + month.toString() + "-" + day.toString())
+
+// Тестируем криптографические функции
+let testData = "Hello, foo_lang!"
+println("Тестовые данные: " + testData)
+
+let md5Hash = md5Hash(testData)
+let sha256Hash = sha256Hash(testData)
+println("MD5: " + md5Hash)
+println("SHA256: " + sha256Hash)
+
+let encoded = base64Encode(testData)
+let decoded = base64Decode(encoded)
+println("Base64 encoded: " + encoded)
+println("Base64 decoded: " + decoded)
+
+// Тестируем случайные данные
+let randomStr = randomString(16)
+let uuid = randomUUID()
+println("Случайная строка: " + randomStr)
+println("UUID: " + uuid)
+
+// Тестируем файловые функции
+let testFile = "test_demo.txt"
+let content = "Тест стандартных библиотек в " + timeFormat(currentTime, "15:04:05")
+
+println("Записываем в файл: " + testFile)
+let writeResult = writeFile(testFile, content)
+if writeResult.isOk() {
+    println("✅ Файл записан успешно")
+    
+    println("Читаем файл...")
+    let readResult = readFile(testFile)
+    if readResult.isOk() {
+        println("✅ Содержимое: " + readResult.unwrap())
+    }
+    
+    // Удаляем файл
+    let removeResult = removeFile(testFile)
+    if removeResult.isOk() {
+        println("✅ Файл удален")
+    }
+}
+
+println("=== ТЕСТИРОВАНИЕ ЗАВЕРШЕНО ===")
+println()
+println("🚀 Все встроенные функции работают!")
+println("📚 Стандартные модули готовы:")
+println("  • std/fs.foo - файловая система")
+println("  • std/http.foo - HTTP клиент/сервер") 
+println("  • std/crypto.foo - криптография")
+println("  • std/time.foo - работа с датой/временем")

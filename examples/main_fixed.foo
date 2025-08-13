@@ -1,0 +1,48 @@
+import "./math_module.foo"
+
+fn calculateDistance(x1, y1, x2, y2) {
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
+}
+
+const add = fn(x, y) => x + y
+const square = fn(n) => n * n
+const double = fn(x) => x * 2
+
+fn identity<T>(value: T) -> T {
+    return value
+}
+
+println(add(1,23))
+
+println(multiply(1,2))
+println(PI)
+
+fn testParams(name=12, value=21) {
+    println("Функция вызвана с: ${name} ${value}")
+    return "Результат: ${name} = ${value}"
+}
+
+println(testParams())
+
+fn simpleAsync() {
+    // await sleep(100)
+    println("Async функция выполняется")
+    return "Результат из async"
+}
+
+fn foo() -> float {
+    println("Calling abs(-12.00)...")
+    let result = abs(-12.00)
+    println("abs result: " + result.toString())
+    return result
+}
+
+// let promise = async simpleAsync()
+// let result = await promise
+// println(result)
+
+println("Testing identity:")
+println(identity(12))
+
+println("Testing foo:")
+println(foo())

@@ -1,0 +1,59 @@
+println("=== ДЕМОНСТРАЦИЯ МАКРОСОВ ===")
+
+macro debug(varName) {
+    println("DEBUG: " + varName)
+}
+
+let myVar = 42
+@debug("myVar = 42")
+
+macro greet(name) {
+    println("Hello, " + name + "!")
+}
+
+@greet("foo_lang")
+
+struct Person {
+    name: string,
+    age: int
+}
+
+struct Person {
+    name: string,
+    age: int
+}
+
+macro generateHelpers(structParam: StructType) {
+    println("Generating helpers for: " + structParam.Name)
+    
+    Expr {
+        println("Generated helper for " + structParam.Name)
+        
+        fn createPerson(name, age) {
+            return { name: name, age: age }
+        }
+    }
+}
+
+
+// macro generateHelpers(structParam: StructType) {
+//     println("Generating helpers for: " + structParam.Name)
+    
+//     return {
+//        code: "println("Generated helper for " + structParam.Name)
+        
+//         fn createPerson(name, age) {
+//             return { name: name, age: age }
+//         }"
+//     }
+// }
+
+@generateHelpers(Person)
+
+let person = createPerson("Alice", 30)
+println("Created person: " + person.name)
+ 
+let x = async person 
+
+await x
+

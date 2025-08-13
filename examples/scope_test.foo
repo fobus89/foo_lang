@@ -1,0 +1,30 @@
+println("Testing scope of builtin functions...")
+
+println("1. abs at top level:")
+let topLevel = abs(-5)
+println("abs(-5) = " + topLevel.toString())
+
+println("2. abs in simple function:")
+fn simpleFunction() {
+    let result = abs(-10)
+    println("abs(-10) = " + result.toString())
+    return result
+}
+simpleFunction()
+
+println("3. abs in typed function:")
+fn typedFunction() -> float {
+    let result = abs(-15)
+    println("abs(-15) = " + result.toString())
+    return result
+}
+typedFunction()
+
+println("4. Testing all math functions in typed function:")
+fn mathTest() -> float {
+    println("sqrt(16) = " + sqrt(16).toString())
+    println("abs(-20) = " + abs(-20).toString())
+    println("pow(2, 3) = " + pow(2, 3).toString())
+    return abs(-25)
+}
+mathTest()

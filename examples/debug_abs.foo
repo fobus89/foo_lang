@@ -1,0 +1,27 @@
+println("Testing abs in different contexts...")
+
+// Прямой вызов
+println("1. Direct call:")
+let result1 = abs(-42)
+println("abs(-42) = " + result1.toString())
+
+// В функции
+fn testAbs() {
+    println("2. Inside function:")
+    let result = abs(-15.5)
+    println("abs(-15.5) = " + result.toString())
+    return result
+}
+
+let result2 = testAbs()
+
+// В typed функции
+fn typedAbs() -> float {
+    println("3. Inside typed function:")
+    let value = abs(-99.9)
+    println("abs(-99.9) = " + value.toString())
+    return value
+}
+
+let result3 = typedAbs()
+println("All abs tests completed!")

@@ -1,0 +1,9 @@
+println("Testing abs function...")
+
+let value = abs(-42)
+println("abs(-42) = " + value.toString())
+
+let value2 = abs(15.5)
+println("abs(15.5) = " + value2.toString())
+
+println("abs function works!")
