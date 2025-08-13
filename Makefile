@@ -8,7 +8,8 @@ uninstall:
 
 install:
 # 	cd syntax\vscode\package.json change version
-	cd lsp && go build -o foo-lsp.exe .
-	cd syntax/vscode && npm run compile \
-	&& npx vsce package \
+# 	cd lsp && go build -o foo-lsp.exe .
+	cd lsp && go install .
+	cd syntax/vscode && bun run compile \
+	&& bunx vsce package \
 	&& code --install-extension foo-lang-1.1.5.vsix --force

@@ -1,0 +1,52 @@
+// Тест STDIO функций
+
+println("=== STDIO Functions Demo ===")
+println("")
+
+// 1. Простой ввод строки
+println("Test 1: Basic input")
+let name = input("Enter your name: ")
+println("Hello, " + name + "!")
+
+// 2. Ввод числа
+println("\nTest 2: Number input")
+let age = inputNumber("Enter your age: ")
+println("You are " + age.toString() + " years old")
+
+// 3. Форматированный вывод
+println("\nTest 3: Formatted output")
+printf("Name: %s, Age: %d\n", name, age)
+printf("Pi value: %.2f\n", 3.14159)
+
+// 4. Чтение строки без prompt
+println("\nTest 4: ReadLine without prompt")
+println("Type something and press Enter:")
+let line = readLine()
+println("You typed: " + line)
+
+// 5. Вывод без переноса строки
+println("\nTest 5: Write without newline")
+write("Loading")
+for let i = 0; i < 5; i++ {
+    write(".")
+    // sleep(200) // если есть sleep функция
+}
+writeLn(" Done!")
+
+// 6. Работа с символами
+println("\nTest 6: Character I/O")
+write("Press any key: ")
+let char = getChar()
+println("\nYou pressed: '" + char + "'")
+write("ASCII codes: ")
+for let i = 65; i <= 70; i++ {
+    putChar(i)
+    write(" ")
+}
+writeLn("")
+
+// 7. Множественный вывод
+println("\nTest 7: Multiple values output")
+writeLn("Values:", 42, 3.14, true, null)
+
+println("\n=== STDIO Demo Complete ===")

@@ -1,0 +1,104 @@
+// Тест отладочных функций
+
+println("=== Debug Functions Demo ===")
+println("")
+
+// 1. Отладочный вывод различных типов
+println("Test 1: Debug output")
+let number = 42
+let text = "Hello World"
+let flag = true
+let obj = {name: "John", age: 30, active: true}
+let arr = [1, 2, 3, "test", true]
+
+debug(number)
+debug(text)
+debug(flag)
+debug(obj)
+debug(arr)
+
+// 2. Определение типов
+println("\nTest 2: Type detection")
+println("Type of number:", typeOf(number))
+println("Type of text:", typeOf(text))
+println("Type of flag:", typeOf(flag))
+println("Type of obj:", typeOf(obj))
+println("Type of arr:", typeOf(arr))
+
+// 3. Размер значений в памяти
+println("\nTest 3: Memory size")
+println("Size of number:", sizeOf(number), "bytes")
+println("Size of text:", sizeOf(text), "bytes")
+println("Size of obj:", sizeOf(obj), "bytes")
+println("Size of arr:", sizeOf(arr), "bytes")
+
+// 4. Статистика памяти
+println("\nTest 4: Memory statistics")
+let memStats = memStats()
+println("Current memory usage:")
+println("  Allocated:", (memStats.alloc / 1024).toString() + " KB")
+println("  Heap objects:", memStats.heap_objects)
+println("  GC count:", memStats.gc_count)
+println("  Goroutines:", memStats.goroutines)
+println("  CPUs:", memStats.cpus)
+
+// 5. Сборка мусора
+println("\nTest 5: Garbage collection")
+println("Running GC...")
+gc()
+println("GC completed")
+
+// 6. Трассировка стека
+println("\nTest 6: Stack trace")
+fn testFunction() {
+    fn innerFunction() {
+        trace(5)  // Показать 5 уровней стека
+    }
+    innerFunction()
+}
+testFunction()
+
+// 7. Получение стека как строки
+println("\nTest 7: Stack as string")
+let stackStr = getStackTrace()
+println("Stack trace length:", stackStr.length(), "characters")
+
+// 8. Assertions
+println("\nTest 8: Assertions")
+assert(true, "This should pass")
+println("First assertion passed")
+
+try {
+    assert(false, "This should fail")
+} catch error {
+    println("Assertion failed as expected:", error)
+}
+
+// 9. Простое профилирование
+println("\nTest 9: Basic profiling")
+fn slowFunction() {
+    let sum = 0
+    for let i = 0; i < 1000000; i++ {
+        sum += i
+    }
+    return sum
+}
+
+// Примечание: profile требует callable функцию
+// let profileResult = profile(slowFunction)
+// println("Profiling result:", profileResult)
+
+// 10. Бенчмарк
+println("\nTest 10: Benchmarking")
+fn fastFunction() {
+    return 42 * 42
+}
+
+// let benchResult = benchmark(fastFunction, 10000)
+// println("Benchmark results:")
+// println("  Iterations:", benchResult.iterations)
+// println("  Average time:", benchResult.avg_time_us, "μs")
+// println("  Operations per second:", benchResult.ops_per_second)
+
+println("\n=== Debug Demo Complete ===")
+println("Note: Some advanced profiling features require function references")

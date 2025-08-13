@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
   console.log("Foo Language extension activated 1.1.5");
 
   // Путь к LSP серверу - абсолютный путь
-  const serverExecutable = "D:\\dev\\go\\foo_lang_v2\\lsp\\foo-lsp.exe";
+  const serverExecutable = "/home/fobus/go/bin/foo_lang_lsp";
 
   // Опции для запуска LSP сервера
   const serverOptions: ServerOptions = {
@@ -58,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Регистрируем команды расширения
   const disposable = vscode.commands.registerCommand("foo.restart", () => {
     client.restart();
-    vscode.window.showInformationMessage("Foo Language Server restarted");
+    vscode.window.showInformationMessage("Foo Language Server restarted 1.1.5");
   });
 
   context.subscriptions.push(disposable);
@@ -71,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       // Показываем уведомление о готовности
       vscode.window.showInformationMessage(
-        "Foo Language Server is now active! 🚀"
+        "Foo Language Server is now active! 🚀 1.1.5"
       );
     })
     .catch((error) => {

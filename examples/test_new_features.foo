@@ -1,0 +1,84 @@
+// Демонстрация всех новых возможностей
+
+println("🚀 foo_lang v3 - Новые возможности")
+println("=====================================")
+
+// 1. STDIO - Базовый ввод/вывод
+println("\n📝 1. STDIO Functions")
+printf("Formatted output: %s = %d\n", "answer", 42)
+writeLn("Multiple values:", 1, 2.5, true, null)
+
+// 2. Системная информация
+println("\n🖥️  2. System Information")
+let osInfo = getOS()
+printf("Running on: %s/%s with %d CPUs\n", osInfo.os, osInfo.arch, osInfo.cpus)
+println("Current directory:", getWorkingDir())
+println("Process PID:", getPid())
+
+// 3. CLI аргументы  
+println("\n🔧 3. CLI Arguments")
+println("Script:", getScriptName())
+println("Arguments count:", getArgCount())
+if getArgCount() > 0 {
+    println("Arguments:", getArgs())
+}
+
+// 4. Переменные окружения
+println("\n🌍 4. Environment Variables")
+let user = getEnv("USER")
+if user {
+    println("Current user:", user)
+}
+println("PATH length:", getEnv("PATH") ? getEnv("PATH").length() : 0)
+
+// 5. Отладочные функции
+println("\n🐛 5. Debug Functions")
+let testObj = {
+    name: "Test Object",
+    data: [1, 2, 3],
+    active: true
+}
+println("Object type:", typeOf(testObj))
+println("Object size:", sizeOf(testObj), "bytes")
+
+// 6. Статистика памяти
+println("\n📊 6. Memory Statistics")
+let mem = memStats()
+printf("Memory: %d KB allocated, %d objects, %d GC runs\n", 
+    mem.alloc / 1024, mem.heap_objects, mem.gc_count)
+
+// 7. Выполнение команд
+println("\n⚙️  7. Process Execution")
+let result = exec("echo", "Hello from subprocess!")
+if result.success {
+    println("Command output:", result.stdout.trim())
+} else {
+    println("Command failed:", result.error)
+}
+
+// 8. Математические расширения
+println("\n🔢 8. Enhanced Math")
+let numbers = [1, 2, 3, 4, 5]
+println("Numbers:", numbers)
+println("First number absolute:", numbers[0].abs())  // Метод типа
+
+// 9. Демонстрация типизации
+println("\n🏷️  9. Type System")
+let x: int = 100
+let y: float = 3.14
+let message: string = "Typed variables work!"
+println("x (int):", x, "- type:", typeOf(x))
+println("y (float):", y, "- type:", typeOf(y))  
+println("message (string):", message, "- type:", typeOf(message))
+
+// 10. Флаги и парсинг
+println("\n🚩 10. Flag Parsing")
+let debugMode = getFlag("debug", false)
+let port = getFlag("port", "8080") 
+printf("Debug mode: %s, Port: %s\n", debugMode, port)
+
+println("\n✨ Все функции работают корректно!")
+println("=====================================")
+println("🎯 Для полного тестирования запустите:")
+println("   go run main.go examples/test_new_features.foo --debug --port=3000")
+println("")

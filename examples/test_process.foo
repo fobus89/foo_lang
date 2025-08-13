@@ -1,0 +1,76 @@
+// Тест процессов и системных функций
+
+println("=== Process & System Functions Demo ===")
+println("")
+
+// 1. Выполнение команд
+println("Test 1: Command execution")
+let result = exec("echo", "Hello from shell!")
+println("stdout:", result.stdout)
+println("success:", result.success)
+println("exitCode:", result.exitCode)
+
+// 2. Выполнение команды с ошибкой
+println("\nTest 2: Command with error")
+let errorResult = exec("nonexistent_command")
+println("success:", errorResult.success)
+if errorResult.error {
+    println("error:", errorResult.error)
+}
+
+// 3. Работа с переменными окружения
+println("\nTest 3: Environment variables")
+let path = getEnv("PATH")
+if path {
+    println("PATH exists:", path.length() > 0)
+} else {
+    println("PATH not found")
+}
+
+// Установим тестовую переменную
+setEnv("FOO_TEST", "Hello World")
+let testVar = getEnv("FOO_TEST")
+println("Test variable:", testVar)
+
+// 4. Информация о системе
+println("\nTest 4: System information")
+let osInfo = getOS()
+println("OS:", osInfo.os)
+println("Architecture:", osInfo.arch)
+println("CPUs:", osInfo.cpus)
+
+// 5. Информация о процессе
+println("\nTest 5: Process information")
+let pid = getPid()
+println("Current PID:", pid)
+
+let hostname = getHostname()
+println("Hostname:", hostname)
+
+// 6. Рабочая директория
+println("\nTest 6: Working directory")
+let currentDir = getWorkingDir()
+println("Current directory:", currentDir)
+
+// 7. Все переменные окружения
+println("\nTest 7: All environment variables")
+let allEnv = getAllEnv()
+println("Environment variables count:", Object.keys(allEnv).length())
+
+// Показать несколько переменных
+let envKeys = ["HOME", "USER", "SHELL"]
+for let key in envKeys {
+    let value = getEnv(key)
+    if value {
+        println(key + ":", value)
+    }
+}
+
+// 8. Запуск процесса в фоне (осторожно!)
+println("\nTest 8: Background process")
+// let backgroundPid = spawn("sleep", "1")
+// println("Started background process with PID:", backgroundPid)
+
+println("\n=== Process Demo Complete ===")
+
+// Примечание: будьте осторожны с exec и spawn - они выполняют реальные команды!

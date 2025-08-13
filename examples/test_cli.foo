@@ -1,0 +1,57 @@
+// Тест CLI аргументов
+
+println("=== CLI Arguments Demo ===")
+println("")
+
+// 1. Основная информация о скрипте
+println("Test 1: Script information")
+let scriptName = getScriptName()
+let scriptPath = getScriptPath()
+let scriptDir = getScriptDir()
+println("Script name:", scriptName)
+println("Script path:", scriptPath)  
+println("Script directory:", scriptDir)
+
+// 2. Аргументы командной строки
+println("\nTest 2: Command line arguments")
+let args = getArgs()
+let argCount = getArgCount()
+println("Number of arguments:", argCount)
+
+if argCount > 0 {
+    println("Arguments:")
+    for let i = 0; i < argCount; i++ {
+        let arg = getArg(i)
+        println("  [" + i.toString() + "]:", arg)
+    }
+} else {
+    println("No arguments provided")
+}
+
+// 3. Проверка наличия конкретного аргумента
+println("\nTest 3: Check for specific arguments")
+let hasHelp = hasArg("--help")
+let hasVerbose = hasArg("-v")
+println("Has --help:", hasHelp)
+println("Has -v:", hasVerbose)
+
+// 4. Получение флагов
+println("\nTest 4: Flag parsing")
+let name = getFlag("name", "default")
+let port = getFlag("port", "8080")
+let debug = getFlag("debug")
+println("Name flag:", name)
+println("Port flag:", port)
+println("Debug flag:", debug)
+
+// 5. Полный парсинг аргументов
+println("\nTest 5: Full argument parsing")
+let parsed = parseArgs()
+println("Parsed arguments:")
+println("  Flags:", parsed.flags)
+println("  Positional:", parsed.positional)
+
+println("\n=== CLI Demo Complete ===")
+println("")
+println("Для тестирования передайте аргументы:")
+println("  go run main.go examples/test_cli.foo --name=John --port 3000 --debug arg1 arg2")
