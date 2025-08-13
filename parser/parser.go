@@ -132,6 +132,10 @@ func (p *Parser) MatchAnyNext(tokens ...token.Token) bool {
 	return false
 }
 
+func (p *Parser) IsAtEnd() bool {
+	return p.Match(token.EOF)
+}
+
 func (p *Parser) Parse() []ast.Expr {
 	var exprs []ast.Expr
 
@@ -509,14 +513,26 @@ func (p *Parser) MacroDefinition() ast.Expr {
 	var macroTimeStatements []ast.Expr
 	var codeGenBody ast.Expr
 
-	// Парсим все выражения до Expr блока или конца макроса
-	for !p.Match(token.RBRACE) && !p.Match(token.EXPR) {
+	// Парсим все выражения до Expr или generate блока или конца макроса
+	for !p.Match(token.RBRACE) && !p.Match(token.EXPR) && !p.Match(token.GENERATE) {
 		stmt := p.Statement()
 		macroTimeStatements = append(macroTimeStatements, stmt)
 	}
 
-	// Если есть Expr блок
-	if p.Match(token.EXPR) {
+	// Если есть generate блок (шаблонная генерация)
+	if p.Match(token.GENERATE) {
+		p.Next() // consume 'generate'
+		
+		if !p.MatchAndNext(token.LBRACE) {
+			p.error("expected '{' after 'generate'", p.Peek(0))
+		}
+		
+		// Читаем весь шаблон как текст до закрывающей }
+		template := p.readTemplateBlock()
+		codeGenBody = ast.NewGenerateExpr(template)
+		
+	// Если есть Expr блок (обычная генерация)
+	} else if p.Match(token.EXPR) {
 		p.Next() // consume 'Expr'
 
 		if !p.MatchAndNext(token.LBRACE) {
@@ -2287,4 +2303,35 @@ func (p *Parser) parseTypeAnnotation() string {
 
 	// Если несколько типов - возвращаем Union тип
 	return strings.Join(types, "|")
+}
+
+// readTemplateBlock читает шаблонный блок для generate
+func (p *Parser) readTemplateBlock() string {
+	var template strings.Builder
+	braceCount := 1 // Мы уже прочитали открывающую {
+	
+	for braceCount > 0 && !p.IsAtEnd() {
+		tok := p.Peek(0)
+		
+		// Отслеживаем вложенные фигурные скобки
+		if tok.Token == token.LBRACE {
+			braceCount++
+		} else if tok.Token == token.RBRACE {
+			braceCount--
+			if braceCount == 0 {
+				// Это закрывающая скобка блока generate
+				p.Next() // consume }
+				break
+			}
+		}
+		
+		// Добавляем токен в шаблон
+		template.WriteString(tok.Value)
+		if tok.Token != token.EOF {
+			template.WriteString(" ")
+		}
+		p.Next()
+	}
+	
+	return template.String()
 }

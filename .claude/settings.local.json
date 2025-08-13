@@ -51,6 +51,7 @@
     "deny": []
   },
   "enabledMcpjsonServers": [
-    "context7"
+    "context7",
+    "go-lsp"
   ]
 }

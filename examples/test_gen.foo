@@ -47,9 +47,8 @@ extension string {
 
 
 println("323".isPalindrome())
-println(len)
 
-@GET("/users/{id}")
+// @GET("/users/{id}")
 fn parseInt(str) {
     if str == "42" {
         return Ok(42)
@@ -60,7 +59,49 @@ fn parseInt(str) {
     return Err("invalid number format")
 }
 
-
 //let 
-
 println(parseInt(1).unwrapOr(0))
+
+// Макрос с новым синтаксисом - генерирует утилиты для структуры
+macro generateStructUtils(structParam: StructType) {
+    // Macro-time: анализируем структуру во время компиляции
+    println("=== Macro-time: Analyzing struct '" + structParam.Name + "' ===")
+    
+    // Expr блок: генерируем полезный код для структуры
+    Expr {
+        println("\n=== Generated utilities for " + structParam.Name + " ===")
+        
+        // Генерируем фабричную функцию
+        fn createUser(name, age) {
+            return User{name: name, age: age}
+        }
+        
+        // Генерируем функцию для отображения
+        fn printUser(user) {
+            println("User: " + user.name + ", Age: " + user.age)
+        }
+        
+        println("✓ Factory function 'createUser' generated")
+        println("✓ Display function 'printUser' generated")
+    }
+}
+
+// Определяем структуру
+struct User {
+    name: string,
+    age: int
+}
+
+// Получаем тип структуры
+let userType = type(User)
+
+// Вызываем макрос для структуры - он сгенерирует функции
+@generateStructUtils(userType)
+
+// Используем сгенерированные функции
+println("\n=== Using generated functions ===")
+let alice = createUser("Alice", 30)
+let bob = createUser("Bob", 25)
+
+printUser(alice)
+printUser(bob)

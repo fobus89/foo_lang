@@ -20,6 +20,7 @@ const (
 	STRUCT        // struct
 	TYPE          // type
 	EXPR          // Expr
+	GENERATE      // generate
 	FNTYPE        // FnType
 	STRUCTTYPE    // StructType
 	ENUMTYPE      // EnumType

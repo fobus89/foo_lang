@@ -1,42 +1,97 @@
-import "./math_module.foo"
+// import "./math_module.foo"
 
-fn calculateDistance(x1, y1, x2, y2) {
-    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
-}
+// fn calculateDistance(x1, y1, x2, y2) {
+//     return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
+// }
 
-const add = fn(x, y) => x + y
-const square = fn(n) => n * n
-const double = fn(x) => x * 2
+// const add = fn(x, y) => x + y
+// const square = fn(n) => n * n
+// const double = fn(x) => x * 2
 
-println(add(1,23))
+// println(add(1,23))
 
-macro generateStructUtils(structParam: StructType) {
-    println("=== Struct-Only Macro ===")
-    println("Processing struct: " + structParam.Name)
+// // macro generateStructUtils(structParam: StructType) {
+//     // println("=== Struct-Only Macro ===")
+//     // println("Processing struct: " + structParam.Name)
 
-    Expr {
-        println(structParam)
-        println("// Generated utilities for " + structParam.Name)
-        println("fn create" + structParam.Name + "() {")
-        println("    return {}")
-        println("}")
+//     // Expr {
+//     //     println(structParam)
+//     //     println("// Generated utilities for " + structParam.Name)
+//     //     println("fn create" + structParam.Name + "() {")
+//     //     println("    return {}")
+//     //     println("}")
         
-        println("fn validate" + structParam.Name + "(obj) {")
-        println("    // Add validation logic")
-        println("    return true") 
-        println("}")
+//     //     println("fn validate" + structParam.Name + "(obj) {")
+//     //     println("    // Add validation logic")
+//     //     println("    return true") 
+//     //     println("}")
         
-        println("fn serialize" + structParam.Name + "(obj) {")
-        println("    return JSON.stringify(obj)")
-        println("}")
-    } 
-}
+//     //     println("fn serialize" + structParam.Name + "(obj) {")
+//     //     println("    return JSON.stringify(obj)")
+//     //     println("}")
+//     // } 
+// // }
 
-enum MathConstants {
-    PI_VALUE,
-    E_VALUE,
-    GOLDEN_RATIO
-}
+// enum MathConstants {
+//     PI_VALUE,
+//     E_VALUE,
+//     GOLDEN_RATIO
+// }
+
+
+
+
+
+// fn identity<T>(value: T) -> T {
+//     return value
+// }
+
+// let numbers = [1, 2, 3, 4, 5]
+// let squared = numbers.map(fn(n) => n * n).filter(fn(n)=> n%2==0)
+
+// println(squared)
+
+
+
+// println(multiply(1,2))
+// println(PI)
+
+// fn testParams(name=12, value=21) {
+//     println("Функция вызвана с: ${name} ${value}")
+//     return "Результат: ${name} = ${value}"
+// }
+
+// println(testParams())
+
+// fn simpleAsync() {
+//     await sleep(100)
+//     println("Async функция выполняется")
+//     return "Результат из async"
+// }
+
+// fn foo() -> float {
+//     // await sleep(1000)
+//     let value = -12.00
+//     if value < 0 {
+//         return -value
+//     }
+//     return value
+// }
+
+// let promise = async simpleAsync()
+
+// let result = await promise
+
+// println(result)
+
+// println(identity(12))
+
+// println(foo())
+
+// let path = getEnv("PATH")
+// let osInfo = getOS()
+// printf("Running on: %s/%s with %d CPUs\n", osInfo["os"], osInfo["arch"], osInfo["cpus"])
+
 
 struct User {
     name: string,
@@ -44,55 +99,100 @@ struct User {
     email: string
 }
 
+struct Product {
+    title: string,
+    price: float,
+    inStock: bool
+}
+
+// macro generateStructUtils(structParam: StructType) {
+//     println("=== Struct-Only Macro ===")
+//     println("Processing struct: " + structParam.Name)
+    
+//     // Получаем имя структуры
+//     let structName = structParam.Name
+
+//     Expr {
+//         println("=== Generated code from Struct-Only Macro ===")
+//         println("Working with struct: " + structName)
+        
+//         // В текущей реализации foo_lang имена функций должны быть известны во время компиляции
+//         // Поэтому используем условную логику для разных типов
+        
+//         if structName == "User" {
+//             // Генерируем функции для User
+//             fn createUser(name, age, email) {
+//                 return User{name: name, age: age, email: email}
+//             }
+            
+//             fn validateUser(user) {
+//                 if !user.name || user.name == "" {
+//                     return false
+//                 }
+//                 if !user.age || user.age < 0 {
+//                     return false
+//                 }
+//                 return true
+//             }
+            
+//             println("✓ Generated: createUser, validateUser")
+//         } else if structName == "Product" {
+//             // Генерируем функции для Product (другая сигнатура)
+//             fn createProduct(title, price, inStock) {
+//                 return Product{title: title, price: price, inStock: inStock}
+//             }
+            
+//             fn validateProduct(product) {
+//                 if !product.title || product.title == "" {
+//                     return false
+//                 }
+//                 if !product.price || product.price < 0 {
+//                     return false
+//                 }
+//                 return true
+//             }
+            
+//             println("✓ Generated: createProduct, validateProduct")
+//         } else {
+//             println("⚠ Unknown struct type: " + structName)
+//         }
+//     }
+// }
+
+macro generateStructUtils(structParam: StructType) {
+    println("=== Template Macro ===")
+    println("Processing struct: " + structParam.Name)
+
+    generate {
+        fn print${structParam.Name}(obj) {
+            println("=== Info for ${structParam.Name} ===")
+            println("Object: " + obj)
+        }
+    }
+}
+
+// Вызываем макрос для User
 @generateStructUtils(User)
 
+// Используем сгенерированные функции для User
+println("\n=== Testing User functions ===")
+let john = createUser("John", 35, "john@example.com")
+println("Created user: " + john.name + ", age: " + john.age + ", email: " + john.email)
+println("Valid user: " + validateUser(john))
 
-fn identity<T>(value: T) -> T {
-    return value
-}
+let invalidUser = User{name: "", age: -5, email: ""}
+println("Invalid user: " + validateUser(invalidUser))
 
-let numbers = [1, 2, 3, 4, 5]
-let squared = numbers.map(fn(n) => n * n).filter(fn(n)=> n%2==0)
+// Вызываем макрос для Product в отдельной области видимости
+println("\n=== Testing Product structure ===")
 
-println(squared)
+// Создаем Product без макроса (так как функции с одинаковой сигнатурой конфликтуют)
+let laptop = Product{title: "Laptop", price: 999.99, inStock: true}
+println("Created product manually: " + laptop.title + ", price: " + laptop.price)
 
 
 
-println(multiply(1,2))
-println(PI)
 
-fn testParams(name=12, value=21) {
-    println("Функция вызвана с: ${name} ${value}")
-    return "Результат: ${name} = ${value}"
-}
-
-println(testParams())
-
-fn simpleAsync() {
-    await sleep(100)
-    println("Async функция выполняется")
-    return "Результат из async"
-}
-
-fn foo() -> float {
-    // await sleep(1000)
-    let value = -12.00
-    if value < 0 {
-        return -value
-    }
-    return value
-}
-
-let promise = async simpleAsync()
-
-let result = await promise
-
-println(result)
-
-println(identity(12))
-
-println(foo())
-
-// let path = getEnv("PATH")
-// let osInfo = getOS()
-// printf("Running on: %s/%s with %d CPUs\n", osInfo["os"], osInfo["arch"], osInfo["cpus"])
+// Тест нового макроса с шаблоном
+println("\n=== Testing template macro ===")
+@generateStructUtils2(User)

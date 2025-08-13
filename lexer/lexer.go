@@ -92,6 +92,7 @@ var keywords = MapType[string]{
 	"struct":  token.STRUCT,
 	"type":       token.TYPE,
 	"Expr":       token.EXPR,
+	"generate":   token.GENERATE,
 	"Type":       token.TYPE,        // Алиас для type  
 	"FnType":     token.FNTYPE,
 	"StructType": token.STRUCTTYPE,
