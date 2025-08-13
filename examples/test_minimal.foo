@@ -1,0 +1,12 @@
+// Минимальный тест
+
+println("Testing new functions...")
+
+let osInfo = getOS()
+println(osInfo)
+
+let user = getEnv("USER")
+println(user)
+
+let pid = getPid()
+println(pid)

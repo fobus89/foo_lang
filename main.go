@@ -78,6 +78,20 @@ func main() {
 	builtin.InitializeCryptoFunctions(scopeStack)
 	builtin.InitializeRegexFunctions(scopeStack)
 	builtin.InitializeSyncFunctions(scopeStack)
+	
+	// Новые критически важные функции
+	builtin.InitializeStdioFunctions(scopeStack)
+	builtin.InitializeProcessFunctions(scopeStack)
+	builtin.InitializeCliFunctions(scopeStack)
+	builtin.InitializeDebugFunctions(scopeStack)
+	
+	// Инициализируем CLI аргументы
+	builtin.InitCLI(os.Args)
+	
+	// 🔥 Новые улучшения: Extension methods и глобальные объекты
+	builtin.InitializeSystemExtensions(scopeStack)  // Extension methods для System, IO, Console и т.д.
+	builtin.InitializeGlobalObjects(scopeStack)     // Глобальные объекты IO, System, Console, Process и т.д.
+	builtin.InitializeResultFunctions(scopeStack)   // Result функции Ok/Err для обработки ошибок
 
 	exprs := p.ParseWithModules()
 

@@ -91,4 +91,4 @@
 
 let path = getEnv("PATH")
 let osInfo = getOS()
-printf("Running on: %s/%s with %d CPUs\n", osInfo.os, osInfo.arch, osInfo.cpus)
+printf("Running on: %s/%s with %d CPUs\n", osInfo["os"], osInfo["arch"], osInfo["cpus"])

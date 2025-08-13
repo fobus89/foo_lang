@@ -1,0 +1,201 @@
+// Демонстрация улучшенной обработки ошибок в духе Rust
+// 🔥 Новая система: Result<T, E> типы вместо panic()
+
+println("=== Демонстрация улучшенной обработки ошибок ===\n")
+
+// === 1. БЕЗОПАСНЫЙ ДОСТУП К МАССИВАМ ===
+println("1. Безопасный доступ к массивам:")
+
+let numbers = [1, 2, 3, 4, 5]
+println("Array: " + numbers)
+
+// Нормальный доступ
+let result1 = numbers[2]  // Должен вернуть Ok(3)
+if result1.isOk() {
+    println("numbers[2] = " + result1.unwrap())
+} else {
+    println("Error accessing numbers[2]")
+}
+
+// Доступ за границы массива
+let result2 = numbers[10] // Должен вернуть Err(IndexError)
+if result2.isErr() {
+    println("numbers[10] failed as expected: " + result2.unwrapOr("INDEX_ERROR"))
+} else {
+    println("numbers[10] = " + result2.unwrap())
+}
+
+// === 2. БЕЗОПАСНАЯ РАБОТА С ФУНКЦИЯМИ ===
+println("\n2. Безопасная работа с функциями:")
+
+// Определяем функцию деления
+fn safeDivide(a, b) {
+    if b == 0 {
+        return Err("Division by zero")
+    }
+    return Ok(a / b)
+}
+
+let divResult1 = safeDivide(10, 2)
+if divResult1.isOk() {
+    println("10 / 2 = " + divResult1.unwrap())
+} else {
+    println("Division failed: " + divResult1.unwrapOr("ERROR"))
+}
+
+let divResult2 = safeDivide(10, 0)
+if divResult2.isErr() {
+    println("10 / 0 failed as expected: " + divResult2.unwrapOr("DIVISION_ERROR"))
+}
+
+// === 3. ОБРАБОТКА ОШИБОК С MATCH ===
+println("\n3. Обработка ошибок с match:")
+
+fn processValue(value) {
+    if value > 0 {
+        return Ok("Positive: " + value.toString())
+    } else if value == 0 {
+        return Err("Zero is not allowed")
+    } else {
+        return Err("Negative numbers not supported")
+    }
+}
+
+let values = [5, 0, -3]
+for let i = 0; i < values.length(); i++ {
+    let val = values[i]
+    let result = processValue(val)
+    
+    if result.isOk() {
+        println("Success: " + result.unwrap())
+    } else {
+        println("Error: " + result.unwrapOr("UNKNOWN_ERROR"))
+    }
+}
+
+// === 4. ЦЕПОЧКИ ОБРАБОТКИ ОШИБОК ===
+println("\n4. Цепочки обработки ошибок:")
+
+fn validateAge(age) {
+    if age < 0 {
+        return Err("Age cannot be negative")
+    }
+    if age > 150 {
+        return Err("Age too high")
+    }
+    return Ok(age)
+}
+
+fn calculateBirthYear(age) {
+    let validAge = validateAge(age)
+    if validAge.isErr() {
+        return validAge  // Передаем ошибку дальше
+    }
+    
+    let currentYear = 2025
+    let birthYear = currentYear - validAge.unwrap()
+    return Ok(birthYear)
+}
+
+let ages = [25, -5, 200, 30]
+for let i = 0; i < ages.length(); i++ {
+    let age = ages[i]
+    let birthYearResult = calculateBirthYear(age)
+    if birthYearResult.isOk() {
+        println("Age " + age + " -> Birth year: " + birthYearResult.unwrap())
+    } else {
+        println("Age " + age + " -> Error: " + birthYearResult.unwrapOr("VALIDATION_ERROR"))
+    }
+}
+
+// === 5. КОМБИНИРОВАНИЕ РЕЗУЛЬТАТОВ ===
+println("\n5. Комбинирование результатов:")
+
+fn combineResults(result1, result2) {
+    if result1.isErr() {
+        return result1
+    }
+    if result2.isErr() {
+        return result2
+    }
+    
+    let combined = [result1.unwrap(), result2.unwrap()]
+    return Ok(combined)
+}
+
+let r1 = Ok(42)
+let r2 = Ok("hello")
+let r3 = Err("failure")
+
+let combined1 = combineResults(r1, r2)
+if combined1.isOk() {
+    println("Combined success: " + combined1.unwrap())
+}
+
+let combined2 = combineResults(r1, r3)
+if combined2.isErr() {
+    println("Combined error: " + combined2.unwrapOr("COMBINE_ERROR"))
+}
+
+// === 6. ИСПОЛЬЗОВАНИЕ unwrapOr ДЛЯ ЗНАЧЕНИЙ ПО УМОЛЧАНИЮ ===
+println("\n6. Значения по умолчанию:")
+
+fn getConfigValue(key) {
+    let config = {
+        "host": "localhost",
+        "port": "8080"
+    }
+    
+    if config[key] {
+        return Ok(config[key])
+    } else {
+        return Err("Key not found: " + key)
+    }
+}
+
+let host = getConfigValue("host").unwrapOr("default-host")
+let timeout = getConfigValue("timeout").unwrapOr("30")
+let invalid = getConfigValue("invalid").unwrapOr("fallback-value")
+
+println("Host: " + host)
+println("Timeout: " + timeout) 
+println("Invalid key: " + invalid)
+
+// === 7. ОБРАБОТКА ОШИБОК В ASYNC ФУНКЦИЯХ ===
+println("\n7. Async обработка ошибок:")
+
+fn asyncOperation(shouldFail) {
+    await sleep(10)  // Небольшая задержка
+    
+    if shouldFail {
+        return Err("Async operation failed")
+    } else {
+        return Ok("Async success")
+    }
+}
+
+// Запускаем несколько async операций
+let asyncTasks = [
+    async asyncOperation(false),
+    async asyncOperation(true),
+    async asyncOperation(false)
+]
+
+for let i = 0; i < asyncTasks.length(); i++ {
+    let task = asyncTasks[i]
+    let result = await task
+    if result.isOk() {
+        println("Task " + i + " succeeded: " + result.unwrap())
+    } else {
+        println("Task " + i + " failed: " + result.unwrapOr("ASYNC_ERROR"))
+    }
+}
+
+println("\n=== Демонстрация завершена ===")
+println("🎉 Новая система обработки ошибок:")
+println("✅ Result<T, E> типы вместо panic()")
+println("✅ Детальные сообщения об ошибках с контекстом")
+println("✅ Stack traces для отладки")  
+println("✅ Безопасные операции с проверкой типов")
+println("✅ Цепочки обработки ошибок")
+println("✅ Интеграция с async/await")

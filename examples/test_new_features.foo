@@ -5,13 +5,13 @@ println("=====================================")
 
 // 1. STDIO - Базовый ввод/вывод
 println("\n📝 1. STDIO Functions")
-printf("Formatted output: %s = %d\n", "answer", 42)
+printf("Formatted output: %s = %d\\n", "answer", 42)
 writeLn("Multiple values:", 1, 2.5, true, null)
 
 // 2. Системная информация
 println("\n🖥️  2. System Information")
 let osInfo = getOS()
-printf("Running on: %s/%s with %d CPUs\n", osInfo.os, osInfo.arch, osInfo.cpus)
+printf("Running on: %s/%s with %d CPUs\\n", osInfo["os"], osInfo["arch"], osInfo["cpus"])
 println("Current directory:", getWorkingDir())
 println("Process PID:", getPid())
 
@@ -29,7 +29,7 @@ let user = getEnv("USER")
 if user {
     println("Current user:", user)
 }
-println("PATH length:", getEnv("PATH") ? getEnv("PATH").length() : 0)
+println("PATH exists:", getEnv("PATH") != null)
 
 // 5. Отладочные функции
 println("\n🐛 5. Debug Functions")
@@ -44,23 +44,22 @@ println("Object size:", sizeOf(testObj), "bytes")
 // 6. Статистика памяти
 println("\n📊 6. Memory Statistics")
 let mem = memStats()
-printf("Memory: %d KB allocated, %d objects, %d GC runs\n", 
-    mem.alloc / 1024, mem.heap_objects, mem.gc_count)
+printf("Memory: %d KB allocated, %d objects, %d GC runs\\n", mem["alloc"] / 1024, mem["heap_objects"], mem["gc_count"])
 
 // 7. Выполнение команд
 println("\n⚙️  7. Process Execution")
 let result = exec("echo", "Hello from subprocess!")
-if result.success {
-    println("Command output:", result.stdout.trim())
+if result["success"] {
+    println("Command output:", result["stdout"])
 } else {
-    println("Command failed:", result.error)
+    println("Command failed:", result["error"])
 }
 
 // 8. Математические расширения
 println("\n🔢 8. Enhanced Math")
 let numbers = [1, 2, 3, 4, 5]
 println("Numbers:", numbers)
-println("First number absolute:", numbers[0].abs())  // Метод типа
+println("First number absolute:", abs(numbers[0]))  // Функция abs
 
 // 9. Демонстрация типизации
 println("\n🏷️  9. Type System")
@@ -75,7 +74,7 @@ println("message (string):", message, "- type:", typeOf(message))
 println("\n🚩 10. Flag Parsing")
 let debugMode = getFlag("debug", false)
 let port = getFlag("port", "8080") 
-printf("Debug mode: %s, Port: %s\n", debugMode, port)
+printf("Debug mode: %s, Port: %s\\n", debugMode, port)
 
 println("\n✨ Все функции работают корректно!")
 println("=====================================")

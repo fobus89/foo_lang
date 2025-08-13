@@ -1,0 +1,22 @@
+// Тест break в for-yield
+println("=== Тест break в for-yield ===\n")
+
+println("1. Цикл с break и yield:")
+const arr = for let i = 0; i < 10; i++ {
+    println("Итерация " + i)
+    if i > 4 {
+        println("  Break на i = " + i)
+        break
+    }
+    println("  Yield " + i)
+    yield i
+}
+
+println("\n2. Результат:")
+println("Массив: " + arr)
+println("Длина массива: " + arr.length())
+
+println("\n3. Элементы массива:")
+for let j = 0; j < arr.length(); j++ {
+    println("  arr[" + j + "] = " + arr[j])
+}

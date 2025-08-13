@@ -1,0 +1,163 @@
+// Простая демонстрация улучшенной обработки ошибок
+// 🔥 Result<T, E> типы вместо panic()
+
+println("=== Простая демонстрация Result типов ===\n")
+
+// === 1. СОЗДАНИЕ Result ТИПОВ ===
+println("1. Создание Result типов:")
+
+// Создаем Ok результат
+let success = Ok("Operation successful")
+println("Success result: " + success)
+println("Is Ok: " + success.isOk())
+println("Is Err: " + success.isErr())
+println("Value: " + success.unwrap())
+
+// Создаем Err результат
+let failure = Err("Operation failed")
+println("\nFailure result: " + failure)
+println("Is Ok: " + failure.isOk())
+println("Is Err: " + failure.isErr())
+println("Default value: " + failure.unwrapOr("Default"))
+
+// === 2. БЕЗОПАСНОЕ ИЗВЛЕЧЕНИЕ ЗНАЧЕНИЙ ===
+println("\n2. Безопасное извлечение значений:")
+
+// Функция возвращающая Result
+fn divide(a, b) {
+    if b == 0.0 {
+        return Err("Division by zero")
+    }
+    return Ok(a / b)
+}
+
+let result1 = divide(10.0, 2.0)
+if result1.isOk() {
+    println("10 / 2 = " + result1.unwrap())
+} else {
+    println("Division failed")
+}
+
+let result2 = divide(10.0, 0.0) 
+if result2.isErr() {
+    println("Division by zero handled: " + result2.unwrapOr("ERROR"))
+}
+
+// === 3. PATTERN MATCHING С Result ===
+println("\n3. Pattern matching с Result:")
+
+fn processNumber(n) {
+    if n < 0 {
+        return Err("Negative numbers not allowed")
+    }
+    if n == 0 {
+        return Err("Zero is not valid")
+    }
+    return Ok(n * 2)
+}
+
+let numbers = [5, -3, 0, 8]
+for let i = 0; i < numbers.length(); i++ {
+    let num = numbers[i]
+    let result = processNumber(num)
+    
+    if result.isOk() {
+        println("Processed " + num + " -> " + result.unwrap())
+    } else {
+        println("Error for " + num + ": " + result.unwrapOr("ERROR"))
+    }
+}
+
+// === 4. ИСПОЛЬЗОВАНИЕ unwrapOr ===
+println("\n4. Значения по умолчанию с unwrapOr:")
+
+fn getConfig(key) {
+    let configs = {
+        "host": "localhost",
+        "port": "8080"
+    }
+    
+    if configs[key] {
+        return Ok(configs[key])
+    } else {
+        return Err("Config not found: " + key)
+    }
+}
+
+let host = getConfig("host").unwrapOr("default-host")
+let port = getConfig("port").unwrapOr("3000")
+let timeout = getConfig("timeout").unwrapOr("30")
+
+println("Host: " + host)
+println("Port: " + port)  
+println("Timeout (default): " + timeout)
+
+// === 5. CHAIN OF RESULTS ===
+println("\n5. Цепочка Result операций:")
+
+fn validateAge(age) {
+    if age < 0 {
+        return Err("Age cannot be negative")
+    }
+    if age > 120 {
+        return Err("Age too high")
+    }
+    return Ok(age)
+}
+
+fn classifyAge(age) {
+    if age < 18 {
+        return Ok("Minor")
+    } else if age < 65 {
+        return Ok("Adult")
+    } else {
+        return Ok("Senior")
+    }
+}
+
+let ages = [25, -5, 150, 70]
+for let i = 0; i < ages.length(); i++ {
+    let age = ages[i]
+    let validAge = validateAge(age)
+    if validAge.isOk() {
+        let classification = classifyAge(validAge.unwrap())
+        println("Age " + age + " -> " + classification.unwrap())
+    } else {
+        println("Age " + age + " -> Invalid: " + validAge.unwrapOr("ERROR"))
+    }
+}
+
+// === 6. Result В КОЛЛЕКЦИЯХ ===
+println("\n6. Result в коллекциях:")
+
+// Создаем коллекцию результатов
+let results = [
+    Ok("success1"),
+    Err("error1"),
+    Ok("success2"),
+    Err("error2"),
+    Ok("success3")
+]
+
+let successes = []
+let errors = []
+
+for let i = 0; i < results.length(); i++ {
+    let result = results[i]
+    if result.isOk() {
+        successes = successes.push(result.unwrap())
+    } else {
+        errors = errors.push(result.unwrapOr("UNKNOWN_ERROR"))
+    }
+}
+
+println("Successes: " + successes)
+println("Errors: " + errors)
+
+println("\n=== Демонстрация завершена ===")
+println("🎉 Result типы обеспечивают:")
+println("✅ Безопасную обработку ошибок без panic()")
+println("✅ Явную проверку успеха/ошибки")
+println("✅ Значения по умолчанию через unwrapOr")
+println("✅ Pattern matching для элегантной обработки")
+println("✅ Композицию операций с проверкой ошибок")

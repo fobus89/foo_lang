@@ -1,0 +1,45 @@
+// Тест на изоляцию переменных цикла
+println("=== Тест изоляции переменных цикла ===\n")
+
+println("1. Цикл с переменной counter:")
+for let counter = 0; counter < 3; counter++ {
+    println("counter в цикле: " + counter)
+}
+
+println("\n2. Пытаемся получить counter вне цикла:")
+// Следующая строка должна вызвать ошибку, если scope изолирован
+try {
+    println("counter вне цикла: " + counter)
+    println("❌ БАГАН: переменная counter доступна вне цикла!")
+} catch {
+    println("✅ ПРАВИЛЬНО: переменная counter недоступна вне цикла")
+}
+
+println("\n3. Цикл с переменной внутри блока:")
+{
+    let blockVar = "блочная переменная"
+    println("blockVar в блоке: " + blockVar)
+    
+    for let loopVar = 10; loopVar < 13; loopVar++ {
+        println("loopVar в цикле: " + loopVar)
+    }
+}
+
+println("\n4. Пытаемся получить переменные вне блока:")
+// Эти строки должны вызвать ошибки
+try {
+    println("blockVar вне блока: " + blockVar)  
+    println("❌ БАГАН: blockVar доступна вне блока!")
+} catch {
+    println("✅ ПРАВИЛЬНО: blockVar недоступна вне блока")
+}
+
+try {
+    println("loopVar вне блока: " + loopVar)
+    println("❌ БАГАН: loopVar доступна вне блока!")  
+} catch {
+    println("✅ ПРАВИЛЬНО: loopVar недоступна вне блока")
+}
+
+println("\n=== Заключение ===")
+println("Если увидели ошибки выше - scope работает правильно")

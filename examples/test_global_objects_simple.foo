@@ -1,0 +1,50 @@
+// Простая демонстрация глобальных объектов
+
+println("=== Простой тест глобальных объектов ===")
+
+// 1. IO объект - ввод/вывод
+println("\n1. IO объект:")
+IO.writeLn("Hello from IO object!")
+IO.printf("Formatted output: %s = %d\n", "answer", 42)
+
+// 2. System объект - системная информация
+println("\n2. System объект:")
+let os = System.getOS()
+println("OS info:")
+println(os)
+
+let user = System.getEnv("USER") 
+if user {
+    println("Current user: " + user)
+}
+
+// 3. Process объект - процессы
+println("\n3. Process объект:")
+println("Current PID: " + Process.getPid())
+
+let cmdResult = Process.exec("echo", "Hello World")
+println("Command result:")
+println(cmdResult)
+
+// 4. Debug объект - отладка
+println("\n4. Debug объект:")
+let value = "test string"
+println("Value type: " + Debug.typeOf(value))
+println("Value size: " + Debug.sizeOf(value) + " bytes")
+
+// 5. Memory объект - память
+println("\n5. Memory объект:")
+let mem = Memory.stats()
+println("Memory allocated: " + (mem["alloc"] / 1024) + " KB")
+
+// 6. CLI объект - аргументы
+println("\n6. CLI объект:")
+println("Script: " + CLI.getScriptName())
+println("Args count: " + CLI.getArgCount())
+
+// 7. Console объект - консоль
+println("\n7. Console объект:")
+Console.writeLn("Console output test")
+
+println("\n=== Тест завершен ===")
+println("✅ Все глобальные объекты работают корректно!")

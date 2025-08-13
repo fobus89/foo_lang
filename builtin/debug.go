@@ -2,6 +2,7 @@ package builtin
 
 import (
 	"fmt"
+	"foo_lang/scope"
 	"foo_lang/value"
 	"os"
 	"reflect"
@@ -448,3 +449,56 @@ func StopCPUProfile(args []*value.Value) (*value.Value, error) {
 }
 
 var cpuProfileFile *os.File
+
+// InitializeDebugFunctions инициализирует встроенные отладочные функции
+func InitializeDebugFunctions(globalScope *scope.ScopeStack) {
+	// typeOf функция
+	typeOfFunc := func(args []*value.Value) *value.Value {
+		result, err := TypeOf(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("typeOf", value.NewValue(typeOfFunc))
+	
+	// sizeOf функция
+	sizeOfFunc := func(args []*value.Value) *value.Value {
+		result, err := SizeOf(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("sizeOf", value.NewValue(sizeOfFunc))
+	
+	// memStats функция
+	memStatsFunc := func(args []*value.Value) *value.Value {
+		result, err := MemStats(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("memStats", value.NewValue(memStatsFunc))
+	
+	// debug функция
+	debugFunc := func(args []*value.Value) *value.Value {
+		result, err := Debug(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("debug", value.NewValue(debugFunc))
+	
+	// trace функция
+	traceFunc := func(args []*value.Value) *value.Value {
+		result, err := Trace(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("trace", value.NewValue(traceFunc))
+}

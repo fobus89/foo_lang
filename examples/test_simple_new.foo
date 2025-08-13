@@ -1,0 +1,57 @@
+// Простой тест новых функций
+
+println("=== Тест новых функций ===")
+
+// 1. Системная информация
+println("1. System info:")
+let osInfo = getOS()
+println("OS info:")
+println(osInfo)
+
+// 2. CLI аргументы
+println("\n2. CLI args:")
+println("Script name:")
+println(getScriptName())
+println("Args count:")
+println(getArgCount())
+
+// 3. Переменные окружения  
+println("\n3. Environment:")
+let user = getEnv("USER")
+if user {
+    println("User:")
+println(user)
+} else {
+    println("User not found")
+}
+
+// 4. Процессы
+println("\n4. Process info:")
+println("PID:")
+println(getPid())
+println("Working dir:")
+println(getWorkingDir())
+
+// 5. Выполнение команд
+println("\n5. Command execution:")
+let result = exec("echo", "Hello World")
+println("Command result:")
+println(result)
+
+// 6. Отладочные функции
+println("\n6. Debug functions:")
+let testValue = 42
+println("Value:")
+println(testValue)
+println("Type:")
+println(typeOf(testValue))
+println("Size:")
+println(sizeOf(testValue))
+
+// 7. Память
+println("\n7. Memory stats:")
+let mem = memStats()
+println("Memory stats:")
+println(mem)
+
+println("\n=== Тест завершен ===")

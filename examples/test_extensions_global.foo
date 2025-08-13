@@ -1,0 +1,115 @@
+// Демонстрация Extension Methods и глобальных объектов
+// 🔥 Новые возможности foo_lang: объектно-ориентированный подход к системным функциям
+
+println("=== Демонстрация Extension Methods и глобальных объектов ===\n")
+
+// === 1. ГЛОБАЛЬНЫЙ IO ОБЪЕКТ ===
+println("1. Глобальный IO объект:")
+
+// Используем IO объект для ввода/вывода
+IO.printf("System info: %s/%s\n", "linux", "x86_64")
+IO.writeLn("Hello from IO object!")
+
+// === 2. ГЛОБАЛЬНЫЙ SYSTEM ОБЪЕКТ ===
+println("\n2. Глобальный System объект:")
+
+let osInfo = System.getOS()
+println("OS info: " + osInfo["os"] + "/" + osInfo["arch"])
+
+let user = System.getEnv("USER")
+if user {
+    println("Current user: " + user)
+} else {
+    println("User not found")
+}
+
+// === 3. ГЛОБАЛЬНЫЙ PROCESS ОБЪЕКТ ===
+println("\n3. Глобальный Process объект:")
+
+let pid = Process.getPid()
+println("Process PID: " + pid)
+
+// Выполняем команду через Process объект
+let result = Process.exec("echo", "Hello World")
+println("Command result:")
+println(result)
+
+// === 4. ГЛОБАЛЬНЫЙ DEBUG ОБЪЕКТ ===
+println("\n4. Глобальный Debug объект:")
+
+let testValue = 42
+println("Value type: " + Debug.typeOf(testValue))
+println("Value size: " + Debug.sizeOf(testValue) + " bytes")
+
+// Отладочная информация
+Debug.debug(testValue)
+
+// === 5. ГЛОБАЛЬНЫЙ MEMORY ОБЪЕКТ ===
+println("\n5. Глобальный Memory объект:")
+
+let memoryStats = Memory.stats()
+println("Memory allocated: " + (memoryStats["alloc"] / 1024) + " KB")
+
+// === 6. ГЛОБАЛЬНЫЙ CLI ОБЪЕКТ ===
+println("\n6. Глобальный CLI объект:")
+
+println("Script name: " + CLI.getScriptName())
+println("Arguments count: " + CLI.getArgCount())
+
+let args = CLI.getArgs()
+println("Arguments: " + args)
+
+// === 7. CONSOLE ОБЪЕКТ ===
+println("\n7. Глобальный Console объект:")
+
+Console.writeLn("Console output with writeLn")
+Console.printf("Formatted console output: %s = %d\n", "answer", 42)
+
+// === 8. СРАВНЕНИЕ СТИЛЕЙ ВЫЗОВА ===
+println("\n=== Сравнение стилей вызова ===")
+
+// Старый стиль - прямые функции
+println("\nСтарый стиль (функции):")
+printf("Old style: %s\n", "direct function call")
+let osOld = getOS()
+println("OS info (old):")
+println(osOld)
+
+// Новый стиль - глобальные объекты
+println("\nНовый стиль (объекты):")
+Console.printf("New style: %s\n", "object method call")
+let osNew = System.getOS()
+println("OS info (new): " + osNew["os"])
+
+// === 9. ЦЕПОЧКИ ВЫЗОВОВ ===
+println("\n=== Цепочки вызовов ===")
+
+// Комбинируем объекты в цепочки
+let currentDir = System.getWorkingDir()
+IO.printf("Working in: %s\n", currentDir)
+println("Directory type: " + Debug.typeOf(currentDir))
+
+// === 10. ОБЪЕКТНО-ОРИЕНТИРОВАННЫЙ ПОДХОД ===
+println("\n=== ОО подход к системному программированию ===")
+
+// Группируем связанные операции по объектам
+let sessionInfo = {
+    "user": System.getEnv("USER"),
+    "pid": Process.getPid(),
+    "os": System.getOS()["os"],
+    "memory": Memory.stats()["alloc"]
+}
+
+Debug.debug(sessionInfo)
+IO.printf("Session: %s@%s (PID: %d, Memory: %d KB)\n", 
+    sessionInfo["user"], 
+    sessionInfo["os"], 
+    sessionInfo["pid"], 
+    sessionInfo["memory"] / 1024)
+
+println("\n=== Демонстрация завершена ===")
+println("🎉 foo_lang теперь поддерживает:")
+println("✅ Extension methods для системных типов")
+println("✅ Глобальные объекты (IO, System, Process, Debug, Memory, CLI, Console)")
+println("✅ Объектно-ориентированный API для системных функций")
+println("✅ Чистый и читаемый код через группировку функций в объекты")

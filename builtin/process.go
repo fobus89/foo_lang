@@ -3,6 +3,7 @@ package builtin
 import (
 	"bytes"
 	"fmt"
+	"foo_lang/scope"
 	"foo_lang/value"
 	"os"
 	"os/exec"
@@ -279,4 +280,69 @@ func GetOS(args []*value.Value) (*value.Value, error) {
 	}
 	
 	return value.NewValue(resultMap), nil
+}
+
+// InitializeProcessFunctions инициализирует встроенные функции процессов
+func InitializeProcessFunctions(globalScope *scope.ScopeStack) {
+	// Адаптируем функции для совместимости со старым API
+	
+	// getOS функция
+	getOSFunc := func(args []*value.Value) *value.Value {
+		result, err := GetOS(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("getOS", value.NewValue(getOSFunc))
+	
+	// getPid функция  
+	getPidFunc := func(args []*value.Value) *value.Value {
+		result, err := GetPid(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("getPid", value.NewValue(getPidFunc))
+	
+	// getEnv функция
+	getEnvFunc := func(args []*value.Value) *value.Value {
+		result, err := GetEnv(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("getEnv", value.NewValue(getEnvFunc))
+	
+	// exec функция
+	execFunc := func(args []*value.Value) *value.Value {
+		result, err := Exec(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("exec", value.NewValue(execFunc))
+	
+	// getWorkingDir функция
+	getWorkingDirFunc := func(args []*value.Value) *value.Value {
+		result, err := GetWorkingDir(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("getWorkingDir", value.NewValue(getWorkingDirFunc))
+	
+	// spawn функция
+	spawnFunc := func(args []*value.Value) *value.Value {
+		result, err := Spawn(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("spawn", value.NewValue(spawnFunc))
 }

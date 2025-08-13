@@ -450,6 +450,26 @@ func (m *MethodCallExpr) Eval() *Value {
 		}
 	}
 	
+	// Методы для объектов (map[string]*value.Value) - глобальные объекты типа IO, System и т.д.
+	if objectMap, ok := obj.Any().(map[string]*value.Value); ok {
+		if method, exists := objectMap[m.MethodName]; exists {
+			// Проверяем что это функция
+			if fn, isFn := method.Any().(func([]*value.Value) *value.Value); isFn {
+				// Вычисляем аргументы
+				args := make([]*value.Value, len(m.Args))
+				for i, arg := range m.Args {
+					// Конвертируем AST Value в value.Value
+					astValue := arg.Eval()
+					args[i] = value.NewValue(astValue.Any())
+				}
+				// Вызываем функцию и конвертируем результат обратно
+				result := fn(args)
+				return NewValue(result.Any())
+			}
+		}
+		// Если метод не найден, продолжаем поиск
+	}
+	
 	// Проверяем extension методы
 	typeName := value.GetValueTypeName(obj)
 	if extensionMethod, ok := value.GetExtensionMethod(typeName, m.MethodName); ok {

@@ -3,6 +3,7 @@ package builtin
 import (
 	"bufio"
 	"fmt"
+	"foo_lang/scope"
 	"foo_lang/value"
 	"os"
 	"strconv"
@@ -230,4 +231,47 @@ func Write(args []*value.Value) (*value.Value, error) {
 		}
 	}
 	return value.NewValue(nil), nil
+}
+
+// InitializeStdioFunctions инициализирует встроенные STDIO функции
+func InitializeStdioFunctions(globalScope *scope.ScopeStack) {
+	// printf функция (адаптированная)
+	printfFunc := func(args []*value.Value) *value.Value {
+		result, err := Printf(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("printf", value.NewValue(printfFunc))
+	
+	// writeLn функция
+	writeLnFunc := func(args []*value.Value) *value.Value {
+		result, err := WriteLn(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("writeLn", value.NewValue(writeLnFunc))
+	
+	// input функция
+	inputFunc := func(args []*value.Value) *value.Value {
+		result, err := Input(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("input", value.NewValue(inputFunc))
+	
+	// readLine функция
+	readLineFunc := func(args []*value.Value) *value.Value {
+		result, err := ReadLine(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("readLine", value.NewValue(readLineFunc))
 }

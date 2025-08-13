@@ -1,0 +1,36 @@
+// Тест на реальную проблему с let в циклах
+println("=== Тест проблемы с let в циклах ===\n")
+
+println("1. Нормальный случай - переменная объявляется один раз:")
+let x = 10
+println("x = " + x)
+
+println("\n2. Цикл с let - может ли переменная быть переопределена?")
+
+// Этот цикл должен работать - каждая итерация создает новую переменную в новой области
+for let i = 0; i < 2; i++ {
+    let temp = i * 10  // Объявляем temp в каждой итерации
+    println("Итерация " + i + ", temp = " + temp)
+}
+
+println("\n3. Вложенные циклы с let:")
+for let outer = 1; outer <= 2; outer++ {
+    println("Внешний цикл: outer = " + outer)
+    
+    for let inner = 1; inner <= 2; inner++ {
+        let nested = outer * 100 + inner  // Новая переменная в каждой итерации
+        println("  Внутренний цикл: inner = " + inner + ", nested = " + nested)
+    }
+}
+
+println("\n4. Цикл в функции:")
+fn testLoopInFunction() {
+    for let funcVar = 0; funcVar < 2; funcVar++ {
+        let localTemp = funcVar + 1000
+        println("В функции: funcVar = " + funcVar + ", localTemp = " + localTemp)
+    }
+}
+
+testLoopInFunction()
+
+println("\n=== Если все прошло без ошибок - нет проблем с let в циклах ===")

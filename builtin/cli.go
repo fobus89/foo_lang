@@ -2,6 +2,7 @@ package builtin
 
 import (
 	"fmt"
+	"foo_lang/scope"
 	"foo_lang/value"
 	"os"
 	"path/filepath"
@@ -288,4 +289,47 @@ func ParseArgs(args []*value.Value) (*value.Value, error) {
 	}
 
 	return value.NewValue(result), nil
+}
+
+// InitializeCliFunctions инициализирует встроенные CLI функции
+func InitializeCliFunctions(globalScope *scope.ScopeStack) {
+	// getScriptName функция
+	getScriptNameFunc := func(args []*value.Value) *value.Value {
+		result, err := GetScriptName(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("getScriptName", value.NewValue(getScriptNameFunc))
+	
+	// getArgCount функция
+	getArgCountFunc := func(args []*value.Value) *value.Value {
+		result, err := GetArgCount(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("getArgCount", value.NewValue(getArgCountFunc))
+	
+	// getArgs функция
+	getArgsFunc := func(args []*value.Value) *value.Value {
+		result, err := GetArgs(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("getArgs", value.NewValue(getArgsFunc))
+	
+	// getFlag функция
+	getFlagFunc := func(args []*value.Value) *value.Value {
+		result, err := GetFlag(args)
+		if err != nil {
+			return value.NewValue("Error: " + err.Error())
+		}
+		return result
+	}
+	globalScope.Set("getFlag", value.NewValue(getFlagFunc))
 }
