@@ -1,0 +1,47 @@
+// Рабочий тест template интерполяции
+
+struct User {
+    name: string,
+    age: int,
+    email: string
+}
+
+macro generateHelpers(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    println("Struct kind: " + structParam.Kind)
+    
+    generate {
+        fn create${structParam.Name}(name, age, email) {
+            println("Creating ${structParam.Name} with template interpolation!")
+            return ${structParam.Name}{
+                name: name,
+                age: age, 
+                email: email
+            }
+        }
+        
+        fn print${structParam.Name}(obj) {
+            println("=== ${structParam.Name} Details ===")
+            println("Type: ${structParam.Kind}")
+            println("Name: " + obj.name)
+            println("Age: " + obj.age.toString())
+            println("Email: " + obj.email)
+        }
+        
+        fn get${structParam.Name}Summary(obj) {
+            return "Summary of ${structParam.Name}: " + obj.name + " (" + obj.age.toString() + " years)"
+        }
+    }
+}
+
+println("=== Template Interpolation Success Test ===")
+
+// Вызываем макрос для генерации функций
+@generateHelpers(User)
+
+// Используем сгенерированные функции
+let user = createUser("Alice", 25, "alice@example.com")
+printUser(user)
+
+let summary = getUserSummary(user)
+println(summary)

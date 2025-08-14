@@ -19,6 +19,8 @@ func (s *StringFormatExpr) Eval() *Value {
 		if part == nil {
 			continue
 		}
+		
+		
 		res := part.Eval()
 		if res == nil {
 			continue

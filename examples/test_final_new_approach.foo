@@ -1,0 +1,65 @@
+// Финальная демонстрация нового подхода
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro demonstrateNewApproach(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    
+    generate {
+        fn create${structParam.Name}(name, age) {
+            return ${structParam.Name}{name: name, age: age}
+        }
+        
+        fn print${structParam.Name}DetailedInfo(obj) {
+            println("=== Detailed ${structParam.Name} Info ===")
+            println("Type: ${structParam.Kind}")
+            println("Name: " + obj.name)
+            println("Age: " + obj.age.toString())
+            
+            // Генерируем несколько строк в macro-time
+            println("Generated line 1 for ${structParam.Name}")
+            println("Generated line 2 for ${structParam.Name}") 
+            println("Generated line 3 for ${structParam.Name}")
+        }
+        
+        fn get${structParam.Name}Summary(obj) {
+            return "${structParam.Name}: " + obj.name + " (" + obj.age.toString() + " years)"
+        }
+    }
+}
+
+println("=== НОВЫЙ ПОДХОД: Compile-time $ операции ===")
+println("")
+
+@demonstrateNewApproach(User)
+
+let user = createUser("Alice", 25)
+printUserDetailedInfo(user)
+
+let summary = getUserSummary(user)
+println(summary)
+
+println("")
+println("🔥 ЧТО ИЗМЕНИТСЯ:")
+println("")
+println("ТЕКУЩИЙ ПОДХОД:")
+println("  - Всё в generate {} выполняется как обычный код")
+println("  - Интерполяция ${} работает только для переменных")
+println("  - Циклы/условия выполняются в runtime")
+println("")
+println("НОВЫЙ ПОДХОД ($ префиксы):")
+println("  - $if = compile-time условие (выполняется во время макроса)")
+println("  - if  = runtime условие (остается в сгенерированном коде)")
+println("  - $for = compile-time цикл (генерирует код)")
+println("  - for  = runtime цикл (остается в сгенерированном коде)")
+println("  - $let = compile-time переменная (для макроса)")
+println("  - let  = runtime переменная (в сгенерированном коде)")
+println("")
+println("ПРЕИМУЩЕСТВА:")
+println("  ✅ Четкое разделение compile-time vs runtime")
+println("  ✅ Мощные возможности генерации кода")
+println("  ✅ Понятный и читаемый синтаксис")
+println("  ✅ Нет путаницы с ${} блоками")

@@ -1,0 +1,15 @@
+// Отладка scope в compile-time циклах
+
+macro testScope() {
+    let testVar = 42
+    println("Before generate: testVar = " + testVar.toString())
+    
+    generate {
+        $for num in 3 {
+            println("In loop: num = ${num}")
+        }
+    }
+}
+
+println("=== Testing scope debug ===")
+@testScope()

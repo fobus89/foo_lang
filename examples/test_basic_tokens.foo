@@ -1,0 +1,11 @@
+// Проверка базовых токенов
+println("Testing basic functionality")
+
+let x = 42
+if x > 0 {
+    println("x is positive")
+}
+
+for let i = 0; i < 3; i++ {
+    println("Loop iteration: " + i.toString())
+}

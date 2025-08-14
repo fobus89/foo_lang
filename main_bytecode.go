@@ -174,12 +174,3 @@ func compareWithTreeWalking(content []byte, globalScope *scope.ScopeStack) {
 	}
 }
 
-// Функция для запуска bytecode режима
-func RunBytecodeMode() {
-	mainBytecode()
-}
-
-// main функция для запуска bytecode интерпретатора
-func main() {
-	mainBytecode()
-}

@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"foo_lang/scope"
 	"foo_lang/value"
-	"strings"
 	"regexp"
+	"strings"
 )
+
+// ParserFunc - функция для парсинга кода, устанавливается извне чтобы избежать циклических зависимостей
+var ParserFunc func(string) []Expr
 
 // GenerateExpr представляет блок generate {} для шаблонной генерации кода в макросах
 type GenerateExpr struct {
@@ -18,31 +21,46 @@ func NewGenerateExpr(template string) *GenerateExpr {
 }
 
 func (g *GenerateExpr) Eval() *value.Value {
-	// Обрабатываем шаблон и заменяем ${...} на реальные значения
-	processedCode := g.processTemplate()
-	
-	// TODO: Нужен способ динамически парсить и выполнять сгенерированный код
-	// Пока просто выводим сгенерированный код для отладки
-	fmt.Println("=== Generated code ===")
-	fmt.Println(processedCode)
-	fmt.Println("======================")
-	
-	// Возвращаем nil пока не реализован полный механизм
+	// Создаем TemplateExpr для обработки шаблона
+	templateExpr := NewTemplateExpr(g.Template)
+
+	// Обрабатываем шаблон и получаем сгенерированный код
+	result := templateExpr.Eval()
+
+	if result != nil && result.Any() != nil {
+		generatedCode := fmt.Sprintf("%v", result.Any())
+
+		// Выводим сгенерированный код для отладки
+		// fmt.Println("=== Generated code ===")
+		// fmt.Println(generatedCode)
+		// fmt.Println("======================")
+
+		// Парсим и выполняем сгенерированный код
+		if len(generatedCode) > 0 && ParserFunc != nil {
+			exprs := ParserFunc(generatedCode)
+			for _, expr := range exprs {
+				expr.Eval()
+			}
+		}
+
+		return result
+	}
+
 	return value.NewValue(nil)
 }
 
 // processTemplate обрабатывает шаблон и заменяет ${...} интерполяции
 func (g *GenerateExpr) processTemplate() string {
 	template := g.Template
-	
+
 	// Регулярное выражение для поиска ${...}
 	re := regexp.MustCompile(`\$\{([^}]+)\}`)
-	
+
 	// Заменяем все ${...} на вычисленные значения
 	result := re.ReplaceAllStringFunc(template, func(match string) string {
 		// Убираем ${ и }
-		expr := match[2:len(match)-1]
-		
+		expr := match[2 : len(match)-1]
+
 		// Обрабатываем специальные конструкции
 		if strings.HasPrefix(expr, "for ") {
 			return g.processForLoop(expr)
@@ -53,7 +71,7 @@ func (g *GenerateExpr) processTemplate() string {
 			return g.evaluateExpression(expr)
 		}
 	})
-	
+
 	return result
 }
 
@@ -65,7 +83,7 @@ func (g *GenerateExpr) evaluateExpression(expr string) string {
 			return fmt.Sprintf("%v", val.Any())
 		}
 	}
-	
+
 	// Обрабатываем доступ к свойствам (например, structParam.Name)
 	if strings.Contains(expr, ".") {
 		parts := strings.Split(expr, ".")
@@ -83,7 +101,7 @@ func (g *GenerateExpr) evaluateExpression(expr string) string {
 			}
 		}
 	}
-	
+
 	// Если не можем вычислить, возвращаем как есть в ${}
 	return "${" + expr + "}"
 }
@@ -92,10 +110,10 @@ func (g *GenerateExpr) evaluateExpression(expr string) string {
 func (g *GenerateExpr) processForLoop(expr string) string {
 	// Упрощенная обработка for циклов
 	// Формат: for field in structParam.Fields { ... }
-	
+
 	// Извлекаем переменную, коллекцию и тело
 	// Это упрощенная версия, в реальной реализации нужен полный парсер
-	
+
 	// Пока возвращаем заглушку
 	return "/* for loop processing not yet implemented */"
 }

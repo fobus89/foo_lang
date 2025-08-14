@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+// FieldInfo представляет информацию о поле структуры
+type FieldInfo struct {
+	Name string
+	Type *TypeInfo
+}
+
 // TypeInfo представляет информацию о типе
 type TypeInfo struct {
 	Kind   string                 // "struct", "fn", "enum", "primitive"
@@ -264,6 +270,22 @@ func NewEnumType(name string, values []string) *EnumType {
 	return &EnumType{
 		TypeInfo: NewEnumTypeInfo(name, values),
 	}
+}
+
+// GetFields возвращает список полей структуры как FieldInfo
+func (ti *TypeInfo) GetFields() []*FieldInfo {
+	if ti.Kind != "struct" {
+		return []*FieldInfo{}
+	}
+	
+	fields := make([]*FieldInfo, 0, len(ti.Fields))
+	for name, fieldType := range ti.Fields {
+		fields = append(fields, &FieldInfo{
+			Name: name,
+			Type: fieldType,
+		})
+	}
+	return fields
 }
 
 // GetFieldNames возвращает имена полей структуры

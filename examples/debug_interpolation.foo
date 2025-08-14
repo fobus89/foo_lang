@@ -1,0 +1,12 @@
+// Отладка интерполяции в compile-time циклах
+
+macro testInterpolation() {
+    generate {
+        $for counter in 3 {
+            println("Iteration ${counter}")
+        }
+    }
+}
+
+println("=== Testing interpolation debug ===")
+@testInterpolation()

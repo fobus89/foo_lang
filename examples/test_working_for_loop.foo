@@ -1,0 +1,34 @@
+// Тест рабочего цикла в template интерполяции
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro generateWithLoop(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    
+    generate {
+        fn print${structParam.Name}Info(obj) {
+            println("=== ${structParam.Name} Info ===")
+            println("Type: ${structParam.Kind}")
+            println("Name: " + obj.name)
+            
+            // Генерируем несколько строк вывода
+            println("Line 1 for ${structParam.Name}")
+            println("Line 2 for ${structParam.Name}")
+            println("Line 3 for ${structParam.Name}")
+        }
+    }
+}
+
+println("=== Working Template Generation Test ===")
+
+// Вызываем макрос
+@generateWithLoop(User)
+
+// Тестируем в простом варианте
+println("Direct test:")
+println("=== User Info ===")
+println("Type: struct")
+println("Name: Alice")

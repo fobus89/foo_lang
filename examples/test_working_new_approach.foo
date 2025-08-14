@@ -1,0 +1,59 @@
+// Рабочая демонстрация нового подхода
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro demonstrateApproach(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    
+    generate {
+        fn create${structParam.Name}(name, age) {
+            return ${structParam.Name}{name: name, age: age}
+        }
+        
+        fn print${structParam.Name}Info(obj) {
+            println("=== ${structParam.Name} Info ===")
+            println("Type: ${structParam.Kind}")
+            println("Name: " + obj.name)
+            println("Age: " + obj.age.toString())
+        }
+        
+        fn get${structParam.Name}Summary(obj) {
+            return obj.name + " is a " + "${structParam.Name}"
+        }
+    }
+}
+
+println("=== ДЕМОНСТРАЦИЯ НОВОГО ПОДХОДА ===")
+println("")
+
+@demonstrateApproach(User)
+
+let user = createUser("Alice", 25)
+printUserInfo(user)
+
+let summary = getUserSummary(user)
+println("Summary: " + summary)
+
+println("")
+println("🎯 НОВЫЙ ПОДХОД С $ ПРЕФИКСАМИ:")
+println("")
+println("КЛЮЧЕВАЯ ИДЕЯ:")
+println("$ перед оператором = compile-time (выполняется во время макроса)")
+println("Без $ = runtime (выполняется в сгенерированном коде)")
+println("")
+println("ПРИМЕРЫ:")
+println("for   = runtime цикл в сгенерированном коде")  
+println("$for  = compile-time цикл для генерации кода")
+println("if    = runtime условие в сгенерированном коде")
+println("$if   = compile-time условие для генерации кода")
+println("let   = runtime переменная в сгенерированном коде")
+println("$let  = compile-time переменная для макроса")
+println("")
+println("ПРЕИМУЩЕСТВА:")
+println("✅ Четкое разделение compile-time vs runtime")
+println("✅ Мощные возможности генерации кода")
+println("✅ Понятный и читаемый синтаксис")
+println("✅ Больше никаких проблем с $ блоками!")

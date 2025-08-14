@@ -1,0 +1,34 @@
+// Рабочий случай для пользователя: сложные блоки кода в template
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro generateWithCodeBlock(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    
+    generate {
+        fn print${structParam.Name}Info(obj) {
+            println("=== ${structParam.Name} Info ===")
+            println("Type: ${structParam.Kind}")
+            println("Name: " + obj.name)
+            
+            ${
+                let count = 3;
+                for let i = 0; i < count; i++ {
+                    println("Line " + i.toString() + " for ${structParam.Name}")
+                }
+            }
+        }
+    }
+}
+
+println("=== User Case: Code Blocks in Templates ===")
+
+// Вызываем макрос
+@generateWithCodeBlock(User)
+
+// Тестируем сгенерированную функцию
+let user = User{name: "Alice", age: 25}
+printUserInfo(user)

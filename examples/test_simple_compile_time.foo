@@ -1,0 +1,23 @@
+// Простой тест compile-time операций
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro simpleTest(structParam: StructType) {
+    generate {
+        $let typeName = structParam.Name
+        $if typeName == "User" {
+            fn processUser() {
+                println("Processing User type")
+            }
+        }
+    }
+}
+
+println("=== Simple Compile-Time Test ===")
+
+@simpleTest(User)
+
+processUser()

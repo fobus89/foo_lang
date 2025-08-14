@@ -1,0 +1,55 @@
+// Концепт compile-time операций с $ префиксом
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro generateWithCompileTime(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    
+    generate {
+        fn print${structParam.Name}Info(obj) {
+            println("=== ${structParam.Name} Info ===")
+            println("Type: ${structParam.Kind}")
+            println("Name: " + obj.name)
+            
+            // Пока используем обычный синтаксис, но в будущем будет $for
+            for let i = 0; i < 3; i++ {
+                println("Line " + i.toString() + " for ${structParam.Name}")
+            }
+        }
+        
+        fn create${structParam.Name}() {
+            // В будущем здесь будет $if для compile-time условий
+            if true {
+                return ${structParam.Name}{name: "default", age: 0}
+            }
+        }
+    }
+}
+
+println("=== Compile-Time Concept Test ===")
+
+// Вызываем макрос
+@generateWithCompileTime(User)
+
+// Тестируем функции
+printUserInfo(createUser())
+
+// Показываем что мы хотим достичь (пока в комментариях):
+/*
+ЦЕЛЬ: заменить обычные операторы на compile-time версии:
+
+for let i = 0; i < 3; i++ {     →    $for let i = 0; i < 3; i++ {
+    println("...")                      println("...")
+}                                   }
+
+if condition {                  →    $if condition {
+    return value                        return value  
+}                                   }
+
+let variable = value            →    $let variable = value
+
+Где $ означает "выполни во время компиляции макроса, а не в runtime"
+*/

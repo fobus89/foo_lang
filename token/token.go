@@ -36,6 +36,10 @@ const (
 	IF
 	ELSE
 	FOR
+	COMPILE_FOR      // $for (compile-time for loop)
+	COMPILE_IF       // $if (compile-time if)
+	COMPILE_WHILE    // $while (compile-time while)
+	COMPILE_LET      // $let (compile-time variable)
 	FN
 	ENUM
 	RESULT

@@ -1,0 +1,13 @@
+// Тест исправленной интерполяции в compile-time циклах
+
+macro testFixedFor() {
+    generate {
+        $for num in 3 {
+            println("Number: ${num}")
+        }
+    }
+}
+
+println("=== Testing fixed interpolation ===")
+@testFixedFor()
+println("=== Test completed ===")

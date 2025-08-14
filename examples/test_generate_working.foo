@@ -1,0 +1,25 @@
+// Рабочий тест генерации
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro generatePrint(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    
+    generate {
+        fn printMessage() {
+            println("Generated function for User struct!")
+            println("This function was created by macro!")
+        }
+    }
+}
+
+println("=== Testing working generate block ===")
+
+// Вызываем макрос
+@generatePrint(User)
+
+// Используем сгенерированную функцию
+printMessage()

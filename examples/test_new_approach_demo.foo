@@ -1,0 +1,98 @@
+// Демонстрация нового подхода с compile-time операциями
+
+struct User {
+    name: string,
+    age: int
+}
+
+struct Product {
+    name: string,
+    price: float
+}
+
+// Пример того КАК ДОЛЖНО РАБОТАТЬ с новым подходом $ префиксов:
+
+/*
+macro generateAccessors(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    
+    generate {
+        // $if - выполняется во время компиляции макроса
+        $if structParam.Name == "User" {
+            fn create${structParam.Name}(name, age) {
+                return ${structParam.Name}{name: name, age: age}
+            }
+        }
+        
+        // $for - цикл выполняется во время компиляции макроса  
+        $for field in structParam.Fields {
+            fn get${field.Name}(obj) {
+                return obj.${field.name}
+            }
+        }
+        
+        // $let - переменная создается во время компиляции макроса
+        $let methodCount = 3
+        
+        $for let i = 0; i < methodCount; i++ {
+            fn helper${i}() {
+                println("Helper method ${i} for ${structParam.Name}")
+            }
+        }
+        
+        // Обычные операторы выполняются в runtime сгенерированного кода
+        fn print${structParam.Name}Info(obj) {
+            println("=== ${structParam.Name} Info ===")
+            
+            // Это runtime операции в сгенерированном коде
+            for let i = 0; i < 3; i++ {
+                println("Runtime line " + i.toString())
+            }
+            
+            if obj.name.length() > 0 {
+                println("Name: " + obj.name)
+            }
+        }
+    }
+}
+*/
+
+// А пока используем текущий рабочий подход:
+macro generateSimple(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    
+    generate {
+        fn create${structParam.Name}(name) {
+            return ${structParam.Name}{name: name}
+        }
+        
+        fn print${structParam.Name}(obj) {
+            println("Created ${structParam.Name}: " + obj.name)
+        }
+    }
+}
+
+println("=== New Approach Demo ===")
+println("Демонстрация нового подхода с $ префиксами")
+
+@generateSimple(User)
+@generateSimple(Product)
+
+let user = createUser("Alice")
+printUser(user)
+
+let product = createProduct("Laptop")
+printProduct(product)
+
+println("")
+println("🎯 КЛЮЧЕВАЯ ИДЕЯ:")
+println("$ перед оператором = compile-time (выполняется во время макроса)")
+println("Без $ = runtime (выполняется в сгенерированном коде)")
+println("")
+println("Примеры:")
+println("for   = runtime цикл в сгенерированном коде")  
+println("$for  = compile-time цикл для генерации кода")
+println("if    = runtime условие в сгенерированном коде")
+println("$if   = compile-time условие для генерации кода")
+println("let   = runtime переменная в сгенерированном коде")
+println("$let  = compile-time переменная для макроса")

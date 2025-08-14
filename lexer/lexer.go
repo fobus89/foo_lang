@@ -299,6 +299,9 @@ func (l *Lexer) Token() token.TokenType {
 	case unicode.IsLetter(ch):
 		return l.ReadIdentifier()
 
+	case ch == '$':
+		return l.ReadCompileTimeKeyword()
+
 	case IsAnySymbol(ch):
 		return l.ReadOperator()
 	}
@@ -467,6 +470,44 @@ func (l *Lexer) ReadIdentifier() token.TokenType {
 	}
 
 	return token.NewTokenType(tok, string(symbols), l.line, l.col)
+}
+
+// ReadCompileTimeKeyword читает compile-time ключевые слова с префиксом $
+func (l *Lexer) ReadCompileTimeKeyword() token.TokenType {
+	start := l.pos
+	
+	// Пропускаем $
+	l.Next()
+	
+	// Читаем ключевое слово после $
+	for l.HasNext() {
+		if !unicode.IsLetter(l.Peek(0)) && !unicode.IsDigit(l.Peek(0)) && !(l.Peek(0) == '_') {
+			break
+		}
+		l.Next()
+	}
+	
+	symbols := l.Get(start, l.pos)
+	if len(symbols) == 0 {
+		return token.NewTokenType(token.ILLEGAL, "ILLEGAL", l.line, l.col)
+	}
+	
+	keyword := string(symbols)
+	
+	// Проверяем compile-time ключевые слова
+	switch keyword {
+	case "$for":
+		return token.NewTokenType(token.COMPILE_FOR, keyword, l.line, l.col)
+	case "$if":
+		return token.NewTokenType(token.COMPILE_IF, keyword, l.line, l.col)
+	case "$while":
+		return token.NewTokenType(token.COMPILE_WHILE, keyword, l.line, l.col)
+	case "$let":
+		return token.NewTokenType(token.COMPILE_LET, keyword, l.line, l.col)
+	default:
+		// Неизвестное compile-time ключевое слово - возвращаем обычный AT токен
+		return token.NewTokenType(token.AT, "$", l.line, l.col)
+	}
 }
 
 func IsAnySymbol(r rune) bool {

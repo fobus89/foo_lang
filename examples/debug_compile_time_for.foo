@@ -1,0 +1,23 @@
+// Отладочный тест для compile-time циклов
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro testCompileTimeFor(structParam: StructType) {
+    generate {
+        $for i in 3 {
+            println("Loop iteration ${i}")
+        }
+        
+        fn test() {
+            println("Function generated!")
+        }
+    }
+}
+
+println("=== Testing compile-time for loop ===")
+// Пока упростим - запустим без параметров
+// testCompileTimeFor(userType)
+// test()

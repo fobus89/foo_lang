@@ -1,0 +1,18 @@
+// Простой тест template генерации
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro testTemplate(structParam: StructType) {
+    println("=== Testing template interpolation ===")
+    println("structParam.Name = " + structParam.Name)
+    println("structParam.Kind = " + structParam.Kind)
+    
+    generate {
+        println("Hello ${structParam.Name}!")
+    }
+}
+
+@testTemplate(User)

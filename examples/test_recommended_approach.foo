@@ -1,0 +1,46 @@
+// Рекомендуемый подход: простая интерполяция переменных
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro generateCode(structParam: StructType) {
+    generate {
+        // Compile-time операции (выполняются во время макроса):
+        $if structParam.Name == "User" {           // ← Условие проверяется в macro-time
+            // Этот код будет сгенерирован только для User
+        }
+
+        $for field in structParam.Fields {        // ← Цикл выполняется в macro-time
+            // Генерируется код для каждого поля
+        }
+
+        $let count = 3                            // ← Переменная существует в macro-time
+
+        // Runtime операции (остаются в сгенерированном коде):
+        fn processUser(obj) {
+            if obj.name.length() > 0 {            // ← Runtime условие
+                // Этот код выполняется при вызове функции
+            }
+
+            for let i = 0; i < 3; i++ {           // ← Runtime цикл
+                // Этот цикл выполняется при вызове функции
+            }
+
+            let result = "processed"              // ← Runtime переменная
+        }
+    }
+}
+
+println("=== Recommended Approach Test ===")
+
+// Вызываем макрос
+@generateCode(User)
+
+// Тестируем все сгенерированные функции
+let user = createUser("Alice", 25)
+printUserInfo(user)
+
+let summary = getUserSummary(user)
+println(summary)

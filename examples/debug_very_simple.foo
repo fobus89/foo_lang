@@ -1,0 +1,15 @@
+// Очень простой тест 
+
+let testVar = 42
+println("Simple: ${testVar}")
+
+macro simpleLoop() {
+    generate {
+        $for i in 2 {
+            println("Loop: ${i}")
+        }
+    }
+}
+
+println("=== Very simple test ===")
+@simpleLoop()

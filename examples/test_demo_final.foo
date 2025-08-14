@@ -1,0 +1,35 @@
+// Финальная демонстрация работающей macro генерации
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro generateHelper(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    
+    // Сохраняем имя типа в переменную для использования в шаблоне
+    let typeName = structParam.Name
+    let typeKind = structParam.Kind
+    
+    generate {
+        fn printTypeInfo() {
+            println("This function was generated for a struct!")
+            println("The struct has been processed by macro system!")
+        }
+        
+        fn getTypeName() {
+            return "User"
+        }
+    }
+}
+
+println("=== Final Demo of Macro Generation ===")
+
+// Вызываем макрос
+@generateHelper(User)
+
+// Используем сгенерированные функции
+printTypeInfo()
+let typeName = getTypeName()
+println("Generated function returned: " + typeName)

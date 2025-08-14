@@ -1,23 +1,22 @@
-// Тест шаблонной генерации с generate блоком
+// Простой тест генерации без сложных шаблонов
 
 struct User {
     name: string,
     age: int
 }
 
-// Простой макрос с generate блоком
 macro generatePrint(structParam: StructType) {
     println("=== Macro-time: Processing " + structParam.Name + " ===")
     
     generate {
-        fn print${structParam.Name}(user) {
-            println("${structParam.Name} name: " + user.name)
-            println("${structParam.Name} age: " + user.age)
+        fn printUser(user) {
+            println("User name: " + user.name)
+            println("User age: " + user.age)
         }
     }
 }
 
-println("=== Testing generate block ===")
+println("=== Testing simple generate block ===")
 
 // Вызываем макрос
 @generatePrint(User)

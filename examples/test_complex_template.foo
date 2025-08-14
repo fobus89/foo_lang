@@ -1,0 +1,59 @@
+// Сложный тест template интерполяции
+
+struct User {
+    name: string,
+    age: int
+}
+
+struct Product {
+    name: string,
+    price: float
+}
+
+macro generateAccessors(structParam: StructType) {
+    println("=== Macro-time: Generating accessors for " + structParam.Name + " ===")
+    
+    generate {
+        fn get${structParam.Name}Name(obj) {
+            println("Getting name from ${structParam.Name}")
+            return obj.name
+        }
+        
+        fn create${structParam.Name}(name) {
+            println("Creating new ${structParam.Name} with name: " + name)
+            return ${structParam.Name}{name: name}
+        }
+        
+        fn print${structParam.Name}Info(obj) {
+            ${
+                for let i=0;i<10;i++ { 
+                     println("=== ${structParam.Name} Info === ${i}")
+                }
+            }
+            println("=== ${structParam.Name} Info ===")
+            println("Type: ${structParam.Kind}")
+            println("Name: " + obj.name)
+        }
+    }
+}
+
+println("=== Complex Template Generation Test ===")
+
+// Генерируем аксессоры для User
+@generateAccessors(User)
+
+// Генерируем аксессоры для Product  
+@generateAccessors(Product)
+
+// Тестируем сгенерированные функции
+let user = createUser("Alice")
+printUserInfo(user)
+
+let product = createProduct("Laptop")  
+printProductInfo(product)
+
+let userName = getUserName(user)
+println("Retrieved user name: " + userName)
+
+let productName = getProductName(product)
+println("Retrieved product name: " + productName)

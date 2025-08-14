@@ -17,6 +17,7 @@ type Parser struct {
 	pos         int
 	currentFile string            // Путь к текущему файлу для обработки импортов
 	scopeStack  *scope.ScopeStack // Стек областей видимости для парсера
+	sourceText  string            // Исходный текст для обработки шаблонов
 }
 
 func (p *Parser) error(msg string, tok token.TokenType) {
@@ -33,6 +34,7 @@ func NewParser[T []rune | string | []byte](input T) *Parser {
 	return &Parser{
 		tokens:     tokens,
 		scopeStack: scope.NewScopeStack(),
+		sourceText: string(input),
 	}
 }
 
@@ -43,6 +45,7 @@ func NewParserWithFile[T []rune | string | []byte](input T, filePath string) *Pa
 		tokens:      tokens,
 		currentFile: filePath,
 		scopeStack:  scope.NewScopeStack(),
+		sourceText:  string(input),
 	}
 }
 
@@ -58,6 +61,7 @@ func NewParserFromFile(filePath string) (*Parser, error) {
 		tokens:      tokens,
 		currentFile: filePath,
 		scopeStack:  scope.NewScopeStack(),
+		sourceText:  string(content),
 	}, nil
 }
 
@@ -343,6 +347,23 @@ func (p *Parser) Statement() ast.Expr {
 
 	if p.MatchAllNext(token.IF) {
 		return p.IfStatement()
+	}
+
+	// Compile-time операции
+	if p.MatchAllNext(token.COMPILE_IF) {
+		return p.CompileTimeIfStatement()
+	}
+
+	if p.MatchAllNext(token.COMPILE_FOR) {
+		return p.CompileTimeForStatement()
+	}
+
+	if p.MatchAllNext(token.COMPILE_LET) {
+		return p.CompileTimeLetStatement()
+	}
+
+	if p.MatchAllNext(token.COMPILE_WHILE) {
+		return p.CompileTimeWhileStatement()
 	}
 
 	if p.Match(token.MATCH) {
@@ -706,6 +727,18 @@ func (p *Parser) BlockStatement() ast.Expr {
 		p.error("expected {", p.Peek(0))
 	}
 
+	var statments []ast.Expr
+
+	for !p.MatchAndNext(token.RBRACE) {
+		statments = append(statments, p.Statement())
+	}
+
+	return ast.NewBodyStatment(statments)
+}
+
+// BlockStatementWithoutLBrace парсит блок statements без ожидания открывающей {
+// Используется когда { уже потреблен
+func (p *Parser) BlockStatementWithoutLBrace() ast.Expr {
 	var statments []ast.Expr
 
 	for !p.MatchAndNext(token.RBRACE) {
@@ -2305,33 +2338,217 @@ func (p *Parser) parseTypeAnnotation() string {
 	return strings.Join(types, "|")
 }
 
-// readTemplateBlock читает шаблонный блок для generate
+// readTemplateBlock читает шаблонный блок для generate как сырой текст
 func (p *Parser) readTemplateBlock() string {
+	// Читаем сырой текст из sourceText между позициями
+	startPos := p.findCurrentPosition()
+	if startPos == -1 {
+		// Fallback: используем старый метод
+		return p.readTemplateBlockTokens()
+	}
+	
+	// Ищем конец блока - закрывающую скобку }
+	braceCount := 1
+	i := startPos
+	for i < len(p.sourceText) && braceCount > 0 {
+		if p.sourceText[i] == '{' {
+			braceCount++
+		} else if p.sourceText[i] == '}' {
+			braceCount--
+		}
+		i++
+	}
+	
+	if braceCount > 0 {
+		// Не найдена закрывающая скобка
+		return p.readTemplateBlockTokens()
+	}
+	
+	// Извлекаем текст между скобками (без них)
+	template := strings.TrimSpace(p.sourceText[startPos:i-1])
+	
+	// Пропускаем токены до закрывающей скобки
+	p.skipToClosingBrace()
+	
+	return template
+}
+
+// findCurrentPosition ищет текущую позицию в sourceText по линии и колонке
+func (p *Parser) findCurrentPosition() int {
+	if p.pos >= len(p.tokens) {
+		return -1
+	}
+	
+	currentToken := p.tokens[p.pos]
+	lines := strings.Split(p.sourceText, "\n")
+	
+	if currentToken.Line-1 >= len(lines) {
+		return -1
+	}
+	
+	position := 0
+	for i := 0; i < currentToken.Line-1; i++ {
+		position += len(lines[i]) + 1 // +1 для \n
+	}
+	
+	// Находим позицию открывающей скобки в строке
+	line := lines[currentToken.Line-1]
+	bracePos := strings.Index(line[currentToken.Col:], "{")
+	if bracePos == -1 {
+		return -1
+	}
+	
+	return position + currentToken.Col + bracePos + 1 // +1 чтобы пропустить {
+}
+
+// readTemplateBlockTokens читает блок используя токены (fallback метод)
+func (p *Parser) readTemplateBlockTokens() string {
 	var template strings.Builder
 	braceCount := 1 // Мы уже прочитали открывающую {
+	prevToken := token.EOF
 	
 	for braceCount > 0 && !p.IsAtEnd() {
 		tok := p.Peek(0)
 		
-		// Отслеживаем вложенные фигурные скобки
 		if tok.Token == token.LBRACE {
 			braceCount++
 		} else if tok.Token == token.RBRACE {
 			braceCount--
 			if braceCount == 0 {
-				// Это закрывающая скобка блока generate
 				p.Next() // consume }
 				break
 			}
 		}
 		
-		// Добавляем токен в шаблон
-		template.WriteString(tok.Value)
-		if tok.Token != token.EOF {
+		if prevToken != token.EOF && needsSpacing(prevToken, tok.Token) {
 			template.WriteString(" ")
 		}
+		
+		if tok.Token == token.STRING {
+			template.WriteString(`"` + tok.Value + `"`)
+		} else {
+			template.WriteString(tok.Value)
+		}
+		
+		prevToken = tok.Token
 		p.Next()
 	}
 	
 	return template.String()
+}
+
+// skipToClosingBrace пропускает токены до закрывающей скобки
+func (p *Parser) skipToClosingBrace() {
+	braceCount := 1
+	for braceCount > 0 && !p.IsAtEnd() {
+		tok := p.Peek(0)
+		if tok.Token == token.LBRACE {
+			braceCount++
+		} else if tok.Token == token.RBRACE {
+			braceCount--
+		}
+		p.Next()
+	}
+}
+
+// needsSpacing определяет, нужен ли пробел между токенами
+func needsSpacing(prev, curr token.Token) bool {
+	// Не добавляем пробелы перед:
+	switch curr {
+	case token.LPAREN, token.RPAREN, token.LBRACE, token.RBRACE, 
+		 token.LBRACK, token.RBRACK, token.DOT, token.COMMA, token.SEMICOLON:
+		return false
+	}
+	
+	// Не добавляем пробелы после:
+	switch prev {
+	case token.LPAREN, token.LBRACE, token.LBRACK, token.DOT:
+		return false
+	}
+	
+	// Во всех остальных случаях добавляем пробел
+	return true
+}
+// CompileTimeIfStatement парсит compile-time условие $if
+func (p *Parser) CompileTimeIfStatement() ast.Expr {
+	// $if уже потреблен
+	condition := p.Expression()
+	
+	if !p.MatchAndNext(token.LBRACE) {
+		p.error("expected '{' after $if condition", p.Peek(0))
+	}
+	
+	// Используем BlockStatementWithoutLBrace так как { уже потреблен
+	thenBody := p.BlockStatementWithoutLBrace()
+	
+	var elseBody ast.Expr
+	if p.MatchAndNext(token.ELSE) {
+		if p.MatchAndNext(token.LBRACE) {
+			// Используем BlockStatementWithoutLBrace так как { уже потреблен
+			elseBody = p.BlockStatementWithoutLBrace()
+		} else {
+			p.error("expected '{' after else", p.Peek(0))
+		}
+	}
+	
+	return ast.NewCompileTimeIfExpr(condition, thenBody, elseBody)
+}
+
+// CompileTimeForStatement парсит compile-time цикл $for
+func (p *Parser) CompileTimeForStatement() ast.Expr {
+	// $for уже потреблен
+	
+	// Парсим iterator in collection
+	if !p.Match(token.IDENT) {
+		p.error("expected iterator variable after $for", p.Peek(0))
+	}
+	iterator := p.Next().Value
+	
+	if !p.MatchAndNext(token.IDENT) || p.Peek(-1).Value != "in" {
+		p.error("expected 'in' after iterator variable", p.Peek(0))
+	}
+	
+	collection := p.Expression()
+	
+	if !p.MatchAndNext(token.LBRACE) {
+		p.error("expected '{' after $for collection", p.Peek(0))
+	}
+	
+	// Используем BlockStatementWithoutLBrace так как { уже потреблен
+	body := p.BlockStatementWithoutLBrace()
+	
+	return ast.NewCompileTimeForExpr(iterator, collection, body)
+}
+
+// CompileTimeLetStatement парсит compile-time переменную $let
+func (p *Parser) CompileTimeLetStatement() ast.Expr {
+	// $let уже потреблен
+	
+	if !p.Match(token.IDENT) {
+		p.error("expected variable name after $let", p.Peek(0))
+	}
+	name := p.Next().Value
+	
+	if !p.MatchAndNext(token.EQ) {
+		p.error("expected '=' after $let variable name", p.Peek(0))
+	}
+	
+	expr := p.Expression()
+	
+	return ast.NewCompileTimeLetExpr(name, expr)
+}
+
+// CompileTimeWhileStatement парсит compile-time цикл $while
+func (p *Parser) CompileTimeWhileStatement() ast.Expr {
+	// $while уже потреблен
+	condition := p.Expression()
+	
+	if !p.MatchAndNext(token.LBRACE) {
+		p.error("expected '{' after $while condition", p.Peek(0))
+	}
+	
+	// Используем BlockStatementWithoutLBrace так как { уже потреблен
+	body := p.BlockStatementWithoutLBrace()
+	
+	return ast.NewCompileTimeWhileExpr(condition, body)
 }

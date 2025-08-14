@@ -1,0 +1,31 @@
+// Простой тест блока кода в template интерполяции
+
+struct User {
+    name: string,
+    age: int
+}
+
+macro generateWithLoop(structParam: StructType) {
+    println("=== Macro-time: Processing " + structParam.Name + " ===")
+    
+    generate {
+        fn print${structParam.Name}Info(obj) {
+            println("=== ${structParam.Name} Info ===")
+            println("Type: ${structParam.Kind}")
+            println("Name: " + obj.name)
+            ${
+                println("Generated output from code block!")
+                println("Processing " + structParam.Name)
+            }
+        }
+    }
+}
+
+println("=== Simple Template Block Test ===")
+
+// Вызываем макрос
+@generateWithLoop(User)
+
+// Используем сгенерированную функцию
+let user = User{name: "Alice", age: 25}
+printUserInfo(user)

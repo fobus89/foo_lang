@@ -1,0 +1,14 @@
+// Простейший тест compile-time цикла
+
+macro simpleTest() {
+    generate {
+        $for i in 3 {
+            println("Number ${i}")
+        }
+        
+        println("After loop")
+    }
+}
+
+println("=== Simple compile-time for test ===")
+@simpleTest()

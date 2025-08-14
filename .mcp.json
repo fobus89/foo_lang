@@ -1,12 +1,20 @@
 {
   "mcpServers": {
+    "memory": {
+      "command": "bunx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
     "context7": {
       "command": "bunx",
       "args": ["-y", "@upstash/context7-mcp"]
     },
-    "go-lsp": {
+    "gopls": {
+      "command": "gopls",
+      "args": ["mcp"]
+    },
+    "filesystem": {
       "command": "bunx",
-      "args": ["@modelcontextprotocol/server-lsp", "--cmd", "gopls"]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
     }
   }
 }
